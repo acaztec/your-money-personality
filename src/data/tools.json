@@ -1,0 +1,128 @@
+[
+  {
+    "id": "paycheck-analyzer",
+    "title": "Paycheck Analyzer",
+    "description": "Learn about each section of your paycheck's taxes and deductions",
+    "category": "Career",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "expert-resume",
+    "title": "Expert Resume Critique",
+    "description": "Upload your resume for a free review by a trusted expert",
+    "category": "Career",
+    "personalities": ["ambitious", "organized"]
+  },
+  {
+    "id": "credit-score",
+    "title": "Credit Score",
+    "description": "Estimate your credit score in 2 minutes or less",
+    "category": "Credit and Debt",
+    "personalities": ["cautious", "organized", "anxious"]
+  },
+  {
+    "id": "credit-card-paydown",
+    "title": "Credit Card Pay Down",
+    "description": "Compare fast and proven credit card pay down strategies",
+    "category": "Credit and Debt",
+    "personalities": ["organized", "cautious", "anxious"]
+  },
+  {
+    "id": "debt-income-ratio",
+    "title": "Debt-to-Income Ratio",
+    "description": "Understand if your debt level is healthy or needs work",
+    "category": "Credit and Debt",
+    "personalities": ["cautious", "organized", "anxious"]
+  },
+  {
+    "id": "loan-payment",
+    "title": "Loan Payment Analyzer",
+    "description": "See how much your monthly payments would be if you borrowed a loan",
+    "category": "Credit and Debt",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "scholarship-search",
+    "title": "Scholarship Search",
+    "description": "Find quality scholarships to help pay for school",
+    "category": "Education",
+    "personalities": ["ambitious", "organized"]
+  },
+  {
+    "id": "529-planner",
+    "title": "529 Savings Planner",
+    "description": "Find out if you're on track with your child's college saving goals",
+    "category": "Education",
+    "personalities": ["organized", "cautious", "family-focused"]
+  },
+  {
+    "id": "student-loan",
+    "title": "Student Loan Affordability",
+    "description": "Borrow smart and compare your projected repayment to future salary",
+    "category": "Education",
+    "personalities": ["cautious", "organized"]
+  },
+  {
+    "id": "award-letter",
+    "title": "Award Letter Analyzer",
+    "description": "Compare colleges to see true cost with financial aid awards",
+    "category": "Education",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "auto-buy-lease",
+    "title": "Auto Buy vs. Lease",
+    "description": "Compare your options for buying or leasing your next auto",
+    "category": "Major Purchases",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "money-personality",
+    "title": "Your Money Personality",
+    "description": "Better understand your money decisions with our behavioral analysis",
+    "category": "Money Management",
+    "personalities": ["all"]
+  },
+  {
+    "id": "budget-tool",
+    "title": "Budget",
+    "description": "Plan for expenses, set goals, and keep your finances on track",
+    "category": "Money Management",
+    "personalities": ["organized", "cautious", "anxious"]
+  },
+  {
+    "id": "emergency-fund",
+    "title": "Emergency Fund",
+    "description": "Prepare for emergencies with an analysis of how much to save and when",
+    "category": "Protection",
+    "personalities": ["cautious", "anxious", "organized"]
+  },
+  {
+    "id": "id-theft-risk",
+    "title": "ID Theft Risk",
+    "description": "See your risk level for fraud or identity theft",
+    "category": "Protection",
+    "personalities": ["cautious", "anxious"]
+  },
+  {
+    "id": "retirement-analyzer",
+    "title": "Retirement Analyzer",
+    "description": "Find out if you're on track for retirement in 2 minutes or less",
+    "category": "Wealth Building",
+    "personalities": ["organized", "cautious", "ambitious"]
+  },
+  {
+    "id": "savings-growth",
+    "title": "Savings Growth",
+    "description": "Compare how your financial institution can grow your money",
+    "category": "Wealth Building",
+    "personalities": ["organized", "ambitious"]
+  },
+  {
+    "id": "investment-allocation",
+    "title": "Investment Allocation",
+    "description": "Find out how portfolio allocation can grow your wealth",
+    "category": "Wealth Building",
+    "personalities": ["ambitious", "risk-taker", "organized"]
+  }
+]

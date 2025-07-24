@@ -1,0 +1,162 @@
+[
+  {
+    "id": "dream-career",
+    "title": "Finding your dream career",
+    "duration": "18 mins",
+    "category": "Career",
+    "personalities": ["ambitious", "optimistic"]
+  },
+  {
+    "id": "earning-potential",
+    "title": "Maximizing your earning potential and developing your career",
+    "duration": "15 mins",
+    "category": "Career",
+    "personalities": ["ambitious", "organized"]
+  },
+  {
+    "id": "paycheck-w2",
+    "title": "Understanding your paycheck and W2",
+    "duration": "18 mins",
+    "category": "Career",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "credit-cards",
+    "title": "Using credit cards responsibly",
+    "duration": "20 mins",
+    "category": "Credit and Debt",
+    "personalities": ["cautious", "organized"],
+    "recommended": true
+  },
+  {
+    "id": "credit-mastery",
+    "title": "Mastering credit and optimizing your score",
+    "duration": "20 mins",
+    "category": "Credit and Debt",
+    "personalities": ["organized", "ambitious"],
+    "recommended": true
+  },
+  {
+    "id": "credit-reports",
+    "title": "Understanding credit reports and scores",
+    "duration": "12 mins",
+    "category": "Credit and Debt",
+    "personalities": ["cautious", "organized"]
+  },
+  {
+    "id": "school-cost",
+    "title": "Choosing a school and understanding cost",
+    "duration": "20 mins",
+    "category": "Education",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "student-loans",
+    "title": "Repaying your student loans",
+    "duration": "18 mins",
+    "category": "Education",
+    "personalities": ["cautious", "organized"]
+  },
+  {
+    "id": "child-education",
+    "title": "Saving for a child's education",
+    "duration": "20 mins",
+    "category": "Education",
+    "personalities": ["family-focused", "organized"]
+  },
+  {
+    "id": "car-buying",
+    "title": "Buying or leasing a car",
+    "duration": "35 mins",
+    "category": "Major Purchases",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "saving-goals",
+    "title": "Saving for goals",
+    "duration": "30 mins",
+    "category": "Major Purchases",
+    "personalities": ["organized", "ambitious"]
+  },
+  {
+    "id": "budgeting",
+    "title": "Creating a budget (and sticking to it)",
+    "duration": "15 mins",
+    "category": "Money Management",
+    "personalities": ["organized", "cautious"],
+    "recommended": true
+  },
+  {
+    "id": "banking-beyond",
+    "title": "Banking beyond checking and savings",
+    "duration": "15 mins",
+    "category": "Money Management",
+    "personalities": ["organized", "ambitious"],
+    "recommended": true
+  },
+  {
+    "id": "banking-institutions",
+    "title": "Banking with financial institutions",
+    "duration": "15 mins",
+    "category": "Money Management",
+    "personalities": ["cautious", "organized"]
+  },
+  {
+    "id": "financial-plan",
+    "title": "Creating a financial plan for your priorities and goals",
+    "duration": "20 mins",
+    "category": "Money Management",
+    "personalities": ["organized", "ambitious"]
+  },
+  {
+    "id": "unclaimed-property",
+    "title": "Searching for unclaimed property",
+    "duration": "13 mins",
+    "category": "Money Management",
+    "personalities": ["organized", "cautious"]
+  },
+  {
+    "id": "insurance-needs",
+    "title": "Assessing your insurance needs",
+    "duration": "45 mins",
+    "category": "Protection",
+    "personalities": ["cautious", "family-focused"]
+  },
+  {
+    "id": "estate-plan",
+    "title": "Preparing an estate plan",
+    "duration": "25 mins",
+    "category": "Protection",
+    "personalities": ["cautious", "organized", "family-focused"]
+  },
+  {
+    "id": "identity-theft",
+    "title": "Protecting yourself from identity theft and scams",
+    "duration": "20 mins",
+    "category": "Protection",
+    "personalities": ["cautious", "anxious"]
+  },
+  {
+    "id": "retirement-planning",
+    "title": "Planning for retirement",
+    "duration": "35 mins",
+    "category": "Wealth Building",
+    "personalities": ["organized", "cautious"],
+    "recommended": true
+  },
+  {
+    "id": "investing-wealth",
+    "title": "Investing to build wealth",
+    "duration": "30 mins",
+    "category": "Wealth Building",
+    "personalities": ["ambitious", "risk-taker"],
+    "recommended": true
+  },
+  {
+    "id": "living-retirement",
+    "title": "Living in retirement",
+    "duration": "25 mins",
+    "category": "Wealth Building",
+    "personalities": ["cautious", "organized"]
+  }
+]
