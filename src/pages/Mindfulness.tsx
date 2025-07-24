@@ -1,4 +1,3 @@
-import React from 'react';
 import Layout from '../components/Layout';
 import { Heart, Brain, Zap, Target } from 'lucide-react';
 

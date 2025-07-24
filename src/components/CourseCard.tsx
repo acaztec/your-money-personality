@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, Star } from 'lucide-react';
 import { Course } from '../types';
 

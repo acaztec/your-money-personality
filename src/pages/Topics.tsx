@@ -1,6 +1,5 @@
-import React from 'react';
 import Layout from '../components/Layout';
-import { BookOpen, TrendingUp, Shield, GraduationCap, Car, Home } from 'lucide-react';
+import { BookOpen, TrendingUp, Shield, GraduationCap } from 'lucide-react';
 
 const topics = [
   {

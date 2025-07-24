@@ -1,4 +1,3 @@
-import React from 'react';
 import { Brain, TrendingUp, Target, Users, Zap } from 'lucide-react';
 
 interface PersonalityCardProps {
