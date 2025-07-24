@@ -12,6 +12,7 @@ import coursesData from '../data/courses.json';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [showAllCourses, setShowAllCourses] = useState(false);
 
@@ -22,6 +23,11 @@ export default function Dashboard() {
       return;
     }
     setProfile(JSON.parse(savedProfile));
+    
+    const savedRecommendations = localStorage.getItem('aiRecommendations');
+    if (savedRecommendations) {
+      setAiRecommendations(JSON.parse(savedRecommendations));
+    }
   }, [navigate]);
 
   if (!profile) {
@@ -29,6 +35,9 @@ export default function Dashboard() {
   }
 
   const getRecommendedTools = (): Tool[] => {
+    if (aiRecommendations?.tools && !showAllTools) {
+      return aiRecommendations.tools;
+    }
     return toolsData.filter(tool => 
       tool.personalities.includes('all') || 
       tool.personalities.some(p => profile.personalities.includes(p))
@@ -36,6 +45,9 @@ export default function Dashboard() {
   };
 
   const getRecommendedCourses = (): Course[] => {
+    if (aiRecommendations?.courses && !showAllCourses) {
+      return aiRecommendations.courses;
+    }
     return coursesData.filter(course => 
       course.personalities.some(p => profile.personalities.includes(p))
     );
@@ -53,7 +65,7 @@ export default function Dashboard() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back!</h1>
           <p className="text-gray-600">
-            Based on your assessment, here's your personalized financial wellness dashboard.
+            Based on your assessment, here are AI-powered recommendations tailored specifically for you.
           </p>
         </div>
 
@@ -93,18 +105,27 @@ export default function Dashboard() {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
-              {showAllTools ? 'All Tools' : 'Recommended Tools'}
+              {showAllTools ? 'All Tools' : 'AI-Recommended Tools'}
             </h2>
             <button
               onClick={() => setShowAllTools(!showAllTools)}
               className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
             >
-              {showAllTools ? 'Show Recommended' : 'View All Tools'}
+              {showAllTools ? 'Show AI Picks' : 'View All Tools'}
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedTools.map((tool) => (
-              <ToolCard key={tool.id} tool={tool} />
+              <div key={tool.id}>
+                <ToolCard tool={tool} />
+                {aiRecommendations?.tools && !showAllTools && tool.explanation && (
+                  <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800">
+                      <strong>Why this fits you:</strong> {tool.explanation}
+                    </p>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -113,18 +134,27 @@ export default function Dashboard() {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
-              {showAllCourses ? 'All Courses' : 'Recommended Courses'}
+              {showAllCourses ? 'All Courses' : 'AI-Recommended Courses'}
             </h2>
             <button
               onClick={() => setShowAllCourses(!showAllCourses)}
               className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
             >
-              {showAllCourses ? 'Show Recommended' : 'View All Courses'}
+              {showAllCourses ? 'Show AI Picks' : 'View All Courses'}
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <div key={course.id}>
+                <CourseCard course={course} />
+                {aiRecommendations?.courses && !showAllCourses && course.explanation && (
+                  <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800">
+                      <strong>Perfect for you:</strong> {course.explanation}
+                    </p>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

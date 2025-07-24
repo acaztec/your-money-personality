@@ -12,6 +12,20 @@ interface AssessmentCardProps {
   canGoPrevious: boolean;
 }
 
+const getCheckpointMessage = (questionNumber: number, totalQuestions: number) => {
+  const progress = questionNumber / totalQuestions;
+  
+  if (questionNumber === Math.floor(totalQuestions * 0.25)) {
+    return "Great start! You've completed the first section on spending habits.";
+  } else if (questionNumber === Math.floor(totalQuestions * 0.5)) {
+    return "Halfway there! You just finished the planning and goal-setting section.";
+  } else if (questionNumber === Math.floor(totalQuestions * 0.75)) {
+    return "Almost done! You've completed the decision-making and risk assessment section.";
+  } else if (questionNumber === totalQuestions - 3) {
+    return "Final stretch! Just a few more questions about your financial attitudes.";
+  }
+  return null;
+};
 export default function AssessmentCard({
   question,
   questionNumber,
@@ -23,9 +37,21 @@ export default function AssessmentCard({
   canGoNext,
   canGoPrevious,
 }: AssessmentCardProps) {
+  const checkpointMessage = getCheckpointMessage(questionNumber, totalQuestions);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
+        {/* Checkpoint Message */}
+        {checkpointMessage && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <p className="text-blue-800 font-medium">{checkpointMessage}</p>
+            </div>
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
