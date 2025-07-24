@@ -3,14 +3,14 @@ import { Brain, TrendingUp, MessageCircle, ArrowRight } from 'lucide-react';
 
 export default function Welcome() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <img
             src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
             alt="iGrad Enrich"
-            className="h-8 w-auto bg-primary-500 px-3 py-1 rounded"
+            className="h-8 w-auto bg-blue-600 px-3 py-1 rounded"
           />
         </div>
       </div>
@@ -20,7 +20,7 @@ export default function Welcome() {
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Discover Your
-            <span className="text-primary-600"> Money Personality</span>
+            <span className="text-blue-600"> Money Personality</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
             Take our comprehensive assessment to understand your financial behaviors, 
@@ -28,10 +28,10 @@ export default function Welcome() {
           </p>
           <Link
             to="/assessment"
-            className="inline-flex items-center space-x-2 btn-primary text-lg px-8 py-4"
+            className="btn-primary text-lg px-8 py-4"
           >
             <span>Start Assessment</span>
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5 ml-2" />
           </Link>
         </div>
 
@@ -39,7 +39,7 @@ export default function Welcome() {
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Brain className="w-8 h-8 text-primary-600" />
+              <Brain className="w-8 h-8 text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Personality Assessment
@@ -51,7 +51,7 @@ export default function Welcome() {
 
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <TrendingUp className="w-8 h-8 text-accent-600" />
+              <TrendingUp className="w-8 h-8 text-green-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Personalized Insights
@@ -63,7 +63,7 @@ export default function Welcome() {
 
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <MessageCircle className="w-8 h-8 text-primary-600" />
+              <MessageCircle className="w-8 h-8 text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               AI Financial Coach
@@ -84,10 +84,10 @@ export default function Welcome() {
           </p>
           <Link
             to="/assessment"
-            className="btn-primary inline-flex items-center space-x-2"
+            className="btn-primary"
           >
             <span>Begin Your Journey</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </div>
       </div>
