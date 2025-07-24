@@ -7,9 +7,16 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   build: {
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return 'assets/[name]-[hash][extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
+        }
       },
     },
   },

@@ -6,17 +6,26 @@
 
 @layer base {
   * {
-    @apply border-gray-200;
+    border-color: theme('colors.gray.200');
   }
+  
   body {
-    @apply bg-gray-50 text-gray-900;
+    background-color: theme('colors.gray.50');
+    color: theme('colors.gray.900');
     font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200;
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md;
   }
   
   .btn-secondary {
@@ -24,7 +33,7 @@
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-shadow duration-200;
   }
   
   .slider-track {
@@ -32,10 +41,33 @@
   }
   
   .slider-track::-webkit-slider-thumb {
-    @apply appearance-none w-6 h-6 bg-primary-500 rounded-full cursor-pointer;
+    @apply appearance-none w-6 h-6 bg-primary-500 rounded-full cursor-pointer shadow-md;
   }
   
   .slider-track::-moz-range-thumb {
-    @apply w-6 h-6 bg-primary-500 rounded-full cursor-pointer border-0;
+    @apply w-6 h-6 bg-primary-500 rounded-full cursor-pointer border-0 shadow-md;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-50 to-accent-50;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
