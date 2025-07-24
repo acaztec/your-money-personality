@@ -13,7 +13,7 @@ export default defineConfig({
         manualChunks: undefined,
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'assets/[name]-[hash][extname]'
+            return 'assets/index-[hash].css'
           }
           return 'assets/[name]-[hash][extname]'
         }
