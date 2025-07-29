@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
 import { generateAdvisorSummary } from '../services/aiService';
