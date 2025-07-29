@@ -1,56 +1,27 @@
 import { Profile } from '../types';
 
-// Question to category mapping from the CSV
+// Question to category mapping based on the algorithm you described
 const QUESTION_CATEGORIES = {
-  1: 'Focus',
-  2: 'Focus', 
-  3: 'Focus',
-  4: 'Focus',
-  5: 'Focus',
-  6: 'Focus',
-  7: 'Emotions',
-  8: 'Emotions',
-  9: 'Emotions',
-  10: 'Emotions',
-  11: 'Emotions',
-  12: 'Emotions',
-  13: 'Emotions',
-  14: 'Emotions',
-  15: 'Emotions',
-  16: 'Outlook',
-  17: 'Outlook',
-  18: 'Outlook',
-  19: 'Outlook',
-  20: 'Outlook',
-  21: 'Outlook',
-  22: 'Outlook',
-  23: 'Outlook',
-  24: 'Outlook',
-  25: 'Influence',
-  26: 'Influence',
-  27: 'Influence',
-  28: 'Influence',
-  29: 'Influence',
-  30: 'Influence',
-  31: 'Influence',
-  32: 'Influence',
-  33: 'Influence',
-  34: 'Bonus',
-  35: 'Bonus',
-  36: 'Bonus',
-  37: 'Bonus',
-  38: 'Bonus',
-  39: 'Bonus',
-  40: 'Bonus',
-  41: 'Bonus',
-  42: 'Bonus'
+  // Focus questions (1-6)
+  1: 'Focus', 2: 'Focus', 3: 'Focus', 4: 'Focus', 5: 'Focus', 6: 'Focus',
+  // Emotions questions (7-15)
+  7: 'Emotions', 8: 'Emotions', 9: 'Emotions', 10: 'Emotions', 11: 'Emotions', 
+  12: 'Emotions', 13: 'Emotions', 14: 'Emotions', 15: 'Emotions',
+  // Outlook questions (16-24)
+  16: 'Outlook', 17: 'Outlook', 18: 'Outlook', 19: 'Outlook', 20: 'Outlook',
+  21: 'Outlook', 22: 'Outlook', 23: 'Outlook', 24: 'Outlook',
+  // Influence questions (25-33)
+  25: 'Influence', 26: 'Influence', 27: 'Influence', 28: 'Influence', 29: 'Influence',
+  30: 'Influence', 31: 'Influence', 32: 'Influence', 33: 'Influence',
+  // Bonus questions (34-42)
+  34: 'Bonus', 35: 'Bonus', 36: 'Bonus', 37: 'Bonus', 38: 'Bonus',
+  39: 'Bonus', 40: 'Bonus', 41: 'Bonus', 42: 'Bonus'
 };
 
-// Personality types and descriptions from the lookup CSV
-const PERSONALITY_TYPES = {
-  'Emotions': {
+// Personality data from the CSV
+const PERSONALITY_DATA = {
+  'EMOTIONS': {
     'Apprehensive': {
-      percentage: 24,
       description: 'Apprehensive financial types frequently worry about money. They may be financially strapped or navigating a temporary rough patch, or they may simply be anxious in general. They often second-guess their financial decisions and are constantly aware of how much (or how little) money they have. They live with an unhealthy fear of unexpected expenses or of losing control of their financial lives. On the other hand, when things are operating smoothly, they may thrive in planning and organization.',
       strengths: [
         'You likely have an above-average understanding of financial principles and a keen awareness of your own financial situation and responsibilities.',
@@ -61,6 +32,33 @@ const PERSONALITY_TYPES = {
         'Sometimes it\'s easier not to think about financial challenges or responsibilities. High levels of anxiety may lead you into this type of avoidance behavior.',
         'Financial stress (real or imagined) may lead you to keep more money than necessary locked up in savings, therefore disregarding its investment potential.',
         'You may not feel that you have the knowledge or the discipline to compare financial options and make the best decisions, even if you\'re fully capable.'
+      ],
+      actionItems: [
+        {
+          title: 'Put your financial life on autopilot.',
+          description: 'Sign up for online bill pay. If your bills are paid automatically each month you won\'t spend extra time thinking about them. You can also find tools to set up "push" notifications that will help you anticipate events in an orderly, structured manner and reduce anxiety.'
+        },
+        {
+          title: 'Engage in practical daydreaming.',
+          description: 'Use visualization techniques to imagine how small behavioral changes can have big effects. Then resolve to do just one measurable thing every day to improve your finances. Start with something simple, like making a daily contribution to a savings jar and watching it grow.'
+        },
+        {
+          title: 'Write out your budget.',
+          description: 'Try tracking how much money you have coming in and out on a consistent basis with a budget and projecting it forward with best-case scenarios. You can hopefully ease your money worries with a sense of predictability and pattern.'
+        }
+      ]
+    },
+    'Cautious': {
+      description: 'Cautious financial types have a healthy level of anxiety about their finances. They think about money from time to time and it has a moderate impact on their life in general. While making financial decisions is not necessarily a pleasant activity, cautious types enjoy the feeling of having some money saved, and as a result they tend to be risk averse and avoid unnecessary expenditures. They often set goals that they are saving for, and they don t find it difficult to visualize those goals.',
+      strengths: [
+        'You care about money, but it doesn\'t dominate your thinking. You strike a balance between controlling your finances and letting them control you.',
+        'You tend to avoid irresponsible debt and irresponsible financial behavior in general. While you may succumb to occasional splurges, your spending is mostly moderate.',
+        'You are generally well-prepared in the case of a financial set-back or emergency, both practically and emotionally. You tend to plan rather than panic.'
+      ],
+      challenges: [
+        'You may be slightly too analytical about money while ignoring some of the emotional aspects, such as how your financial restraint may impact your quality of life.',
+        'Being overly risk averse can limit your options, and excessive caution with your finances may actually stop your money from fully working in your favor.',
+        'You tend to enjoy routine in most aspects of life and may find it difficult to make big financial decisions that require you to step out of your comfort zone.'
       ],
       actionItems: [
         {
@@ -77,75 +75,45 @@ const PERSONALITY_TYPES = {
         }
       ]
     },
-    'Cautious': {
-      percentage: 59,
-      description: 'Cautious financial types have a healthy level of anxiety about their finances. They think about money from time to time and it has a moderate impact on their life in general. While making financial decisions is not necessarily a pleasant activity, cautious types enjoy the feeling of having some money saved, and as a result they tend to be risk averse and avoid unnecessary expenditures. They often set goals that they are saving for, and they don\'t find it difficult to visualize those goals.',
-      strengths: [
-        'You care about money, but it doesn\'t dominate your thinking. You strike a balance between controlling your finances and letting them control you.',
-        'You tend to avoid irresponsible debt and irresponsible financial behavior in general. While you may succumb to occasional splurges, your spending is mostly moderate.',
-        'You are generally well-prepared in the case of a financial set-back or emergency, both practically and emotionally. You tend to plan rather than panic.'
-      ],
-      challenges: [
-        'You may be slightly too analytical about money while ignoring some of the emotional aspects, such as how your financial restraint may impact your quality of life.',
-        'Being overly risk averse can limit your options, and excessive caution with your finances may actually stop your money from fully working in your favor.',
-        'You tend to enjoy routine in most aspects of life and may find it difficult to make big financial decisions that require you to step out of your comfort zone.'
-      ]
-    },
     'Relaxed': {
-      description: 'Relaxed financial types don\'t worry much about money, and they tend to enjoy spending it. Going into debt is not a big issue for relaxed types, and they don\'t worry much about paying off those debts in the future. Their attitude might be "spend now and worry about it later." Relaxed financial types may even be somewhat aloof when calculating the risks they are taking. On the other hand they may not focus on the amount of risk at all, but rather on how the process makes them feel in the here and now.',
+      description: 'Relaxed financial types don t worry much about money, and they tend to enjoy spending it. Going into debt is not a big issue for relaxed types, and they don t worry much about paying off those debts in the future. Their attitude might be  spend now and worry about it later.  Relaxed financial types may even be somewhat aloof when calculating the risks they are taking. On the other hand they may not focus on the amount of risk at all, but rather on how the process makes them feel in the here and now.',
       strengths: [
         'You have no hang-ups about enjoying your hard-earned money. If you come across something you really want, you likely find a way to make it happen.',
         'You can be generous with family and friends and easygoing in social situations where money is involved. You don\'t sweat the bill, and gift-giving may be a forte.',
         'You tend to be more willing than other people to take risks, and not just financially. Others may see you as a thrill-seeker.'
       ],
       challenges: [
-        'You are more susceptible than others to the sway of tricky advertising or the temptation of impulse buying and may often waste money on frivolous purchases.',
-        'Your friends or family may begin to perceive you as careless or irresponsible with money, which could negatively impact those relationships.',
-        'Debt management is not something you usually think about when opening a line of credit. You may find yourself in debt without a plan to get out.'
-      ]
-    }
-  },
-  'Outlook': {
-      percentage: 17,
-    'Confident': {
-      description: 'Because people "don\'t know what they don\'t know" they tend to overestimate their ability to make good financial decisions. Confident types make decisions quickly and are efficient in most money matters. This can be a desirable skill and can have great effect. However, confident types may veer into dangerous territory if overly confident, as they can make decisions based on insufficient information or act hastily about other things in their lives (such as their jobs) that can impact their financial situation.',
-        'You have no hang-ups about enjoying your hard-earned money. If you come across something you really want, you likely find a way to make it happen.',
-        'You can be generous with family and friends and easygoing in social situations where money is involved. You don\'t sweat the bill, and gift-giving may be a forte.',
-        'You tend to be more willing than other people to take risks, and not just financially. Others may see you as a thrill-seeker.'
-        'You\'re willing to take monetary risks for the chance of a big payoff. Call it luck or positioning, when there\'s luck to be had, you\'re more likely to have it.'
-      ],
         'You are more susceptible than others to the sway of tricky advertising or the temptation of impulse buying and may often waste money on frivolous purchases.',
         'Your friends or family may begin to perceive you as careless or irresponsible with money, which could negatively impact those relationships.',
         'Debt management is not something you usually think about when opening a line of credit. You may find yourself in debt without a plan to get out.'
       ],
       actionItems: [
         {
-          title: 'Create boundaries.',
-          description: 'Set spending limits for yourself and stick to them. Consider using cash for discretionary spending to make your spending more tangible.'
+          title: 'Put your financial life on autopilot.',
+          description: 'Try signing up for online bill pay: if your bills are paid automatically each month, you won\'t need to switch gears or spend any extra time thinking about them. Just be sure to check your accounts every now and then to make sure things are operating smoothly.'
         },
         {
-          title: 'Plan for fun.',
-          description: 'Budget for entertainment and enjoyable purchases so you can spend guilt-free within your means.'
+          title: 'Slow down; give yourself a moment to reconsider before you buy.',
+          description: 'Before making a spending decision (from impulse buy to major purchase), think through the implications of your decision. If it helps, take a walk around the store or up and down the street while you assess pros, cons, long-term effects, and how much you actually want it.'
         },
         {
-          title: 'Automate savings.',
-          description: 'Set up automatic transfers to savings so you save before you have a chance to spend.'
+          title: 'Give yourself an allowance.',
+          description: 'Evaluate your current accounts for stability. Then, if you can build into your budget a certain amount to spend on fun things each month, you\'ll be less likely to overspend. Consider putting aside a set amount of cash or using a prepaid debit card if that\'s easier.'
         }
-        'You may not have a realistic understanding of your capabilities when making money decisions, nor a realistic picture of the risks you are taking.'
       ]
-    },
-    'Optimistic': {
-      description: 'Optimistic financial types tend to be hopeful about the future and believe that things will work out somehow. In the general population, most people are overly optimistic about their futures as compared to the actual probabilities of positive events occurring. This positive outlook works well on a daily basis, but optimistic types may be caught off guard every now and then when things don\'t work out as hoped. Optimists also tend to associate with similar types of people, which can reinforce their behavior and attitudes.',
-      percentage: 17,
+    }
+  },
+  'OUTLOOK': {
+    'Confident': {
+      description: 'Because people  don t know what they don t know  they tend to overestimate their ability to make good financial decisions. Confident types make decisions quickly and are efficient in most money matters. This can be a desirable skill and can have great effect. However, confident types may veer into dangerous territory if overly confident, as they can make decisions based on insufficient information or act hastily about other things in their lives (such as their jobs) that can impact their financial situation.',
       strengths: [
-        'Your optimistic outlook can be a great asset when approaching debt management, credit repair, or other high stakes or potentially challenging tasks.',
         'Your confidence in your ability to handle money translates well into certain skills; you may excel in professions that require sales techniques and negotiations.',
         'Once you\'ve made up your mind, you don\'t often waver or second-guess yourself. You act on your words, so people view you as steadfast and reliable.',
         'You\'re willing to take monetary risks for the chance of a big payoff. Call it luck or positioning, when there\'s luck to be had, you\'re more likely to have it.'
+      ],
       challenges: [
-        'Since you have faith that everything will "work out," you may be caught off-guard when things don\'t go as hoped, even if you have a backup plan.',
         'Most people don\'t incorporate all of the information available when making decisions, and you may be prone to discounting warning signs or red flags.',
-        'Too much confidence can translate to a careless attitude, so you might not have any emergency funds or be good at saving money.',
+        'Too much confidence can create a lackadaisical attitude, so you might not be well prepared for setbacks, such as with proper insurance or an estate plan.',
         'You may not have a realistic understanding of your capabilities when making money decisions, nor a realistic picture of the risks you are taking.'
       ],
       actionItems: [
@@ -161,126 +129,121 @@ const PERSONALITY_TYPES = {
           title: 'Use your confidence wisely.',
           description: 'Be more careful with the risks you take and ask for a second opinion from someone you trust before taking larger risks. If you consult financial resources or professionals, combine their expertise with your own outlook for a hopeful yet grounded financial plan.'
         }
+      ]
     },
-    'Skeptical': {
-      description: 'Skeptical financial types are concerned about the future and don\'t always expect things to work out financially. Some level of skepticism is healthy, especially when finances are at stake, and these types are good at recognizing risks or scams and taking the appropriate precautions for protecting their assets. But too much skepticism can have a negative impact, such as causing miserly behavior or resentment in social relationships. It can also affect investment choices, causing skeptical types to assume too little risk.',
-      percentage: 41,
+    'Optimistic': {
+      description: 'Optimistic financial types tend to be hopeful about the future and believe that things will work out somehow. In the general population, most people are overly optimistic about their futures as compared to the actual probabilities of positive events occurring. This positive outlook works well on a daily basis, but optimistic types may be caught off guard every now and then when things don\'t work out as hoped. Optimists also tend to associate with similar types of people, which can reinforce their behavior and attitudes.',
       strengths: [
-        'You don\'t expect things to happen automatically, so you are more likely and willing than other types to work hard to meet your financial goals.',
         'Your optimistic outlook can be a great asset when approaching debt management, credit repair, or other high stakes or potentially challenging tasks.',
         'You can have a "happy go lucky" or "go with the flow" attitude that makes you popular with other people. Money is not usually an obstacle to having fun.',
         'You prioritize happiness in life and are generally willing to spend money on positive experiences like entertainment, dining out, and vacations.'
+      ],
       challenges: [
-        'Some amount of concern can help to keep you grounded, but it can also be a downer. You may sometimes feel like "no matter what I do, I can\'t seem to get ahead."',
         'Since you have faith that everything will "work out," you may be caught off-guard when things don\'t go as hoped, even if you have a backup plan.',
         'You may not make accurate assessments as to how the risks you take in life will work out. This can impact both yourself as well as those close to you.',
         'Happiness in the short term can take precedence over happiness in the long term. Without grounding future plans in present reality, debt can become a problem.'
       ],
       actionItems: [
         {
-          title: 'Plan for setbacks.',
-          description: 'While maintaining your positive outlook, prepare for potential challenges by building an emergency fund and having backup plans.'
+          title: 'Get grounded and assess your finances.',
+          description: 'Gather all of your financial information together in one place: accounts, bills, debts, assets and create a budget. This should be a complete and current financial picture. Then project it forward a few years to be more mindful of your overall financial situation.'
         },
         {
-          title: 'Balance present and future.',
-          description: 'Continue enjoying life while also setting aside money for long-term goals and retirement.'
+          title: 'Consider all outcomes.',
+          description: 'Because taking risks is a part of everyday life, make sure you stop and think about any possible negative consequences, not just the positive. Look at "worst case scenarios" along with potential positive outcomes to help make better decisions, financial and otherwise.'
         },
         {
-          title: 'Seek realistic perspectives.',
-          description: 'Get input from trusted friends or advisors who can provide objective viewpoints on your financial decisions.'
+          title: 'Use your optimism wisely.',
+          description: 'Be sure to incorporate long term strategies when thinking about what will make you and those close to you the happiest. If you consult financial resources or professionals, combine their expertise with your own outlook for a hopeful yet grounded financial plan.'
         }
-    }
-  },
-  'Focus': {
-      percentage: 42,
-    'Future Focused': {
-      description: 'Future-focused financial types usually have a set of goals and personal aspirations in place, with a solid understanding of at least the basic financial principles needed to achieve them. These goals tend to be specific and measurable; for instance, future-focused types are more likely than others to visualize what they would like to do in retirement rather than saying "I will figure it out when the time comes." Future-focused types generally save more, and will often earmark the money they are saving for specific goals.',
+      ]
+    },
+    'Skeptical': {
+      description: 'Skeptical financial types are concerned about the future and don\'t always expect things to work out financially. Some level of skepticism is healthy, especially when finances are at stake, and these types are good at recognizing risks or scams and taking the appropriate precautions for protecting their assets. But too much skepticism can have a negative impact, such as causing miserly behavior or resentment in social relationships. It can also affect investment choices, causing skeptical types to assume too little risk.',
+      strengths: [
         'You don\'t expect things to happen automatically, so you are more likely and willing than other types to work hard to meet your financial goals.',
         'You are usually conservative and moderate with money. You don\'t typically engage in wasteful behaviors or bite off more than you can chew.',
         'You tend to be on guard and hold your cards close. As a result, you are no easy target and are not likely to be taken advantage of financially.'
-        'In many situations, you are the type to "keep your eye on the prize." You are likely to be perceived as a hard-working and responsible person.'
       ],
+      challenges: [
         'Some amount of concern can help to keep you grounded, but it can also be a downer. You may sometimes feel like "no matter what I do, I can\'t seem to get ahead."',
         'Your skepticism may keep you from making progress; you are hesitant to take any financial risks, so your money might not be used to its full potential.',
         'Being overly skeptical can make it difficult to accept advice. You may find it hard to trust people, and this may impact your personal relationships.'
       ],
       actionItems: [
         {
-          title: 'Take calculated risks.',
-          description: 'While maintaining your cautious nature, consider low-risk investments that can help your money grow over time.'
+          title: 'Assess your finances realistically.',
+          description: 'Do a realistic assessment of your finances - perhaps you\'re in a better position than you thought. Give yourself credit for what you have accomplished and realize that most other people are in the same boat. If you have a budget, try to find potential for surplus.'
         },
         {
-          title: 'Find trusted advisors.',
-          description: 'Identify one or two financial professionals whose credentials and approach you trust for guidance on major decisions.'
+          title: 'List your goals, and don\'t hold back.',
+          description: 'Compartmentalize your money goals to address all of the important areas in life, such as basic needs, family and friends, and saving for the future. Make goals for each area and concrete plans to meet those goals. Work on those goals a little bit at a time.'
         },
         {
-          title: 'Focus on progress.',
-          description: 'Celebrate small financial wins and track your progress to maintain motivation despite setbacks.'
+          title: 'Engage in tiny acts of trust.',
+          description: 'If you work with a financial professional, be open-minded to their advice and projections. Try to see the larger picture and understand that there may be information that you don\'t have.'
         }
-        'You tend to enjoy routine in most aspects of life and may find it difficult to make big financial decisions that require you to step out of your comfort zone.'
-      ],
-      actionItems: [
-        {
-          title: 'Put people first.',
-      percentage: 43,
-          description: 'Prioritize the value of relationships and set aside a certain amount of money to improve your relationships with friends and family. Make that a similar priority to your other goals for a month and evaluate any resulting changes in your finances with an open mind.'
-        },
+      ]
+    }
+  },
+  'FOCUS': {
+    'Future Focused': {
+      description: 'Future-focused financial types usually have a set of goals and personal aspirations in place, with a solid understanding of at least the basic financial principles needed to achieve them. These goals tend to be specific and measurable; for instance, future-focused types are more likely than others to visualize what they would like to do in retirement rather than saying  I will figure it out when the time comes.  Future-focused types generally save more, and will often earmark the money they are saving for specific goals.',
+      strengths: [
         'You are driven and practical when it comes to your financial goals and personal aspirations, which can often lead to success in achieving them!',
         'You understand the importance of having money saved for a rainy day, and you are generally prepared in the case of an emergency or a financial setback.',
         'In many situations, you are the type to "keep your eye on the prize." You are likely to be perceived as a hard-working and responsible person.'
-        },
-        {
+      ],
+      challenges: [
         'You can get overly caught up in thinking about the impact your present actions will have on the future, and so you don\'t always appreciate the present moment.',
         'Having big dreams is applauded, but your chances of attaining them may be hampered by a disconnect between the dream and your everyday financial behavior.',
         'Your tendency to think ahead may occasionally reach extremes, which can contribute to anxiety or might negatively impact other aspects of your life.'
       ],
       actionItems: [
         {
-          title: 'Balance present and future.',
-          description: 'While planning for the future is important, make sure to enjoy some of your money today and appreciate present moments.'
+          title: 'Break big goals into smaller pieces.',
+          description: 'You probably already know your major financial goals, but have you assessed them on a smaller scale? Break your long-term goals into smaller, more measurable ones. Then assess whether these are feasible, and set up milestones to make sure you\'re staying on track.'
         },
         {
-          title: 'Break down big goals.',
-          description: 'Turn your long-term financial dreams into specific, actionable steps you can take each month.'
+          title: 'Treat yourself.',
+          description: 'Saving money for the future is important, but are you neglecting the present? If spending money on immediate pleasures comes with a sense of guilt, you may not be enjoying your money as much as you should be. The solution is simple: within reason, treat yourself.'
         },
         {
-          title: 'Review and adjust.',
-          description: 'Regularly review your financial plans and adjust them as your life circumstances change.'
+          title: 'Reassess old standards.',
+          description: 'If you already have a savings account, take a closer look. When was the last time you assessed your savings needs? If it\'s been a while, reevaluate these figures in light of your current income and status.'
         }
       ]
     },
     'Present Focused': {
-      percentage: 57,
-      description: 'As the term implies, present-focused people live for today and prefer to leave the future open-ended. This attitude can make for a refreshing lifestyle, yet it can also be fatalistic, in that a disregard for the future implies that everything will just "work out somehow." Alternatively, present-focused types may be well aware of financial behaviors they should adopt, such as saving money, yet they give little thought to how their present actions impact their financial situation in the future.',
+      description: 'As the term implies, present-focused people live for today and prefer to leave the future open-ended. This attitude can make for a refreshing lifestyle, yet it can also be fatalistic, in that a disregard for the future implies that everything will just  work out somehow.  Alternatively, present-focused types may be well aware of financial behaviors they should adopt, such as saving money, yet they give little thought to how their present actions impact their financial situation in the future.',
       strengths: [
         'You tend to live in the moment and relish small pleasures. With few worries about the future, you live a mostly happy and optimistic life.',
-        'You can be good at small-scale budgeting, like making the best use of a set amount of money for a shopping trip, or stretching a dollar when you\'re in a pinch.',
+        'You can be good at small-scale budgeting, like making the best use of a set amount of money for a shopping trip, or stretching your money if necessary.',
         'Since you are not overly concerned with your finances on a daily basis, you can be generous and easygoing in social situations where money is an issue.'
       ],
       challenges: [
         'Your financial goals (if you have them) may be too vague or unrealistic. Or you might know what you want, but have trouble turning your goals into actions.',
         'You can get caught up in the minutiae of everyday financial decisions and lose sight of the bigger picture. You may stress over unimportant details.',
-        'You may not have much money set aside for savings or in your retirement account, or if you do, not much thought is put into how it is invested.'
+        'You may not have much money set aside for savings in your banking or investment accounts, or if you do, not much thought is put into how it is invested.'
       ],
       actionItems: [
         {
-          title: 'Start small with future planning.',
-          description: 'Begin with simple, short-term financial goals that feel manageable and gradually work toward longer-term planning.'
+          title: 'Embrace time value of money.',
+          description: 'If you\'re not familiar with the time value of money, look it up; if you\'re already a pro, calculate how much a given amount will be worth in five, ten, and twenty years. Even if you don\'t have surplus now, you\'ll see the benefits of putting money aside in the future.'
         },
         {
-          title: 'Automate your future.',
-          description: 'Set up automatic savings and investment contributions so your future self is taken care of without daily decisions.'
+          title: 'Link goals and actions.',
+          description: 'Spend some time brainstorming about your future financial aspirations. Then define specific goals for the next month, next year, and the distant future. Compare these to a list of your current priorities. Then set up measurable milestones with actions to take now.'
         },
         {
-          title: 'Make it visual.',
-          description: 'Use apps or tools that show how small actions today can impact your future financial picture.'
+          title: 'Prepare for emergencies.',
+          description: 'Are you prepared for a financial setback? If you haven\'t already done so, build up your emergency fund. Opinion varies, but in general experts recommend keeping 3-6 months worth of expenses at easy access. Check your accounts and make sure you have a comfortable amount.'
         }
       ]
     }
   },
-  'Influence': {
+  'INFLUENCE': {
     'Independent': {
-      percentage: 57,
       description: 'Independent financial types are typically self-reliant in life, which carries over into financial matters. They pride themselves on being independent thinkers, and may even be "lone wolves" in other aspects. Independent financial types may ask for advice from others, but will rely primarily on their own research and perhaps on the services of one or a few professional advisors when they need to make financial decisions. In some cases they may come from families where money was not an acceptable topic of conversation.',
       strengths: [
         'You tend to work hard and are generally responsible with your money, which you spend on things you truly value. You view money as just a means to an end.',
@@ -308,8 +271,7 @@ const PERSONALITY_TYPES = {
       ]
     },
     'Social': {
-      percentage: 28,
-      description: 'Social, outwardly focused people tend to rely heavily or even exclusively on the opinions of others – sometimes more than they know. They are not necessarily independent thinkers when it comes to money and will instead make certain decisions because their friends are making them, particularly those they trust the most. They may put friends\' or family\'s needs ahead of their own. The size and composition of their families or social circles will impact their financial decisions and the degree of risk they are willing to assume.',
+      description: 'Social, outwardly focused people tend to rely heavily or even exclusively on the opinions of others   sometimes more than they know. They are not necessarily independent thinkers when it comes to money and will instead make certain decisions because their friends are making them, particularly those they trust the most. They may put friends\' or family\'s needs ahead of their own. The size and composition of their families or social circles will impact their financial decisions and the degree of risk they are willing to assume.',
       strengths: [
         'You can be excellent at making connections and networking, which is useful when working to find partners in business, or to develop your career.',
         'You always take into account the opinions and wishes of those close to you when making money decisions; you are generally perceived as reliable and trustworthy.',
@@ -322,21 +284,20 @@ const PERSONALITY_TYPES = {
       ],
       actionItems: [
         {
-          title: 'Define your own priorities.',
-          description: 'Before seeking advice from others, take time to identify your personal financial goals and values.'
+          title: 'Develop healthy skepticism.',
+          description: 'Be mindful of over-reliance on the opinions of others. It\'s not always a bad thing to look to others for advice, but be wary of who you listen to when it comes to financial matters. Do your own independent research to back up what others have told you.'
         },
         {
-          title: 'Set boundaries.',
-          description: 'Learn to say no to financial requests or social spending that doesn\'t align with your goals.'
+          title: 'Assert your opinions.',
+          description: 'Deferring to others to make decisions can leave you feeling resentful. You know your goals and money needs better than anyone, you are in the best position to decide how your money is spent. Guidance is fine, but be sure your decisions are ultimately your own.'
         },
         {
-          title: 'Diversify your advisors.',
-          description: 'Get input from multiple trusted sources to avoid being overly influenced by any one person\'s opinion.'
+          title: 'Use your social nature effectively.',
+          description: 'Hold regular conversations with people included in your financial picture to make sure everyone is involved and informed. Determine if there are any decisions that can be made autonomously, then delegate assignments or control of those decisions to yourself and others.'
         }
       ]
     },
     'Elusive': {
-      percentage: 15,
       description: 'Elusive financial types avoid making decisions when it comes to money matters. Financial topics may not be of much interest to them, or they may feel unqualified, or some combination of the two. Whether they are intimidated by financial matters or simply prone to avoidance in making decisions in any sphere of their lives, elusive financial types generally leave decisions to other people. They may also self-identify as dependent or needing help in other aspects of their lives.',
       strengths: [
         'You tend to value time over money, and a decreased focus on money matters means you have more time and energy for things that are truly important to you.',
@@ -350,24 +311,23 @@ const PERSONALITY_TYPES = {
       ],
       actionItems: [
         {
-          title: 'Start with basics.',
-          description: 'Begin with simple financial concepts and gradually build your knowledge and confidence.'
+          title: 'Gain skills and confidence simultaneously.',
+          description: 'To combat the feeling that you are unqualified to make financial decisions, seek out sources of financial literacy education that approach difficult topics in a manner that feels right to you. Consider articles, videos, games, and content that is conversational in tone.'
         },
         {
-          title: 'Find the right help.',
-          description: 'Identify a trusted financial advisor who can guide you while respecting your preferences and comfort level.'
+          title: 'Assert your opinions.',
+          description: 'Deferring to others can result in feeling a lack of control or resentment. You know your goals and money needs better than anyone, so you are in the best position to decide how your money is spent. Guidance is fine, but be sure your decisions are ultimately your own.'
         },
         {
-          title: 'Automate what you can.',
-          description: 'Set up automatic systems for savings and bill paying to reduce the number of financial decisions you need to make.'
+          title: 'Empower yourself with money.',
+          description: 'If making big decisions is uncomfortable for you, start with low stakes. Test out an independent spirit by making an impromptu financial decision - just be sure it won\'t affect your finances too drastically. Start small.'
         }
       ]
     }
   },
-  'Bonus': {
+  'BONUS': {
     'Organized': {
-      percentage: 25,
-      description: 'Organizers tend to be the people in their families or social circles who manage the finances, and they achieve a great deal of satisfaction from keeping tabs on their own or their household\'s financial situation. They are also likely to monitor items such as insurance policies and to be up to date on the details of their financial lives. Organizers may enjoy reading or discussing financial topics, comparing notes, and applying what they\'ve learned to their own financial situation.',
+      description: 'Organizers tend to be the people in their families or social circles who manage the finances, and they achieve a great deal of satisfaction from keeping tabs on their own or their household s financial situation. They are also likely to monitor items such as insurance policies and to be up to date on the details of their financial lives. Organizers may enjoy reading or discussing financial topics, comparing notes, and applying what they\'ve learned to their own financial situation.',
       strengths: [
         'You have an idea of the state of your finances at all times and rarely make costly financial blunders such as overdrawing an account or missing a bill payment.',
         'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
@@ -380,22 +340,21 @@ const PERSONALITY_TYPES = {
       ],
       actionItems: [
         {
-          title: 'Allow for flexibility.',
-          description: 'Build some "fun money" into your budget and give yourself permission to spend it without guilt.'
+          title: 'Buddy up and organize your worries away.',
+          description: 'There\'s no point in denying your organized nature, so why not share? Aim your focus at a particularly disorganized friend and help him get his finances in order. Your systematic methods and his relaxed approach may just teach each other a thing or two.'
         },
         {
-          title: 'Focus on the big picture.',
-          description: 'While tracking details is important, regularly step back to see how your organization is serving your larger goals.'
+          title: 'Guard against potential threats.',
+          description: 'If you find yourself fixating on certain aspects of your financial situation that are beyond your immediate control, implement methods to alleviate the burden. To protect your finances, for example, consider identity theft monitoring for peace of mind.'
         },
         {
-          title: 'Take calculated risks.',
-          description: 'Use your organizational skills to research and plan for appropriate financial risks that can help you grow wealth.'
+          title: 'Stick to a schedule.',
+          description: 'Set up a schedule for monitoring your finances and stick to it. Avoid overly obsessive monitoring of accounts. Allow online banking and other financial websites to do most of the work for you; then try to relax.'
         }
       ]
     },
     'Fun Seeking': {
-      percentage: 18,
-      description: 'Fun-seekers see money as a means for enjoying life. They tend to be hedonists to a certain degree, who will spend money just because they enjoy the process. They have been know to use terms such as "retail therapy," "YOLO," and "treat yo\'self." Financial responsibility is not high on the fun-seekers\' list of concerns, and so these types are most likely to incur large amounts of debt. And beware, even other types have been known to fall into fun-seeker behavior if they come across a large sum of money.',
+      description: 'Fun-seekers see money as a means for enjoying life. They tend to be hedonists to a certain degree, who will spend money just because they enjoy the process. Financial responsibility is not high on the fun-seekers\' list of concerns, and so these types are most likely to incur large amounts of debt. And beware, even other types have been known to fall into fun-seeker behavior if they come across a large sum of money.',
       strengths: [
         'You tend to enjoy life to the fullest. You are likely quite popular and have a number of like-minded friends who will indulge your fun-seeking nature.',
         'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
@@ -422,7 +381,6 @@ const PERSONALITY_TYPES = {
       ]
     },
     'Change Seeking': {
-      percentage: 57,
       description: 'Change-seekers are quickly bored with the status quo and are constantly looking for the next adventure in life.',
       strengths: [
         'You are likely willing to take suitable risks with your money. This has potential for major gains when making ambitious financial decisions or investments.',
@@ -436,16 +394,16 @@ const PERSONALITY_TYPES = {
       ],
       actionItems: [
         {
-          title: 'Plan for change.',
-          description: 'Before making major life changes, calculate the financial impact and create a transition budget.'
+          title: 'Budget for spontaneity.',
+          description: 'It might feel dull to avoid taking risks altogether, so if your budget allows, each month set aside a modest amount of cash in an envelope to be used however you like, whenever you\'re feeling spontaneous. But there\'s a rule: once it\'s gone, it\'s gone.'
         },
         {
-          title: 'Build a change fund.',
-          description: 'Set aside money specifically for new experiences and adventures so you can pursue them without derailing other financial goals.'
+          title: 'View savings as future experiences.',
+          description: 'If the idea of saving money bores you, link it to an actual experience. Think of a financial goal that excites you, and put aside a set amount each month toward that goal. This can be a "restaurant jar" on your countertop or a "vacation" savings account at the bank.'
         },
         {
-          title: 'Channel your energy.',
-          description: 'Use your desire for change to explore new investment opportunities or income streams that align with your interests.'
+          title: 'Zoom out.',
+          description: 'Try to take a holistic view. Always be aware of how the current adventure can impact your ability to have adventures down the road. Before you make a major change (such as a new job or moving to a new location), carefully list all the associated costs you can think of.'
         }
       ]
     }
@@ -453,7 +411,7 @@ const PERSONALITY_TYPES = {
 };
 
 export function calculateProfile(answers: number[]): Profile {
-  // Calculate category scores
+  // Calculate category scores using your algorithm
   const categoryScores: { [key: string]: number[] } = {
     'Focus': [],
     'Emotions': [],
@@ -471,101 +429,90 @@ export function calculateProfile(answers: number[]): Profile {
     }
   });
 
-  // Calculate average scores for each category
-  const categoryAverages: { [key: string]: number } = {};
+  // Calculate sum for each category (as per your algorithm)
+  const categorySums: { [key: string]: number } = {};
   Object.keys(categoryScores).forEach(category => {
     const scores = categoryScores[category];
     if (scores.length > 0) {
-      categoryAverages[category] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+      categorySums[category] = scores.reduce((sum, score) => sum + score, 0);
     }
   });
 
-  // Determine personality types based on scores
-  // This is a simplified algorithm - you may need to adjust based on your specific rules
+  // Determine personality types based on sums and ranking
   const personalities: string[] = [];
   const descriptions: string[] = [];
-  const percentages: number[] = [];
 
-  // Focus category
-  if (categoryAverages['Focus'] >= 4.5) {
+  // Focus category - determine Present vs Future Focused
+  const focusSum = categorySums['Focus'];
+  if (focusSum >= 24) { // Threshold for Future Focused (6 questions * 4 average)
     personalities.push('Future Focused');
-    descriptions.push(PERSONALITY_TYPES['Focus']['Future Focused'].description);
-    percentages.push(PERSONALITY_TYPES['Focus']['Future Focused'].percentage);
+    descriptions.push(PERSONALITY_DATA['FOCUS']['Future Focused'].description);
   } else {
     personalities.push('Present Focused');
-    descriptions.push(PERSONALITY_TYPES['Focus']['Present Focused'].description);
-    percentages.push(PERSONALITY_TYPES['Focus']['Present Focused'].percentage);
+    descriptions.push(PERSONALITY_DATA['FOCUS']['Present Focused'].description);
   }
 
   // Emotions category
-  if (categoryAverages['Emotions'] >= 5.5) {
+  const emotionsSum = categorySums['Emotions'];
+  if (emotionsSum >= 45) { // High anxiety threshold
     personalities.push('Apprehensive');
-    descriptions.push(PERSONALITY_TYPES['Emotions']['Apprehensive'].description);
-    percentages.push(PERSONALITY_TYPES['Emotions']['Apprehensive'].percentage);
-  } else if (categoryAverages['Emotions'] >= 3.5) {
+    descriptions.push(PERSONALITY_DATA['EMOTIONS']['Apprehensive'].description);
+  } else if (emotionsSum >= 27) { // Moderate anxiety threshold
     personalities.push('Cautious');
-    descriptions.push(PERSONALITY_TYPES['Emotions']['Cautious'].description);
-    percentages.push(PERSONALITY_TYPES['Emotions']['Cautious'].percentage);
+    descriptions.push(PERSONALITY_DATA['EMOTIONS']['Cautious'].description);
   } else {
     personalities.push('Relaxed');
-    descriptions.push(PERSONALITY_TYPES['Emotions']['Relaxed'].description);
-    percentages.push(PERSONALITY_TYPES['Emotions']['Relaxed'].percentage);
+    descriptions.push(PERSONALITY_DATA['EMOTIONS']['Relaxed'].description);
   }
 
   // Outlook category
-  if (categoryAverages['Outlook'] >= 5.0) {
+  const outlookSum = categorySums['Outlook'];
+  if (outlookSum >= 45) { // High optimism threshold
     personalities.push('Optimistic');
-    descriptions.push(PERSONALITY_TYPES['Outlook']['Optimistic'].description);
-    percentages.push(PERSONALITY_TYPES['Outlook']['Optimistic'].percentage);
-  } else if (categoryAverages['Outlook'] >= 3.5) {
+    descriptions.push(PERSONALITY_DATA['OUTLOOK']['Optimistic'].description);
+  } else if (outlookSum >= 32) { // Moderate confidence threshold
     personalities.push('Confident');
-    descriptions.push(PERSONALITY_TYPES['Outlook']['Confident'].description);
-    percentages.push(PERSONALITY_TYPES['Outlook']['Confident'].percentage);
+    descriptions.push(PERSONALITY_DATA['OUTLOOK']['Confident'].description);
   } else {
     personalities.push('Skeptical');
-    descriptions.push(PERSONALITY_TYPES['Outlook']['Skeptical'].description);
-    percentages.push(PERSONALITY_TYPES['Outlook']['Skeptical'].percentage);
+    descriptions.push(PERSONALITY_DATA['OUTLOOK']['Skeptical'].description);
   }
 
   // Influence category
-  if (categoryAverages['Influence'] >= 5.0) {
+  const influenceSum = categorySums['Influence'];
+  if (influenceSum >= 40) { // High social threshold
     personalities.push('Social');
-    descriptions.push(PERSONALITY_TYPES['Influence']['Social'].description);
-    percentages.push(PERSONALITY_TYPES['Influence']['Social'].percentage);
-  } else if (categoryAverages['Influence'] >= 3.5) {
+    descriptions.push(PERSONALITY_DATA['INFLUENCE']['Social'].description);
+  } else if (influenceSum >= 27) { // Moderate independence threshold
     personalities.push('Independent');
-    descriptions.push(PERSONALITY_TYPES['Influence']['Independent'].description);
-    percentages.push(PERSONALITY_TYPES['Influence']['Independent'].percentage);
+    descriptions.push(PERSONALITY_DATA['INFLUENCE']['Independent'].description);
   } else {
     personalities.push('Elusive');
-    descriptions.push(PERSONALITY_TYPES['Influence']['Elusive'].description);
-    percentages.push(PERSONALITY_TYPES['Influence']['Elusive'].percentage);
+    descriptions.push(PERSONALITY_DATA['INFLUENCE']['Elusive'].description);
   }
 
   // Bonus category
-  if (categoryAverages['Bonus'] >= 5.5) {
+  const bonusSum = categorySums['Bonus'];
+  if (bonusSum >= 45) { // High change-seeking threshold
     personalities.push('Change Seeking');
-    descriptions.push(PERSONALITY_TYPES['Bonus']['Change Seeking'].description);
-    percentages.push(PERSONALITY_TYPES['Bonus']['Change Seeking'].percentage);
-  } else if (categoryAverages['Bonus'] >= 4.5) {
+    descriptions.push(PERSONALITY_DATA['BONUS']['Change Seeking'].description);
+  } else if (bonusSum >= 32) { // Moderate fun-seeking threshold
     personalities.push('Fun Seeking');
-    descriptions.push(PERSONALITY_TYPES['Bonus']['Fun Seeking'].description);
-    percentages.push(PERSONALITY_TYPES['Bonus']['Fun Seeking'].percentage);
+    descriptions.push(PERSONALITY_DATA['BONUS']['Fun Seeking'].description);
   } else {
     personalities.push('Organized');
-    descriptions.push(PERSONALITY_TYPES['Bonus']['Organized'].description);
-    percentages.push(PERSONALITY_TYPES['Bonus']['Organized'].percentage);
+    descriptions.push(PERSONALITY_DATA['BONUS']['Organized'].description);
   }
 
   return {
-    emotions: 0, // Not used in new system
-    outlook: 0,  // Not used in new system
-    focus: 0,    // Not used in new system
-    influence: 0, // Not used in new system
-    riskTolerance: 0, // Not used in new system
+    emotions: 0, // Legacy field
+    outlook: 0,  // Legacy field
+    focus: 0,    // Legacy field
+    influence: 0, // Legacy field
+    riskTolerance: 0, // Legacy field
     personalities: personalities,
-    personalityScores: categoryAverages,
+    personalityScores: categorySums,
     descriptions: descriptions,
-    percentages: percentages
+    personalityData: PERSONALITY_DATA
   };
 }
