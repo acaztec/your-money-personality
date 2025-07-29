@@ -69,98 +69,56 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Personality Overview */}
+        {/* Money Personality Results */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Your Money Personalities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <PersonalityCard
-              title="Emotional Management"
-              score={profile.emotions}
-              type="emotions"
-            />
-            <PersonalityCard
-              title="Future Outlook"
-              score={profile.outlook}
-              type="outlook"
-            />
-            <PersonalityCard
-              title="Financial Focus"
-              score={profile.focus}
-              type="focus"
-            />
-            <PersonalityCard
-              title="Decision Influence"
-              score={profile.influence}
-              type="influence"
-            />
-            <PersonalityCard
-              title="Risk Tolerance"
-              score={profile.riskTolerance}
-              type="riskTolerance"
-            />
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Money Personality Assessment Results</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Personality Types</h3>
+                <div className="space-y-3">
+                  {profile.personalities.map((personality, index) => (
+                    <div key={personality} className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
+                      <span className="text-gray-700 capitalize">{personality.replace('-', ' ')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Assessment Summary</h3>
+                <p className="text-gray-600">
+                  Based on your responses, your financial personality has been identified. 
+                  This assessment provides insights for your financial advisor to better 
+                  understand your money management style and preferences.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Recommended Tools */}
+        {/* Resources from bff.enrich */}
         <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              {showAllTools ? 'All Tools' : 'AI-Recommended Tools'}
-            </h2>
-            <button
-              onClick={() => setShowAllTools(!showAllTools)}
-              className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Financial Wellness Resources</h2>
+          <div className="bg-gradient-to-r from-primary-50 to-accent-50 rounded-2xl p-8 text-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Continue Your Financial Journey
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Explore comprehensive financial education resources at bff.enrich.org
+            </p>
+            <a
+              href="https://bff.enrich.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
             >
-              {showAllTools ? 'Show AI Picks' : 'View All Tools'}
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayedTools.map((tool) => (
-              <div key={tool.id}>
-                <ToolCard tool={tool} />
-                {aiRecommendations?.tools && !showAllTools && tool.explanation && (
-                  <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-800">
-                      <strong>Why this fits you:</strong> {tool.explanation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recommended Courses */}
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              {showAllCourses ? 'All Courses' : 'AI-Recommended Courses'}
-            </h2>
-            <button
-              onClick={() => setShowAllCourses(!showAllCourses)}
-              className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
-            >
-              {showAllCourses ? 'Show AI Picks' : 'View All Courses'}
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayedCourses.map((course) => (
-              <div key={course.id}>
-                <CourseCard course={course} />
-                {aiRecommendations?.courses && !showAllCourses && course.explanation && (
-                  <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-800">
-                      <strong>Perfect for you:</strong> {course.explanation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
+              Visit bff.enrich.org
+            </a>
           </div>
         </div>
       </div>
 
-      <ChatPanel profile={profile} />
     </Layout>
   );
 }

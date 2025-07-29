@@ -10,9 +10,6 @@ export default function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/topics', label: 'Topics' },
-    { path: '/mindfulness', label: 'Mindfulness' },
-    { path: '/investing', label: 'Investing Classroom' },
   ];
 
   return (
@@ -40,11 +37,6 @@ export default function Layout({ children }: LayoutProps) {
                     {item.label}
                   </Link>
                 ))}
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-white text-primary-600 px-3 py-1 rounded-full text-sm font-medium">
-                1,250 Points
               </div>
             </div>
           </div>

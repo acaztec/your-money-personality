@@ -28,9 +28,9 @@ export default function Welcome() {
           </p>
           <Link
             to="/assessment"
-            className="btn-primary text-lg px-8 py-4"
+            className="btn-primary"
           >
-            <span>Start Assessment</span>
+            <span>Take Assessment</span>
             <ArrowRight className="w-5 h-5 ml-2" />
           </Link>
         </div>
@@ -74,22 +74,6 @@ export default function Welcome() {
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Ready to Transform Your Financial Future?
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Join thousands who have discovered their money personality and improved their financial wellness.
-          </p>
-          <Link
-            to="/assessment"
-            className="btn-primary"
-          >
-            <span>Begin Your Journey</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
-        </div>
       </div>
     </div>
   );
