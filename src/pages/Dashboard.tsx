@@ -47,7 +47,7 @@ export default function Dashboard() {
   const chapters = [
     {
       title: 'Overview',
-      number: 0,
+      number: 1,
       content: (
         <div className="space-y-8">
           <div className="text-center mb-12">
@@ -77,7 +77,7 @@ export default function Dashboard() {
             <div className="card">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">The Science</h3>
               <p className="text-gray-600 leading-relaxed">
-                This analysis (and the science behind it) is the first of its kind in a financial wellness program.
+                This book (and the science behind it) is the first of its kind in a financial wellness program.
                 It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics. 
                 Our goal is to help you understand - in simple, practical terms - the unique characteristics of your 
                 personality that affect your financial decision making.
@@ -100,7 +100,7 @@ export default function Dashboard() {
     // Emotions Chapter
     {
       title: 'Emotions',
-      number: 1,
+      number: 2,
       personalityType: profile.personalities[1], // Emotions is second in array
       category: 'EMOTIONS',
       content: null
@@ -108,7 +108,7 @@ export default function Dashboard() {
     // Outlook Chapter  
     {
       title: 'Outlook',
-      number: 2,
+      number: 3,
       personalityType: profile.personalities[2], // Outlook is third in array
       category: 'OUTLOOK',
       content: null
@@ -136,77 +136,6 @@ export default function Dashboard() {
       personalityType: profile.personalities[4], // Bonus is fifth in array
       category: 'BONUS',
       content: null
-    },
-    // Recommendations Chapter
-    {
-      title: 'Recommendations',
-      number: 7,
-      content: (
-        <div className="space-y-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personalities</h2>
-          </div>
-
-          <div className="grid md:grid-cols-5 gap-4 mb-12">
-            {profile.personalities.map((personality, index) => {
-              const categories = ['Focus', 'Emotions', 'Outlook', 'Influence', 'Bonus'];
-              const color = getChapterColor(index);
-              return (
-                <div key={index} className="text-center">
-                  <div className={`w-16 h-16 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-3`}>
-                    {getChapterIcon(index)}
-                  </div>
-                  <div className="text-sm text-gray-600 mb-1">Your {categories[index]} Type</div>
-                  <div className="font-semibold text-gray-900">{personality}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="text-center">
-            <button className="text-blue-600 hover:text-blue-700 font-medium">
-              View all money personality types
-            </button>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Recommended Tools For Your Personality Types</h3>
-              <div className="space-y-4">
-                {profile.personalities.slice(0, 5).map((personality, index) => (
-                  <div key={index} className="card">
-                    <h4 className="font-semibold text-gray-900 mb-2">Sample Tool for {personality}</h4>
-                    <p className="text-gray-600 text-sm mb-2">Tool description would go here</p>
-                    <div className="text-xs text-gray-500">{personality}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6">
-                <button className="text-blue-600 hover:text-blue-700 font-medium">
-                  Explore All Tools
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Recommended Courses For Your Personality Types</h3>
-              <div className="space-y-4">
-                {profile.personalities.slice(0, 4).map((personality, index) => (
-                  <div key={index} className="card">
-                    <h4 className="font-semibold text-gray-900 mb-2">Sample Course for {personality}</h4>
-                    <div className="text-xs text-gray-500">{personality}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6">
-                <button className="text-blue-600 hover:text-blue-700 font-medium">
-                  Explore All Courses
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
     }
   ];
 
@@ -216,16 +145,26 @@ export default function Dashboard() {
     const personalityData = getPersonalityData(chapter.category, chapter.personalityType);
     
     if (!personalityData) {
-      return <div>Personality data not found</div>;
+      return (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No personality data found</h2>
+          <p className="text-gray-600">
+            Unable to find data for {chapter.category} - {chapter.personalityType}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Available personalities: {Object.keys(profile.personalityData?.[chapter.category] || {}).join(', ')}
+          </p>
+        </div>
+      );
     }
 
-    const color = getChapterColor(chapter.number - 1);
+    const color = getChapterColor(chapter.number - 2); // Adjust for chapter numbering
 
     return (
       <div className="space-y-8">
         <div className="text-center mb-8">
           <div className={`w-20 h-20 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-            {getChapterIcon(chapter.number - 1)}
+            {getChapterIcon(chapter.number - 2)}
           </div>
           <div className="text-lg text-gray-600 mb-2">Your {chapter.title.toUpperCase()} Type</div>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">{chapter.personalityType}</h2>
@@ -251,8 +190,11 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold text-green-600 mb-6">3 Biggest Strengths</h3>
             <div className="space-y-4">
               {personalityData.strengths.map((strength: string, index: number) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="text-green-600 font-semibold text-sm mt-1">Strength</div>
+                <div key={index} className="border-l-4 border-green-500 pl-4">
+                  <div className="text-sm font-semibold text-green-600 mb-1">
+                    When you're {chapter.personalityType}...
+                  </div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Strength</div>
                   <p className="text-gray-600 text-sm leading-relaxed">{strength}</p>
                 </div>
               ))}
@@ -263,8 +205,11 @@ export default function Dashboard() {
             <h3 className="text-xl font-semibold text-orange-600 mb-6">3 Biggest Challenges</h3>
             <div className="space-y-4">
               {personalityData.challenges.map((challenge: string, index: number) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="text-orange-600 font-semibold text-sm mt-1">Challenge</div>
+                <div key={index} className="border-l-4 border-orange-500 pl-4">
+                  <div className="text-sm font-semibold text-orange-600 mb-1">
+                    When you're {chapter.personalityType}...
+                  </div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Challenge</div>
                   <p className="text-gray-600 text-sm leading-relaxed">{challenge}</p>
                 </div>
               ))}
@@ -274,6 +219,9 @@ export default function Dashboard() {
 
         <div className="card">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Action Items</h3>
+          <div className="text-sm font-semibold text-blue-600 mb-4">
+            When you're {chapter.personalityType}...
+          </div>
           <div className="space-y-6">
             {personalityData.actionItems.map((item: any, index: number) => (
               <div key={index} className="border-l-4 border-blue-500 pl-6">
@@ -286,6 +234,9 @@ export default function Dashboard() {
                 <p className="text-gray-600 leading-relaxed">{item.description}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-6 text-center">
+            <div className="text-sm font-semibold text-gray-900 mb-2">Action Items</div>
           </div>
         </div>
       </div>
@@ -310,7 +261,7 @@ export default function Dashboard() {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-gray-900">
-              Chapter {currentChapterData.number === 0 ? '1' : currentChapterData.number}: {currentChapterData.title} 
+              Chapter {currentChapterData.number}: {currentChapterData.title} 
               ({currentChapter + 1}/{chapters.length})
             </h1>
           </div>
