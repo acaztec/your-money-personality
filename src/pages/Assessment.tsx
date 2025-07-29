@@ -1,32 +1,47 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  User, 
+  TrendingUp, 
+  Target, 
+  Users, 
+  Brain,
+  BookOpen,
+  Wrench,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  FileText
+} from 'lucide-react';
 import { Profile } from '../types';
-import { ChevronLeft, ChevronRight, User, Target, Eye, Users, Star } from 'lucide-react';
+import toolsData from '../data/tools.json';
+import coursesData from '../data/courses.json';
+import { generateAdvisorSummary } from '../services/aiService';
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [currentChapter, setCurrentChapter] = useState(0);
+  const location = useLocation();
+  const { profile, assessmentAnswers } = location.state as { profile: Profile; assessmentAnswers: number[] };
+  const [activeChapter, setActiveChapter] = useState(1);
   const [advisorSummary, setAdvisorSummary] = useState<string>('');
+  const [loadingSummary, setLoadingSummary] = useState(false);
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem('userProfile');
-    const savedSummary = localStorage.getItem('advisorSummary');
-    
-    if (!savedProfile) {
-      navigate('/');
-      return;
-    }
+    const generateSummary = async () => {
+      setLoadingSummary(true);
+      try {
+        const summary = await generateAdvisorSummary(profile, assessmentAnswers);
+        setAdvisorSummary(summary);
+      } catch (error) {
+        console.error('Error generating advisor summary:', error);
+        setAdvisorSummary('Unable to generate advisor summary at this time.');
+      } finally {
+        setLoadingSummary(false);
+      }
+    };
 
-    setProfile(JSON.parse(savedProfile));
-    if (savedSummary) {
-      setAdvisorSummary(savedSummary);
-    }
-  }, [navigate]);
-
-  if (!profile) {
-    return <div>Loading...</div>;
-  }
+    generateSummary();
+  }, [profile, assessmentAnswers]);
 
   const getPersonalityData = (category: string, personalityType: string) => {
     // The personality data is stored in the profileCalculator, not in the profile object
@@ -676,7 +691,69 @@ export default function Dashboard() {
           actionItems: [
             {
               title: 'Buddy up and organize your worries away.',
-              description: 'Find a trusted friend or family member to help you make financial decisions. Having someone to bounce ideas off of can help you feel more confident in your choices.'
+              description: 'There\'s no point in denying your organized nature, so why not share? Aim your focus at a particularly disorganized friend and help him get his finances in order. Your systematic methods and his relaxed approach may just teach each other a thing or two.'
+            },
+            {
+              title: 'Guard against potential threats.',
+              description: 'If you find yourself fixating on certain aspects of your financial situation that are beyond your immediate control, implement methods to alleviate the burden. To protect your finances, for example, consider identity theft monitoring for peace of mind.'
+            },
+            {
+              title: 'Stick to a schedule.',
+              description: 'Set up a schedule for monitoring your finances and stick to it. Avoid overly obsessive monitoring of accounts. Allow online banking and other financial websites to do most of the work for you; then try to relax.'
+            }
+          ]
+        },
+        'Fun Seeking': {
+          description: 'Fun-seekers see money as a means for enjoying life. They tend to be hedonists to a certain degree, who will spend money just because they enjoy the process. Financial responsibility is not high on the fun-seekers\' list of concerns, and so these types are most likely to incur large amounts of debt. And beware, even other types have been known to fall into fun-seeker behavior if they come across a large sum of money.',
+          strengths: [
+            'You tend to enjoy life to the fullest. You are likely quite popular and have a number of like-minded friends who will indulge your fun-seeking nature.',
+            'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
+            'You are an excellent shopper and always know where to find the most interesting things. You take pride in your possessions and generally love to share.'
+          ],
+          challenges: [
+            'The social bonding process of shopping or other costly activities can have long-term implications and financial effects. Credit card debt may be a problem.',
+            'You prefer to spend money on enjoyable activities rather than putting it away for a rainy day, so you might have less money saved than you should.',
+            'Online purchases can be your downfall when it comes to reining in spending. You tend to get caught up in the act without much regard to the consequences.'
+          ],
+          actionItems: [
+            {
+              title: 'Take the impulse out of purchasing.',
+              description: 'Every time you start to make an impulse purchase, imagine the item in your life. Picture yourself using it in different circumstances. Does it feel realistic or forced? Think of what else you might use that money on. Then reevaluate - do you still want it?'
+            },
+            {
+              title: 'Anticipate big savings.',
+              description: 'If the idea of saving money bores you, link it to an actual payoff. Think of a financial goal that excites you, and put aside a set amount each month toward that goal. This can be a "gift jar" on your countertop or a "vacation" or "holidays" savings account at the bank.'
+            },
+            {
+              title: 'Use checks and balances online.',
+              description: 'When shopping online, place all your purchases on a wish list or in a shopping cart and leave them there. Read a few product reviews. Then step away from the computer and give yourself a day or two to think about whether or not you really want those items.'
+            }
+          ]
+        },
+        'Change Seeking': {
+          description: 'Change-seekers are quickly bored with the status quo and are constantly looking for the next adventure in life.',
+          strengths: [
+            'You are likely willing to take suitable risks with your money. This has potential for major gains when making ambitious financial decisions or investments.',
+            'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
+            'You value experiences greatly, and it\'s likely you have a wealth of stories to share about your travels to far off places or reviews of cultural events.'
+          ],
+          challenges: [
+            'You might have a habit of making spontaneous decisions without thinking about the costs involved. Current and future expenses sometimes shock you.',
+            'You prefer to spend money on enjoyable activities rather than putting it away for a rainy day, so you might have less money saved than you should.',
+            'While looking forward to the next big thing, you might not be taking into account all of the implications or financial effects that come with transition.'
+          ],
+          actionItems: [
+            {
+              title: 'Budget for spontaneity.',
+              description: 'It might feel dull to avoid taking risks altogether, so if your budget allows, each month set aside a modest amount of cash in an envelope to be used however you like, whenever you\'re feeling spontaneous. But there\'s a rule: once it\'s gone, it\'s gone.'
+            },
+            {
+              title: 'View savings as future experiences.',
+              description: 'If the idea of saving money bores you, link it to an actual experience. Think of a financial goal that excites you, and put aside a set amount each month toward that goal. This can be a "restaurant jar" on your countertop or a "vacation" savings account at the bank.'
+            },
+            {
+              title: 'Zoom out.',
+              description: 'Try to take a holistic view. Always be aware of how the current adventure can impact your ability to have adventures down the road. Before you make a major change (such as a new job or moving to a new location), carefully list all the associated costs you can think of.'
             }
           ]
         }
@@ -687,297 +764,603 @@ export default function Dashboard() {
   };
 
   const getChapterIcon = (index: number) => {
-    const icons = [User, Eye, Target, Users, Star];
-    const IconComponent = icons[index] || User;
-    return <IconComponent className="w-6 h-6" />;
+    const icons = [User, TrendingUp, Target, Users, Brain, BookOpen, FileText];
+    const IconComponent = icons[index - 1] || User;
+    return <IconComponent className="w-5 h-5" />;
   };
 
-  const getChapterColor = (index: number) => {
-    const colors = ['blue', 'green', 'purple', 'orange', 'pink'];
-    return colors[index] || 'blue';
+  const getPersonalityColor = (personality: string) => {
+    const colors = {
+      'Future Focused': 'text-blue-600',
+      'Present Focused': 'text-green-600',
+      'Apprehensive': 'text-red-600',
+      'Cautious': 'text-yellow-600',
+      'Relaxed': 'text-green-600',
+      'Confident': 'text-blue-600',
+      'Optimistic': 'text-green-600',
+      'Skeptical': 'text-gray-600',
+      'Independent': 'text-purple-600',
+      'Social': 'text-pink-600',
+      'Elusive': 'text-gray-600',
+      'Organized': 'text-indigo-600',
+      'Fun Seeking': 'text-orange-600',
+      'Change Seeking': 'text-purple-600'
+    };
+    return colors[personality] || 'text-gray-600';
   };
 
-  // Define chapters based on the real output structure
   const chapters = [
-    {
-      title: 'Overview',
-      number: 1,
-      content: (
-        <div className="space-y-8">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              Your Money Personality®
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Understand the "why" behind your money decisions with our behavioral assessment.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Why</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Managing your finances is about more than just your money in the bank. 
-                It involves setting goals, evaluating choices, and high stakes! Like most things in life, 
-                your unique personality and behaviors are an important piece. This analysis will help you 
-                better understand the "why" behind your financial decision making, while recommending positive changes.
-              </p>
-              <p className="text-sm text-gray-500 mt-4">
-                Please remember, your financial personality and behaviors depend on complex factors and may change over time. 
-                As such, this analysis is to be taken as suggestion only. For individualized advice consult a financial professional.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Science</h3>
-              <p className="text-gray-600 leading-relaxed">
-                This book (and the science behind it) is the first of its kind in a financial wellness program.
-                It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics. 
-                Our goal is to help you understand - in simple, practical terms - the unique characteristics of your 
-                personality that affect your financial decision making.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The How</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Based on your earlier responses, our analysis engine assessed the influences on your financial behaviors 
-                across a range of categories. Our analysis looks at different components of your money personality, 
-                with explanations of your dominant traits, strengths, challenges, and even a few tips and tricks to 
-                make your money personality work for you. Enjoy!
-              </p>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    // Emotions Chapter
-    {
-      title: 'Emotions',
-      number: 2,
-      personalityType: profile.personalities[1], // Emotions is second in array
-      category: 'EMOTIONS',
-      content: null
-    },
-    // Outlook Chapter  
-    {
-      title: 'Outlook',
-      number: 3,
-      personalityType: profile.personalities[2], // Outlook is third in array
-      category: 'OUTLOOK',
-      content: null
-    },
-    // Focus Chapter (skipping number 3 to match real output)
-    {
-      title: 'Focus',
-      number: 4,
-      personalityType: profile.personalities[0], // Focus is first in array
-      category: 'FOCUS',
-      content: null
-    },
-    // Influence Chapter
-    {
-      title: 'Influence',
-      number: 5,
-      personalityType: profile.personalities[3], // Influence is fourth in array
-      category: 'INFLUENCE',
-      content: null
-    },
-    // Bonus Chapter
-    {
-      title: 'Bonus',
-      number: 6,
-      personalityType: profile.personalities[4], // Bonus is fifth in array
-      category: 'BONUS',
-      content: null
-    }
+    { title: 'Your Personality Overview', icon: User },
+    { title: 'Focus & Planning', icon: Target },
+    { title: 'Emotions & Money', icon: TrendingUp },
+    { title: 'Outlook & Confidence', icon: Brain },
+    { title: 'Social Influence', icon: Users },
+    { title: 'Recommended Resources', icon: BookOpen },
+    { title: 'Financial Advisor Summary', icon: FileText }
   ];
 
-  const currentChapterData = chapters[currentChapter];
+  const renderChapterContent = () => {
+    switch (activeChapter) {
+      case 1:
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personality Profile</h2>
+              <p className="text-lg text-gray-600">
+                Based on your assessment responses, here are your primary financial personality traits:
+              </p>
+            </div>
 
-  const renderPersonalityChapter = (chapter: any) => {
-    const personalityData = getPersonalityData(chapter.category, chapter.personalityType);
-    
-    if (!personalityData) {
-      return (
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No personality data found</h2>
-          <p className="text-gray-600">
-            Unable to find data for {chapter.category} - {chapter.personalityType}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Available personalities: {Object.keys(profile.personalityData?.[chapter.category] || {}).join(', ')}
-          </p>
-        </div>
-      );
-    }
-
-    const color = getChapterColor(chapter.number - 2); // Adjust for chapter numbering
-
-    return (
-      <div className="space-y-8">
-        <div className="text-center mb-8">
-          <div className={`w-20 h-20 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-            {getChapterIcon(chapter.number - 2)}
-          </div>
-          <div className="text-lg text-gray-600 mb-2">Your {chapter.title.toUpperCase()} Type</div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">{chapter.personalityType}</h2>
-          <div className="text-lg text-gray-600">
-            {/* Percentage would go here if we had it */}
-          </div>
-        </div>
-
-        <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
-          <p className="text-gray-600 leading-relaxed mb-6">
-            {personalityData.description.split('.')[0]}.
-          </p>
-          
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">What It Means</h4>
-          <p className="text-gray-600 leading-relaxed">
-            {personalityData.description}
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="card">
-            <h3 className="text-xl font-semibold text-green-600 mb-6">3 Biggest Strengths</h3>
-            <div className="space-y-4">
-              {personalityData.strengths.map((strength: string, index: number) => (
-                <div key={index} className="border-l-4 border-green-500 pl-4">
-                  <div className="text-sm font-semibold text-green-600 mb-1">
-                    When you're {chapter.personalityType}...
+            <div className="grid gap-6">
+              {profile.personalities.map((personality, index) => (
+                <div key={personality} className="card">
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}>
+                      <span className={`text-xl font-bold ${getPersonalityColor(personality)}`}>
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className={`text-xl font-semibold mb-2 ${getPersonalityColor(personality)}`}>
+                        {personality}
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        {profile.descriptions?.[index] || 'Description not available'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm font-semibold text-gray-900 mb-1">Strength</div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{strength}</p>
                 </div>
               ))}
             </div>
           </div>
+        );
 
-          <div className="card">
-            <h3 className="text-xl font-semibold text-orange-600 mb-6">3 Biggest Challenges</h3>
-            <div className="space-y-4">
-              {personalityData.challenges.map((challenge: string, index: number) => (
-                <div key={index} className="border-l-4 border-orange-500 pl-4">
-                  <div className="text-sm font-semibold text-orange-600 mb-1">
-                    When you're {chapter.personalityType}...
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 mb-1">Challenge</div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{challenge}</p>
-                </div>
-              ))}
+      case 2:
+        const focusPersonality = profile.personalities.find(p => 
+          p === 'Future Focused' || p === 'Present Focused'
+        );
+        const focusData = focusPersonality ? getPersonalityData('FOCUS', focusPersonality) : null;
+
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Focus & Planning</h2>
+              <p className="text-lg text-gray-600">
+                Understanding your approach to financial planning and goal-setting
+              </p>
             </div>
-          </div>
-        </div>
 
-        <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">Action Items</h3>
-          <div className="text-sm font-semibold text-blue-600 mb-4">
-            When you're {chapter.personalityType}...
-          </div>
-          <div className="space-y-6">
-            {personalityData.actionItems.map((item: any, index: number) => (
-              <div key={index} className="border-l-4 border-blue-500 pl-6">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
-                    {index + 1}
-                  </span>
-                  <h4 className="font-semibold text-gray-900">{item.title}</h4>
+            {focusData ? (
+              <div className="space-y-6">
+                <div className="card">
+                  <h3 className={`text-2xl font-semibold mb-4 ${getPersonalityColor(focusPersonality)}`}>
+                    {focusPersonality}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    {focusData.description}
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-lg font-semibold text-green-600 mb-3">Your Strengths</h4>
+                      <ul className="space-y-2">
+                        {focusData.strengths?.map((strength, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-semibold text-orange-600 mb-3">Areas to Watch</h4>
+                      <ul className="space-y-2">
+                        {focusData.challenges?.map((challenge, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{challenge}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-blue-600 mb-3">Action Items</h4>
+                    <div className="space-y-4">
+                      {focusData.actionItems?.map((item, index) => (
+                        <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-2">{item.title}</h5>
+                          <p className="text-blue-800 text-sm">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-gray-600 leading-relaxed">{item.description}</p>
               </div>
-            ))}
+            ) : (
+              <div className="card text-center">
+                <p className="text-gray-500">No focus personality data found</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Available personalities: {profile.personalities.join(', ')}
+                </p>
+              </div>
+            )}
           </div>
-          <div className="mt-6 text-center">
-            <div className="text-sm font-semibold text-gray-900 mb-2">Action Items</div>
+        );
+
+      case 3:
+        const emotionPersonality = profile.personalities.find(p => 
+          p === 'Apprehensive' || p === 'Cautious' || p === 'Relaxed'
+        );
+        const emotionData = emotionPersonality ? getPersonalityData('EMOTIONS', emotionPersonality) : null;
+
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Emotions & Money</h2>
+              <p className="text-lg text-gray-600">
+                How your emotions influence your financial decisions
+              </p>
+            </div>
+
+            {emotionData ? (
+              <div className="space-y-6">
+                <div className="card">
+                  <h3 className={`text-2xl font-semibold mb-4 ${getPersonalityColor(emotionPersonality)}`}>
+                    {emotionPersonality}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    {emotionData.description}
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-lg font-semibold text-green-600 mb-3">Your Strengths</h4>
+                      <ul className="space-y-2">
+                        {emotionData.strengths?.map((strength, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-semibold text-orange-600 mb-3">Areas to Watch</h4>
+                      <ul className="space-y-2">
+                        {emotionData.challenges?.map((challenge, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{challenge}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-blue-600 mb-3">Action Items</h4>
+                    <div className="space-y-4">
+                      {emotionData.actionItems?.map((item, index) => (
+                        <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-2">{item.title}</h5>
+                          <p className="text-blue-800 text-sm">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="card text-center">
+                <p className="text-gray-500">No emotion personality data found</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Available personalities: {profile.personalities.join(', ')}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-    );
+        );
+
+      case 4:
+        const outlookPersonality = profile.personalities.find(p => 
+          p === 'Confident' || p === 'Optimistic' || p === 'Skeptical'
+        );
+        const outlookData = outlookPersonality ? getPersonalityData('OUTLOOK', outlookPersonality) : null;
+
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Outlook & Confidence</h2>
+              <p className="text-lg text-gray-600">
+                Your general outlook on financial matters and decision-making confidence
+              </p>
+            </div>
+
+            {outlookData ? (
+              <div className="space-y-6">
+                <div className="card">
+                  <h3 className={`text-2xl font-semibold mb-4 ${getPersonalityColor(outlookPersonality)}`}>
+                    {outlookPersonality}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    {outlookData.description}
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-lg font-semibold text-green-600 mb-3">Your Strengths</h4>
+                      <ul className="space-y-2">
+                        {outlookData.strengths?.map((strength, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-semibold text-orange-600 mb-3">Areas to Watch</h4>
+                      <ul className="space-y-2">
+                        {outlookData.challenges?.map((challenge, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{challenge}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-blue-600 mb-3">Action Items</h4>
+                    <div className="space-y-4">
+                      {outlookData.actionItems?.map((item, index) => (
+                        <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-2">{item.title}</h5>
+                          <p className="text-blue-800 text-sm">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="card text-center">
+                <p className="text-gray-500">No outlook personality data found</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Available personalities: {profile.personalities.join(', ')}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 5:
+        const influencePersonality = profile.personalities.find(p => 
+          p === 'Independent' || p === 'Social' || p === 'Elusive'
+        );
+        const influenceData = influencePersonality ? getPersonalityData('INFLUENCE', influencePersonality) : null;
+
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Social Influence</h2>
+              <p className="text-lg text-gray-600">
+                How social factors and others' opinions influence your financial decisions
+              </p>
+            </div>
+
+            {influenceData ? (
+              <div className="space-y-6">
+                <div className="card">
+                  <h3 className={`text-2xl font-semibold mb-4 ${getPersonalityColor(influencePersonality)}`}>
+                    {influencePersonality}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    {influenceData.description}
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-lg font-semibold text-green-600 mb-3">Your Strengths</h4>
+                      <ul className="space-y-2">
+                        {influenceData.strengths?.map((strength, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-semibold text-orange-600 mb-3">Areas to Watch</h4>
+                      <ul className="space-y-2">
+                        {influenceData.challenges?.map((challenge, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700">{challenge}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-blue-600 mb-3">Action Items</h4>
+                    <div className="space-y-4">
+                      {influenceData.actionItems?.map((item, index) => (
+                        <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-2">{item.title}</h5>
+                          <p className="text-blue-800 text-sm">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="card text-center">
+                <p className="text-gray-500">No influence personality data found</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Available personalities: {profile.personalities.join(', ')}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 6:
+        const personalizedTools = toolsData.filter(tool => 
+          tool.personalities.some(p => profile.personalities.includes(p)) || 
+          tool.personalities.includes('all')
+        );
+
+        const personalizedCourses = coursesData.filter(course => 
+          course.personalities.some(p => profile.personalities.includes(p))
+        );
+
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Recommended Resources</h2>
+              <p className="text-lg text-gray-600">
+                Tools and courses tailored to your money personality
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center space-x-3 mb-6">
+                  <Wrench className="w-6 h-6 text-blue-600" />
+                  <h3 className="text-2xl font-semibold text-gray-900">Recommended Tools</h3>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {personalizedTools.map((tool) => (
+                    <div key={tool.id} className="card hover:shadow-md transition-shadow duration-200">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">{tool.title}</h4>
+                      <p className="text-gray-600 mb-3">{tool.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-600 font-medium">{tool.category}</span>
+                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                          Try Tool →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center space-x-3 mb-6">
+                  <BookOpen className="w-6 h-6 text-green-600" />
+                  <h3 className="text-2xl font-semibold text-gray-900">Recommended Courses</h3>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {personalizedCourses.map((course) => (
+                    <div key={course.id} className="card hover:shadow-md transition-shadow duration-200">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900 flex-1">{course.title}</h4>
+                        {course.recommended && (
+                          <span className="bg-accent-100 text-accent-700 text-xs px-2 py-1 rounded-full ml-2">
+                            Recommended
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-green-600 font-medium">{course.category}</span>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-500">{course.duration}</span>
+                          <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                            Start Course →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Financial Advisor Summary</h2>
+              <p className="text-lg text-gray-600">
+                A professional summary for financial advisors working with this client
+              </p>
+            </div>
+
+            <div className="card">
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Client Profile Summary</h3>
+                  <p className="text-gray-600">
+                    Based on the comprehensive money personality assessment
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg">
+                {loadingSummary ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-bounce flex space-x-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    </div>
+                    <span className="ml-3 text-gray-600">Generating advisor summary...</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-gray max-w-none">
+                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                      {advisorSummary}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">Key Personality Traits</h4>
+                <div className="flex flex-wrap gap-2">
+                  {profile.personalities.map((personality, index) => (
+                    <span 
+                      key={personality}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getPersonalityColor(personality)} bg-white`}
+                    >
+                      {personality}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Chapter not found</div>;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-primary-600 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <img 
-            src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-            alt="iGrad Enrich" 
-            className="h-8 w-auto"
-          />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <img 
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
+              alt="iGrad Enrich" 
+              className="h-8 w-auto"
+            />
+            <Link
+              to="/"
+              className="flex items-center space-x-2 text-primary-100 hover:text-white transition-colors duration-200"
+            >
+              <Home className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Chapter Navigation */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Chapter {currentChapterData.number}: {currentChapterData.title} 
-              ({currentChapter + 1}/{chapters.length})
-            </h1>
-          </div>
-          
-          {/* Progress indicator */}
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
-            <div
-              className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentChapter + 1) / chapters.length) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Chapter Content */}
-        <div className="mb-8">
-          {currentChapterData.content || renderPersonalityChapter(currentChapterData)}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
-          <button
-            onClick={() => setCurrentChapter(Math.max(0, currentChapter - 1))}
-            disabled={currentChapter === 0}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
-              currentChapter === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-            }`}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Previous</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (currentChapter < chapters.length - 1) {
-                setCurrentChapter(currentChapter + 1);
-              } else {
-                // Could navigate somewhere else or show completion
-              }
-            }}
-            disabled={currentChapter === chapters.length - 1}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
-              currentChapter === chapters.length - 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'btn-primary'
-            }`}
-          >
-            <span>{currentChapter === chapters.length - 1 ? 'Complete' : 'Next'}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* AI Advisor Summary (if available) */}
-        {advisorSummary && currentChapter === chapters.length - 1 && (
-          <div className="mt-12 card">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Advisor Summary</h3>
-            <div className="prose prose-gray max-w-none">
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{advisorSummary}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Navigation */}
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-4 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-900">Assessment Results</h3>
+              </div>
+              <nav className="p-2">
+                {chapters.map((chapter, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => setActiveChapter(index + 1)}
+                    className={`w-full flex items-center space-x-3 px-3 py-3 text-left rounded-lg transition-colors duration-200 ${
+                      activeChapter === index + 1
+                        ? 'bg-primary-50 text-primary-700 border-l-4 border-primary-600'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    {getChapterIcon(index + 1)}
+                    <div>
+                      <div className="font-medium">Chapter {index + 1}</div>
+                      <div className="text-sm opacity-75">{chapter.title}</div>
+                    </div>
+                  </button>
+                ))}
+              </nav>
             </div>
           </div>
-        )}
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+              {renderChapterContent()}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={() => setActiveChapter(Math.max(1, activeChapter - 1))}
+                disabled={activeChapter === 1}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                  activeChapter === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Previous</span>
+              </button>
+
+              <button
+                onClick={() => setActiveChapter(Math.min(7, activeChapter + 1))}
+                disabled={activeChapter === 7}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                  activeChapter === 7
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'btn-primary'
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
