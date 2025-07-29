@@ -1,7 +1,7 @@
 import { Profile } from '../types';
 
-// Load CSV data - this would be parsed from the actual CSV files
-const PERSONALITY_SCORING: { [key: number]: { category: string; scoring: string; personality: string } } = {
+// Personality scoring based on CSV lookup table
+const PERSONALITY_SCORING = {
   1: { category: 'Spending', scoring: 'Reverse', personality: 'Spontaneous' },
   2: { category: 'Planning', scoring: 'Reverse', personality: 'Pessimistic' },
   3: { category: 'Planning', scoring: 'Reverse', personality: 'Pessimistic' },
