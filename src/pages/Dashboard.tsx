@@ -238,6 +238,7 @@ export default function Dashboard() {
                       <p className="text-gray-700">{challenge}</p>
                     </div>
                   ))}
+                </div>
               </div>
             </div>
 
