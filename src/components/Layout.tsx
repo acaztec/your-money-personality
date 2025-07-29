@@ -17,7 +17,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-blue-600 shadow-sm border-b border-blue-700">
+      <nav className="bg-primary-600 shadow-sm border-b border-primary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
@@ -25,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
                 <img
                   src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
                   alt="iGrad Enrich"
-                  className="h-8 w-auto px-3 py-1 rounded"
+                  className="h-8 w-auto bg-primary-600 px-3 py-1 rounded"
                 />
               </Link>
               <div className="hidden md:flex space-x-6">
@@ -36,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
                     className={`px-3 py-2 text-sm font-medium transition-colors duration-200 ${
                       location.pathname === item.path
                         ? 'text-white border-b-2 border-white'
-                        : 'text-blue-100 hover:text-white'
+                        : 'text-primary-100 hover:text-white'
                     }`}
                   >
                     {item.label}
@@ -45,7 +45,7 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+              <div className="bg-white text-primary-600 px-3 py-1 rounded-full text-sm font-medium">
                 1,250 Points
               </div>
             </div>
