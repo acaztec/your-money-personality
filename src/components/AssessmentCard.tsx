@@ -68,9 +68,11 @@ export default function AssessmentCard({
 
         {/* Question Card */}
         <div className="card mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+          <div className="h-32 flex items-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 leading-relaxed">
             {question}
-          </h2>
+            </h2>
+          </div>
 
           {/* Slider */}
           <div className="mb-8">
