@@ -22,9 +22,10 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
-  if (!profile) {
-    return <div>Loading...</div>;
-  }
+      </div>
+    </Layout>
+  );
+}
 
   return (
     <Layout>
