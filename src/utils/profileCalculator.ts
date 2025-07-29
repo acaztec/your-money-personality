@@ -1,6 +1,6 @@
 import { Profile } from '../types';
 
-// Personality scoring based on CSV lookup table
+// Read CSV data and create lookup tables
 const PERSONALITY_SCORING = {
   1: { category: 'Spending', scoring: 'Reverse', personality: 'Spontaneous' },
   2: { category: 'Planning', scoring: 'Reverse', personality: 'Pessimistic' },
