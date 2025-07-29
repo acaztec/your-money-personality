@@ -12,6 +12,7 @@ export interface Profile {
   personalities: string[];
   personalityScores?: { [key: string]: number };
   descriptions?: string[];
+  percentages?: number[];
 }
 
 export interface Tool {
