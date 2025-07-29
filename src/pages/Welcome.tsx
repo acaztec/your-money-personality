@@ -10,7 +10,7 @@ export default function Welcome() {
           <img
             src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
             alt="iGrad Enrich"
-            className="h-8 w-auto bg-primary-600 px-3 py-1 rounded"
+            className="h-8 w-auto"
           />
         </div>
       </div>
