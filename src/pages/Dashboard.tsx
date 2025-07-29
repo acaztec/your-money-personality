@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from '../components/Layout';
 import { Profile } from '../types';
 
@@ -7,6 +8,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [advisorSummary, setAdvisorSummary] = useState<string>('');
+  const [currentChapter, setCurrentChapter] = useState(0);
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
@@ -26,12 +28,70 @@ export default function Dashboard() {
     return null;
   }
 
+  const totalChapters = profile.personalities.length + 1; // +1 for advisor summary
+  const isAdvisorChapter = currentChapter === profile.personalities.length;
+
+  const handlePrevious = () => {
+    if (currentChapter > 0) {
+      setCurrentChapter(currentChapter - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentChapter < totalChapters - 1) {
+      setCurrentChapter(currentChapter + 1);
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Personality Chapters */}
-        <div className="space-y-8">
-          {profile.personalities.map((personality, index) => {
+        {/* Chapter Navigation */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={handlePrevious}
+            disabled={currentChapter === 0}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              currentChapter === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+            }`}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous</span>
+          </button>
+
+          <div className="text-center">
+            <div className="text-sm text-gray-600 mb-1">
+              Chapter {currentChapter + 1} of {totalChapters}
+            </div>
+            <div className="w-64 bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-primary-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentChapter + 1) / totalChapters) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleNext}
+            disabled={currentChapter === totalChapters - 1}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              currentChapter === totalChapters - 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'btn-primary'
+            }`}
+          >
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Current Chapter Content */}
+        {!isAdvisorChapter ? (
+          // Personality Chapter
+          (() => {
+            const personality = profile.personalities[currentChapter];
             const categoryMap: { [key: string]: string } = {
               'Future Focused': 'Focus',
               'Present Focused': 'Focus',
@@ -50,7 +110,6 @@ export default function Dashboard() {
             };
 
             const category = categoryMap[personality];
-            const chapterNumber = index + 1;
 
             return (
               <div key={personality} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -59,13 +118,13 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white mb-1">
-                        Chapter {chapterNumber}: {category}
+                        Chapter {currentChapter + 1}: {category}
                       </h2>
                       <p className="text-primary-100">Your {category.toUpperCase()} Type</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-white">{chapterNumber}</div>
-                      <div className="text-sm text-primary-100">of {profile.personalities.length}</div>
+                      <div className="text-3xl font-bold text-white">{currentChapter + 1}</div>
+                      <div className="text-sm text-primary-100">of {totalChapters}</div>
                     </div>
                   </div>
                 </div>
@@ -82,7 +141,7 @@ export default function Dashboard() {
                     <h4 className="text-lg font-semibold text-gray-900 mb-3">Summary</h4>
                     <div className="bg-gray-50 rounded-lg p-6">
                       <p className="text-gray-700 leading-relaxed">
-                        {profile.descriptions?.[index] || ''}
+                        {profile.descriptions?.[currentChapter] || ''}
                       </p>
                     </div>
                   </div>
@@ -171,27 +230,45 @@ export default function Dashboard() {
                 </div>
               </div>
             );
-          })}
-        </div>
-
-        {/* AI Advisor Summary */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Advisor Summary</h2>
-          <div className="bg-blue-50 rounded-xl border border-blue-200 p-8">
-            <div className="flex items-start space-x-3 mb-4">
-              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <span className="text-white text-xs font-bold">AI</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Professional Client Summary</h3>
-                <p className="text-sm text-blue-600 mb-4">For Financial Advisor Use Only</p>
+          })()
+        ) : (
+          // Advisor Summary Chapter
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Chapter Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-1">
+                    Chapter {currentChapter + 1}: Advisor Summary
+                  </h2>
+                  <p className="text-blue-100">Professional Client Summary</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{currentChapter + 1}</div>
+                  <div className="text-sm text-blue-100">of {totalChapters}</div>
+                </div>
               </div>
             </div>
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap text-gray-700">{advisorSummary}</div>
+
+            {/* Advisor Summary Content */}
+            <div className="p-8">
+              <div className="flex items-start space-x-3 mb-6">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <span className="text-white text-xs font-bold">AI</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Professional Client Summary</h3>
+                  <p className="text-sm text-blue-600 mb-4">For Financial Advisor Use Only</p>
+                </div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-6">
+                <div className="prose prose-sm max-w-none">
+                  <div className="whitespace-pre-wrap text-gray-700">{advisorSummary}</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Layout>
   );
