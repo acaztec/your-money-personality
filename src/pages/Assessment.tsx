@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Profile } from '../types';
-import { ChevronLeft, ChevronRight, User, Target, Eye, Users, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, Target, Eye, Users, Star, MessageCircle } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -428,10 +428,37 @@ export default function Dashboard() {
         </div>
       )
     },
+    // AI Advisor Summary Chapter
+    {
+      title: 'AI Financial Advisor Summary',
+      number: 2,
+      content: advisorSummary ? (
+        <div className="space-y-8">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-10 h-10 text-blue-600" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
+            <p className="text-lg text-gray-600">
+              Professional insights for your financial advisor based on your personality assessment
+            </p>
+          </div>
+
+          <div className="card">
+            <div 
+              className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-strong:text-gray-900 prose-ul:text-gray-600 prose-li:text-gray-600"
+              dangerouslySetInnerHTML={{ 
+                __html: advisorSummary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^# (.*$)/gim, '<h1>$1</h1>').replace(/^- (.*$)/gim, '<li>$1</li>').replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+              }}
+            />
+          </div>
+        </div>
+      ) : null
+    },
     // Emotions Chapter
     {
       title: 'Emotions',
-      number: 2,
+      number: 3,
       personalityType: profile.personalities[1], // Emotions is second in array
       category: 'EMOTIONS',
       content: null
@@ -439,7 +466,7 @@ export default function Dashboard() {
     // Outlook Chapter  
     {
       title: 'Outlook',
-      number: 3,
+      number: 4,
       personalityType: profile.personalities[2], // Outlook is third in array
       category: 'OUTLOOK',
       content: null
@@ -447,7 +474,7 @@ export default function Dashboard() {
     // Focus Chapter (skipping number 3 to match real output)
     {
       title: 'Focus',
-      number: 4,
+      number: 5,
       personalityType: profile.personalities[0], // Focus is first in array
       category: 'FOCUS',
       content: null
@@ -455,7 +482,7 @@ export default function Dashboard() {
     // Influence Chapter
     {
       title: 'Influence',
-      number: 5,
+      number: 6,
       personalityType: profile.personalities[3], // Influence is fourth in array
       category: 'INFLUENCE',
       content: null
@@ -463,12 +490,12 @@ export default function Dashboard() {
     // Bonus Chapter
     {
       title: 'Bonus',
-      number: 6,
+      number: 7,
       personalityType: profile.personalities[4], // Bonus is fifth in array
       category: 'BONUS',
       content: null
     }
-  ];
+  ].filter(chapter => chapter.content !== null); // Filter out chapters with null content (like AI summary if not available)
 
   const currentChapterData = chapters[currentChapter];
 
@@ -647,14 +674,6 @@ export default function Dashboard() {
         </div>
 
         {/* AI Advisor Summary (if available) */}
-        {advisorSummary && currentChapter === chapters.length - 1 && (
-          <div className="mt-12 card">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Advisor Summary</h3>
-            <div className="prose prose-gray max-w-none">
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{advisorSummary}</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

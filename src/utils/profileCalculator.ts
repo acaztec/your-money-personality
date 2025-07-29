@@ -350,6 +350,68 @@ const PERSONALITY_DATA = {
         {
           title: 'Stick to a schedule.',
           description: 'Set up a schedule for monitoring your finances and stick to it. Avoid overly obsessive monitoring of accounts. Allow online banking and other financial websites to do most of the work for you; then try to relax.'
+        },
+        {
+          title: 'Guard against potential threats.',
+          description: 'If you find yourself fixating on certain aspects of your financial situation that are beyond your immediate control, implement methods to alleviate the burden. To protect your finances, for example, consider identity theft monitoring for peace of mind.'
+        },
+        {
+          title: 'Stick to a schedule.',
+          description: 'Set up a schedule for monitoring your finances and stick to it. Avoid overly obsessive monitoring of accounts. Allow online banking and other financial websites to do most of the work for you; then try to relax.'
+        }
+      ]
+    },
+    'Fun Seeking': {
+      description: 'Fun-seekers see money as a means for enjoying life. They tend to be hedonists to a certain degree, who will spend money just because they enjoy the process. Financial responsibility is not high on the fun-seekers\' list of concerns, and so these types are most likely to incur large amounts of debt. And beware, even other types have been known to fall into fun-seeker behavior if they come across a large sum of money.',
+      strengths: [
+        'You tend to enjoy life to the fullest. You are likely quite popular and have a number of like-minded friends who will indulge your fun-seeking nature.',
+        'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
+        'You are an excellent shopper and always know where to find the most interesting things. You take pride in your possessions and generally love to share.'
+      ],
+      challenges: [
+        'The social bonding process of shopping or other costly activities can have long-term implications and financial effects. Credit card debt may be a problem.',
+        'You prefer to spend money on enjoyable activities rather than putting it away for a rainy day, so you might have less money saved than you should.',
+        'Online purchases can be your downfall when it comes to reining in spending. You tend to get caught up in the act without much regard to the consequences.'
+      ],
+      actionItems: [
+        {
+          title: 'Take the impulse out of purchasing.',
+          description: 'Every time you start to make an impulse purchase, imagine the item in your life. Picture yourself using it in different circumstances. Does it feel realistic or forced? Think of what else you might use that money on. Then reevaluate - do you still want it?'
+        },
+        {
+          title: 'Anticipate big savings.',
+          description: 'If the idea of saving money bores you, link it to an actual payoff. Think of a financial goal that excites you, and put aside a set amount each month toward that goal. This can be a "gift jar" on your countertop or a "vacation" or "holidays" savings account at the bank.'
+        },
+        {
+          title: 'Use checks and balances online.',
+          description: 'When shopping online, place all your purchases on a wish list or in a shopping cart and leave them there. Read a few product reviews. Then step away from the computer and give yourself a day or two to think about whether or not you really want those items.'
+        }
+      ]
+    },
+    'Change Seeking': {
+      description: 'Change-seekers are quickly bored with the status quo and are constantly looking for the next adventure in life.',
+      strengths: [
+        'You are likely willing to take suitable risks with your money. This has potential for major gains when making ambitious financial decisions or investments.',
+        'If you are tempted by tricky advertising or an impulse purchase, you tend to recognize it before your spending gets too far out of hand.',
+        'You value experiences greatly, and it\'s likely you have a wealth of stories to share about your travels to far off places or reviews of cultural events.'
+      ],
+      challenges: [
+        'You might have a habit of making spontaneous decisions without thinking about the costs involved. Current and future expenses sometimes shock you.',
+        'You prefer to spend money on enjoyable activities rather than putting it away for a rainy day, so you might have less money saved than you should.',
+        'While looking forward to the next big thing, you might not be taking into account all of the implications or financial effects that come with transition.'
+      ],
+      actionItems: [
+        {
+          title: 'Budget for spontaneity.',
+          description: 'It might feel dull to avoid taking risks altogether, so if your budget allows, each month set aside a modest amount of cash in an envelope to be used however you like, whenever you\'re feeling spontaneous. But there\'s a rule: once it\'s gone, it\'s gone.'
+        },
+        {
+          title: 'View savings as future experiences.',
+          description: 'If the idea of saving money bores you, link it to an actual experience. Think of a financial goal that excites you, and put aside a set amount each month toward that goal. This can be a "restaurant jar" on your countertop or a "vacation" savings account at the bank.'
+        },
+        {
+          title: 'Zoom out.',
+          description: 'Try to take a holistic view. Always be aware of how the current adventure can impact your ability to have adventures down the road. Before you make a major change (such as a new job or moving to a new location), carefully list all the associated costs you can think of.'
         }
       ]
     },

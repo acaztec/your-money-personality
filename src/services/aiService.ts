@@ -15,13 +15,13 @@ Client Profile:
 
 Assessment Responses: ${assessmentAnswers.join(', ')}
 
-Provide a concise professional summary (2-3 paragraphs) that highlights:
+Provide a concise professional summary in **markdown format** (2-3 paragraphs) that highlights:
 1. Key personality traits and financial behaviors
 2. Potential challenges or concerns to be aware of
 3. Recommended communication and advisory approaches
 4. Areas where this client might need extra support or guidance
 
-Write this as a professional advisor briefing.`;
+Write this as a professional advisor briefing using markdown formatting with headers, bullet points, and emphasis where appropriate.`;
 
    const response = await fetch(AZURE_ENDPOINT, {
       method: 'POST',
