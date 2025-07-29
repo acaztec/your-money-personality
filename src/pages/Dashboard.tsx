@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Profile, Tool, Course } from '../types';
-import { MessageCircle, BookOpen, Wrench, ChevronLeft, ChevronRight, User, Brain } from 'lucide-react';
-import toolsData from '../data/tools.json';
-import coursesData from '../data/courses.json';
+import { MessageCircle, ChevronLeft, ChevronRight, User, Brain } from 'lucide-react';
 
 // Markdown to HTML converter
 const convertMarkdownToHTML = (markdown: string): string => {
@@ -84,60 +82,58 @@ export default function Dashboard() {
     );
   }
 
-  // Get recommended tools and courses based on personality
-  const getRecommendedItems = (items: (Tool | Course)[], personalities: string[]) => {
-    return items.filter(item => 
-      item.personalities.some(p => 
-        personalities.some(userP => 
-          userP.toLowerCase().includes(p.toLowerCase()) || 
-          p.toLowerCase().includes(userP.toLowerCase()) ||
-          p === 'all'
-        )
-      )
-    ).slice(0, 6);
-  };
-
-  const recommendedTools = getRecommendedItems(toolsData as Tool[], profile.personalities);
-  const recommendedCourses = getRecommendedItems(coursesData as Course[], profile.personalities);
-
   // Create chapters based on personality data
   const chapters = [
     {
       id: 1,
-      title: 'Your Money Personality Overview',
+      title: 'Overview',
       icon: User,
       content: (
         <div className="space-y-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personality Types</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personality®</h2>
             <p className="text-lg text-gray-600">
-              Based on your assessment, here are your primary financial personality types:
+              Understand the "why" behind your money decisions with our behavioral assessment.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {profile.personalityData.map((personality: any, index: number) => (
-              <div key={index} className="card">
-                <div className="text-center mb-4">
-                  <div className="w-16 h-16 mx-auto mb-3 bg-blue-50 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">{profile.personalities[index]}</h3>
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {personality.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <div className="space-y-8">
+            <div className="card">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Why</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Managing your finances is about more than just your money in the bank. 
+                It involves setting goals, evaluating choices, and high stakes! Like most things in life, 
+                your unique personality and behaviors are an important piece. This analysis will help you 
+                better understand the "why" behind your financial decision making, while recommending positive changes.
+              </p>
+              <p className="text-gray-600 text-sm">
+                Please remember, your financial personality and behaviors depend on complex factors and may change over time. 
+                As such, this analysis is to be taken as suggestion only. For individualized advice consult a financial professional.
+              </p>
+            </div>
 
-          <div className="bg-blue-50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">What This Means</h3>
-            <p className="text-gray-700">
-              Your personality combination gives you a unique approach to money management. 
-              In the following chapters, you'll discover specific insights, strengths, challenges, 
-              and action plans tailored to each of your personality types.
-            </p>
+            <div className="card">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Science</h3>
+              <p className="text-gray-700 leading-relaxed">
+                This analysis (and the science behind it) is the first of its kind in a financial wellness program. 
+                It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics. 
+                Our goal is to help you understand - in simple, practical terms - the unique characteristics of your 
+                personality that affect your financial decision making.
+              </p>
+            </div>
+
+            <div className="card">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">The How</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Based on your earlier responses, our analysis engine assessed the influences on your financial 
+                behaviors across a range of categories.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Our analysis looks at different components of your money personality, with explanations of your 
+                dominant traits, strengths, challenges, and even a few tips and tricks to make your money 
+                personality work for you. Enjoy!
+              </p>
+            </div>
           </div>
         </div>
       )
@@ -173,9 +169,22 @@ export default function Dashboard() {
 
   // Add personality-specific chapters
   profile.personalityData.forEach((personality: any, index: number) => {
+    // Get the category for this personality type
+    const getPersonalityCategory = (personalityName: string) => {
+      if (['Future Focused', 'Present Focused'].includes(personalityName)) return 'Focus';
+      if (['Apprehensive', 'Cautious', 'Relaxed'].includes(personalityName)) return 'Emotions';
+      if (['Confident', 'Optimistic', 'Skeptical'].includes(personalityName)) return 'Outlook';
+      if (['Independent', 'Social', 'Elusive'].includes(personalityName)) return 'Influence';
+      if (['Organized', 'Fun Seeking', 'Change Seeking'].includes(personalityName)) return 'Bonus';
+      return 'Unknown';
+    };
+
+    const category = getPersonalityCategory(profile.personalities[index]);
+    const personalityName = profile.personalities[index];
+
     chapters.push({
       id: chapters.length + 1,
-      title: `${profile.personalities[index]} Personality`,
+      title: category,
       icon: User,
       content: (
         <div className="space-y-8">
@@ -183,124 +192,81 @@ export default function Dashboard() {
             <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
               <User className="w-8 h-8 text-blue-600" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{profile.personalities[index]}</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              {personality.description}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-green-600 mb-4">Your Strengths</h3>
-              <ul className="space-y-3">
-                {personality.strengths.map((strength: string, idx: number) => (
-                  <li key={idx} className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card">
-              <h3 className="text-xl font-semibold text-orange-600 mb-4">Your Challenges</h3>
-              <ul className="space-y-3">
-                {personality.challenges.map((challenge: string, idx: number) => (
-                  <li key={idx} className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">{challenge}</span>
-                  </li>
-                ))}
-              </ul>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-blue-600 mb-2">{personalityName}</h3>
+              <p className="text-sm text-gray-500">XX% of people are {personalityName} like you</p>
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Plans for You</h3>
-            <div className="grid gap-6">
-              {personality.actionPlans.map((plan: any, idx: number) => (
-                <div key={idx} className="border-l-4 border-blue-500 pl-6">
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">{plan.title}</h4>
-                  <p className="text-gray-700 leading-relaxed">{plan.description}</p>
+          <div className="space-y-8">
+            <div className="card">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {personality.PersonalitySummary || personality.description}
+              </p>
+            </div>
+
+            <div className="card">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">What It Means</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {personality.PersonalityDescription || personality.description}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="card">
+                <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
+                  {[personality.Strength1, personality.Strength2, personality.Strength3].filter(Boolean).map((strength: string, idx: number) => (
+                    <div key={idx} className="border-l-4 border-green-500 pl-4">
+                      <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
+                      <p className="text-gray-700">{strength}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <div className="card">
+                <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
+                  {[personality.Challenge1, personality.Challenge2, personality.Challenge3].filter(Boolean).map((challenge: string, idx: number) => (
+                    <div key={idx} className="border-l-4 border-orange-500 pl-4">
+                      <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
+                      <p className="text-gray-700">{challenge}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Items</h3>
+              <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
+              <div className="space-y-6">
+                {[
+                  { title: personality.ActionPlan1_Summary, description: personality.ActionPlan1_Description },
+                  { title: personality.ActionPlan2_Summary, description: personality.ActionPlan2_Description },
+                  { title: personality.ActionPlan3_Summary, description: personality.ActionPlan3_Description }
+                ].filter(plan => plan.title && plan.description).map((plan: any, idx: number) => (
+                  <div key={idx} className="border-l-4 border-blue-500 pl-6">
+                    <div className="flex items-start space-x-3 mb-2">
+                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
+                        {idx + 1}
+                      </span>
+                      <h4 className="text-lg font-medium text-gray-900">{plan.title}</h4>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed ml-9">{plan.description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )
     });
-  });
-
-  // Add tools and courses chapters
-  chapters.push({
-    id: chapters.length + 1,
-    title: 'Recommended Tools',
-    icon: Wrench,
-    content: (
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-green-50 rounded-full flex items-center justify-center">
-            <Wrench className="w-8 h-8 text-green-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Recommended Tools</h2>
-          <p className="text-lg text-gray-600">
-            Financial tools specifically selected based on your personality types
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recommendedTools.map((tool) => (
-            <div key={tool.id} className="card hover:shadow-md transition-shadow duration-200">
-              <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                  {tool.category}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{tool.title}</h3>
-              <p className="text-gray-600 text-sm">{tool.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  });
-
-  chapters.push({
-    id: chapters.length + 1,
-    title: 'Recommended Courses',
-    icon: BookOpen,
-    content: (
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-purple-50 rounded-full flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-purple-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Recommended Courses</h2>
-          <p className="text-lg text-gray-600">
-            Educational courses tailored to your financial personality
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recommendedCourses.map((course) => (
-            <div key={course.id} className="card hover:shadow-md transition-shadow duration-200">
-              <div className="flex justify-between items-start mb-4">
-                <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
-                  {course.category}
-                </span>
-                {course.recommended && (
-                  <span className="inline-block px-2 py-1 bg-accent-100 text-accent-800 text-xs font-medium rounded">
-                    Recommended
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.title}</h3>
-              <p className="text-gray-500 text-sm">{course.duration}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
   });
 
   const currentChapterData = chapters.find(c => c.id === currentChapter);
