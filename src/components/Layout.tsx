@@ -18,11 +18,13 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
-              <img 
-                src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-                alt="iGrad Enrich" 
-                className="h-8 w-auto"
-              />
+              <Link to="/" className="hover:opacity-80 transition-opacity duration-200">
+                <img 
+                  src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
+                  alt="iGrad Enrich" 
+                  className="h-8 w-auto"
+                />
+              </Link>
               <div className="hidden md:flex space-x-6">
                 {navItems.map((item) => (
                   <Link
