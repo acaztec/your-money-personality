@@ -10,6 +10,8 @@ export interface Profile {
   influence: number;
   riskTolerance: number;
   personalities: string[];
+  personalityScores?: { [key: string]: number };
+  descriptions?: string[];
 }
 
 export interface Tool {

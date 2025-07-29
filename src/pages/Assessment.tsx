@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
-import { generatePersonalizedRecommendations } from '../services/aiService';
+import { generateAdvisorSummary } from '../services/aiService';
 import questionsData from '../data/questions.json';
 
 export default function Assessment() {
@@ -25,12 +25,12 @@ export default function Assessment() {
       setIsCompleting(true);
       const profile = calculateProfile(answers);
       
-      // Generate AI recommendations
-      const recommendations = await generatePersonalizedRecommendations(profile, answers);
+      // Generate AI advisor summary
+      const advisorSummary = await generateAdvisorSummary(profile, answers);
       
       localStorage.setItem('userProfile', JSON.stringify(profile));
       localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-      localStorage.setItem('aiRecommendations', JSON.stringify(recommendations));
+      localStorage.setItem('advisorSummary', advisorSummary);
       navigate('/dashboard');
     }
   };

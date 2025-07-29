@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import PersonalityCard from '../components/PersonalityCard';
-import ToolCard from '../components/ToolCard';
-import CourseCard from '../components/CourseCard';
-import ChatPanel from '../components/ChatPanel';
-import { Profile, Tool, Course } from '../types';
-import toolsData from '../data/tools.json';
-import coursesData from '../data/courses.json';
+import { Profile } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
-  const [showAllTools, setShowAllTools] = useState(false);
-  const [showAllCourses, setShowAllCourses] = useState(false);
+  const [advisorSummary, setAdvisorSummary] = useState<string>('');
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
@@ -24,9 +16,9 @@ export default function Dashboard() {
     }
     setProfile(JSON.parse(savedProfile));
     
-    const savedRecommendations = localStorage.getItem('aiRecommendations');
-    if (savedRecommendations) {
-      setAiRecommendations(JSON.parse(savedRecommendations));
+    const savedSummary = localStorage.getItem('advisorSummary');
+    if (savedSummary) {
+      setAdvisorSummary(savedSummary);
     }
   }, [navigate]);
 
@@ -34,41 +26,9 @@ export default function Dashboard() {
     return <div>Loading...</div>;
   }
 
-  const getRecommendedTools = (): Tool[] => {
-    if (aiRecommendations?.tools && !showAllTools) {
-      return aiRecommendations.tools;
-    }
-    return toolsData.filter(tool => 
-      tool.personalities.includes('all') || 
-      tool.personalities.some(p => profile.personalities.includes(p))
-    );
-  };
-
-  const getRecommendedCourses = (): Course[] => {
-    if (aiRecommendations?.courses && !showAllCourses) {
-      return aiRecommendations.courses;
-    }
-    return coursesData.filter(course => 
-      course.personalities.some(p => profile.personalities.includes(p))
-    );
-  };
-
-  const recommendedTools = getRecommendedTools();
-  const recommendedCourses = getRecommendedCourses();
-  const displayedTools = showAllTools ? toolsData : recommendedTools.slice(0, 6);
-  const displayedCourses = showAllCourses ? coursesData : recommendedCourses.slice(0, 6);
-
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back!</h1>
-          <p className="text-gray-600">
-            Based on your assessment, here are AI-powered recommendations tailored specifically for you.
-          </p>
-        </div>
-
         {/* Money Personality Results */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Money Personality Assessment Results</h2>
@@ -76,11 +36,11 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Personality Types</h3>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {profile.personalities.map((personality, index) => (
-                    <div key={personality} className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
-                      <span className="text-gray-700 capitalize">{personality.replace('-', ' ')}</span>
+                    <div key={personality} className="border-l-4 border-primary-500 pl-4">
+                      <h4 className="font-medium text-gray-900 capitalize">{personality.replace('-', ' ')}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{profile.descriptions?.[index] || ''}</p>
                     </div>
                   ))}
                 </div>
@@ -88,11 +48,30 @@ export default function Dashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Assessment Summary</h3>
                 <p className="text-gray-600">
-                  Based on your responses, your financial personality has been identified. 
-                  This assessment provides insights for your financial advisor to better 
-                  understand your money management style and preferences.
+                  Based on the responses, this client's financial personality has been identified using 
+                  a rule-based algorithm. This assessment provides insights for financial advisors to 
+                  better understand their client's money management style and preferences.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Advisor Summary */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Advisor Summary</h2>
+          <div className="bg-blue-50 rounded-xl border border-blue-200 p-8">
+            <div className="flex items-start space-x-3 mb-4">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-white text-xs font-bold">AI</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Professional Client Summary</h3>
+                <p className="text-sm text-blue-600 mb-4">For Financial Advisor Use Only</p>
+              </div>
+            </div>
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-wrap text-gray-700">{advisorSummary}</div>
             </div>
           </div>
         </div>
@@ -118,7 +97,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
     </Layout>
   );
 }
