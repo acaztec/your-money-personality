@@ -6,13 +6,7 @@ export default function Welcome() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <img
-            src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
-            alt="iGrad Enrich"
-            className="h-8 w-auto"
-          />
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4"></div>
       </div>
 
       {/* Hero Section */}
