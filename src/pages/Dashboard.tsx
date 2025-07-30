@@ -230,16 +230,12 @@ export default function Dashboard() {
                   <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
                   <div className="space-y-4">
                     <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                    {[
-                      personalityData.Strength1,
-                      personalityData.Strength2, 
-                      personalityData.Strength3
-                    ].filter(Boolean).map((strength: string, idx: number) => (
+                    {personalityData.strengths?.map((strength: string, idx: number) => (
                       <div key={idx} className="border-l-4 border-green-500 pl-4">
                         <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
                         <p className="text-gray-700">{strength}</p>
                       </div>
-                    ))}
+                    )) || []}
                   </div>
                 </div>
 
@@ -247,16 +243,12 @@ export default function Dashboard() {
                   <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
                   <div className="space-y-4">
                     <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                    {[
-                      personalityData.Challenge1,
-                      personalityData.Challenge2,
-                      personalityData.Challenge3
-                    ].filter(Boolean).map((challenge: string, idx: number) => (
+                    {personalityData.challenges?.map((challenge: string, idx: number) => (
                       <div key={idx} className="border-l-4 border-orange-500 pl-4">
                         <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
                         <p className="text-gray-700">{challenge}</p>
                       </div>
-                    ))}
+                    )) || []}
                   </div>
                 </div>
               </div>
@@ -265,11 +257,7 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Items</h3>
                 <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
                 <div className="space-y-6">
-                  {[
-                    { title: personalityData.ActionPlan1_Summary, description: personalityData.ActionPlan1_Description },
-                    { title: personalityData.ActionPlan2_Summary, description: personalityData.ActionPlan2_Description },
-                    { title: personalityData.ActionPlan3_Summary, description: personalityData.ActionPlan3_Description }
-                  ].filter(plan => plan.title && plan.description).map((plan: any, idx: number) => (
+                  {personalityData.actionPlans?.map((plan: any, idx: number) => (
                     <div key={idx} className="border-l-4 border-blue-500 pl-6">
                       <div className="flex items-start space-x-3 mb-2">
                         <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
@@ -279,7 +267,7 @@ export default function Dashboard() {
                       </div>
                       <p className="text-gray-700 leading-relaxed ml-9">{plan.description}</p>
                     </div>
-                  ))}
+                  )) || []}
                 </div>
               </div>
             </div>
