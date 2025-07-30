@@ -41,18 +41,6 @@ export default function AssessmentCard({
 
   return (
     <div className="w-full max-w-2xl">
-      {/* Checkpoint Message - Fixed height container */}
-      <div className="mb-6 h-16 flex items-center">
-        {checkpointMessage && (
-          <div className="w-full p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-              <p className="text-blue-800 font-medium text-sm leading-tight">{checkpointMessage}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -127,6 +115,16 @@ export default function AssessmentCard({
           </button>
         </div>
       </div>
+
+      {/* Checkpoint Message - Below the card */}
+      {checkpointMessage && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+            <p className="text-blue-800 font-medium text-sm leading-tight">{checkpointMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
