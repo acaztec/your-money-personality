@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { Profile, Tool, Course } from '../types';
+import { Profile } from '../types';
 import { MessageCircle, ChevronLeft, ChevronRight, User, Brain } from 'lucide-react';
 
 // Markdown to HTML converter
@@ -26,10 +26,16 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Dashboard useEffect running...');
+    
     const savedProfile = localStorage.getItem('userProfile');
     const savedSummary = localStorage.getItem('advisorSummary');
     
+    console.log('Saved profile:', savedProfile);
+    console.log('Saved summary:', savedSummary);
+    
     if (!savedProfile) {
+      console.log('No saved profile found, redirecting to home');
       navigate('/');
       return;
     }
@@ -39,13 +45,12 @@ export default function Dashboard() {
       console.log('Parsed profile:', parsedProfile);
       setProfile(parsedProfile);
       setAdvisorSummary(savedSummary || '');
+      setLoading(false);
     } catch (error) {
       console.error('Error parsing saved profile:', error);
       navigate('/');
       return;
     }
-
-    setLoading(false);
   }, [navigate]);
 
   if (loading) {
@@ -64,8 +69,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!profile || !profile.personalityData || !Array.isArray(profile.personalityData)) {
-    console.error('Profile data missing or invalid:', profile);
+  if (!profile) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -83,6 +87,10 @@ export default function Dashboard() {
       </Layout>
     );
   }
+
+  console.log('Profile data for rendering:', profile);
+  console.log('Profile personalities:', profile.personalities);
+  console.log('Profile personalityData:', profile.personalityData);
 
   // Create chapters based on personality data
   const chapters = [
@@ -169,114 +177,117 @@ export default function Dashboard() {
     }
   ];
 
-  // Add personality-specific chapters
-  profile.personalityData.forEach((personality: any, index: number) => {
-    // Get the category for this personality type
-    const getPersonalityCategory = (personalityName: string) => {
-      if (['Future Focused', 'Present Focused'].includes(personalityName)) return 'Focus';
-      if (['Apprehensive', 'Cautious', 'Relaxed'].includes(personalityName)) return 'Emotions';
-      if (['Confident', 'Optimistic', 'Skeptical'].includes(personalityName)) return 'Outlook';
-      if (['Independent', 'Social', 'Elusive'].includes(personalityName)) return 'Influence';
-      if (['Organized', 'Fun Seeking', 'Change Seeking'].includes(personalityName)) return 'Bonus';
-      return 'Unknown';
-    };
+  // Add personality-specific chapters only if we have valid data
+  if (profile.personalityData && Array.isArray(profile.personalityData)) {
+    profile.personalityData.forEach((personalityData: any, index: number) => {
+      const personalityName = profile.personalities[index];
+      
+      // Get the category for this personality type
+      const getPersonalityCategory = (personalityName: string) => {
+        if (['Future Focused', 'Present Focused'].includes(personalityName)) return 'Focus';
+        if (['Apprehensive', 'Cautious', 'Relaxed'].includes(personalityName)) return 'Emotions';
+        if (['Confident', 'Optimistic', 'Skeptical'].includes(personalityName)) return 'Outlook';
+        if (['Independent', 'Social', 'Elusive'].includes(personalityName)) return 'Influence';
+        if (['Organized', 'Fun Seeking', 'Change Seeking'].includes(personalityName)) return 'Bonus';
+        return 'Unknown';
+      };
 
-    const category = getPersonalityCategory(profile.personalities[index]);
-    const personalityName = profile.personalities[index];
+      const category = getPersonalityCategory(personalityName);
 
-    chapters.push({
-      id: chapters.length + 1,
-      title: category,
-      icon: User,
-      content: (
-        <div className="space-y-8">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-blue-600" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-blue-600 mb-2">{personalityName}</h3>
-            </div>
-          </div>
-
+      chapters.push({
+        id: chapters.length + 1,
+        title: category,
+        icon: User,
+        content: (
           <div className="space-y-8">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
-              <p className="text-gray-700 leading-relaxed">
-                {personality.PersonalitySummary || personality.description}
-              </p>
-            </div>
-
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">What It Means</h3>
-              <p className="text-gray-700 leading-relaxed">
-                {personality.PersonalityDescription || personality.description}
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="card">
-                <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                  {[
-                    personalityData.Strength1,
-                    personalityData.Strength2, 
-                    personalityData.Strength3
-                  ].filter(Boolean).map((strength: string, idx: number) => (
-                    <div key={idx} className="border-l-4 border-green-500 pl-4">
-                      <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
-                      <p className="text-gray-700">{strength}</p>
-                    </div>
-                  ))}
-                </div>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-blue-600" />
               </div>
-
-              <div className="card">
-                <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                  {[
-                    personalityData.Challenge1,
-                    personalityData.Challenge2,
-                    personalityData.Challenge3
-                  ].filter(Boolean).map((challenge: string, idx: number) => (
-                    <div key={idx} className="border-l-4 border-orange-500 pl-4">
-                      <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
-                      <p className="text-gray-700">{challenge}</p>
-                    </div>
-                  ))}
-                </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-blue-600 mb-2">{personalityName}</h3>
               </div>
             </div>
 
-            <div className="card">
-              <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Items</h3>
-              <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
-              <div className="space-y-6">
-                {[
-                  { title: personalityData.ActionPlan1_Summary, description: personalityData.ActionPlan1_Description },
-                  { title: personalityData.ActionPlan2_Summary, description: personalityData.ActionPlan2_Description },
-                  { title: personalityData.ActionPlan3_Summary, description: personalityData.ActionPlan3_Description }
-                ].filter(plan => plan.title && plan.description).map((plan: any, idx: number) => (
-                  <div key={idx} className="border-l-4 border-blue-500 pl-6">
-                    <div className="flex items-start space-x-3 mb-2">
-                      <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
-                        {idx + 1}
-                      </span>
-                      <h4 className="text-lg font-medium text-gray-900">{plan.title}</h4>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed ml-9">{plan.description}</p>
+            <div className="space-y-8">
+              <div className="card">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {personalityData.I18n_PersonalitySummary || personalityData.PersonalitySummary || personalityData.PersonalityDescription}
+                </p>
+              </div>
+
+              <div className="card">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">What It Means</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {personalityData.I18n_PersonalityDescription || personalityData.PersonalityDescription}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="card">
+                  <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
+                    {[
+                      personalityData.Strength1,
+                      personalityData.Strength2, 
+                      personalityData.Strength3
+                    ].filter(Boolean).map((strength: string, idx: number) => (
+                      <div key={idx} className="border-l-4 border-green-500 pl-4">
+                        <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
+                        <p className="text-gray-700">{strength}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                <div className="card">
+                  <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
+                    {[
+                      personalityData.Challenge1,
+                      personalityData.Challenge2,
+                      personalityData.Challenge3
+                    ].filter(Boolean).map((challenge: string, idx: number) => (
+                      <div key={idx} className="border-l-4 border-orange-500 pl-4">
+                        <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
+                        <p className="text-gray-700">{challenge}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="card">
+                <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Items</h3>
+                <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
+                <div className="space-y-6">
+                  {[
+                    { title: personalityData.ActionPlan1_Summary, description: personalityData.ActionPlan1_Description },
+                    { title: personalityData.ActionPlan2_Summary, description: personalityData.ActionPlan2_Description },
+                    { title: personalityData.ActionPlan3_Summary, description: personalityData.ActionPlan3_Description }
+                  ].filter(plan => plan.title && plan.description).map((plan: any, idx: number) => (
+                    <div key={idx} className="border-l-4 border-blue-500 pl-6">
+                      <div className="flex items-start space-x-3 mb-2">
+                        <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
+                          {idx + 1}
+                        </span>
+                        <h4 className="text-lg font-medium text-gray-900">{plan.title}</h4>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed ml-9">{plan.description}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )
+        )
+      });
     });
-  });
+  }
 
   const currentChapterData = chapters.find(c => c.id === currentChapter);
   const totalChapters = chapters.length;
