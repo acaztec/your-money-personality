@@ -214,14 +214,14 @@ export default function Dashboard() {
               <div className="card">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  {personalityData.I18n_PersonalitySummary || personalityData.PersonalitySummary || personalityData.PersonalityDescription}
+                  {personalityData.description}
                 </p>
               </div>
 
               <div className="card">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">What It Means</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  {personalityData.I18n_PersonalityDescription || personalityData.PersonalityDescription}
+                  {personalityData.description}
                 </p>
               </div>
 
