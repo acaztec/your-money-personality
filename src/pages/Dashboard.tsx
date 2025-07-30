@@ -219,7 +219,11 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                  {[personality.Strength1, personality.Strength2, personality.Strength3].filter(Boolean).map((strength: string, idx: number) => (
+                  {[
+                    personalityData.Strength1,
+                    personalityData.Strength2, 
+                    personalityData.Strength3
+                  ].filter(Boolean).map((strength: string, idx: number) => (
                     <div key={idx} className="border-l-4 border-green-500 pl-4">
                       <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
                       <p className="text-gray-700">{strength}</p>
@@ -232,7 +236,11 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
-                  {[personality.Challenge1, personality.Challenge2, personality.Challenge3].filter(Boolean).map((challenge: string, idx: number) => (
+                  {[
+                    personalityData.Challenge1,
+                    personalityData.Challenge2,
+                    personalityData.Challenge3
+                  ].filter(Boolean).map((challenge: string, idx: number) => (
                     <div key={idx} className="border-l-4 border-orange-500 pl-4">
                       <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
                       <p className="text-gray-700">{challenge}</p>
@@ -247,9 +255,9 @@ export default function Dashboard() {
               <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
               <div className="space-y-6">
                 {[
-                  { title: personality.ActionPlan1_Summary, description: personality.ActionPlan1_Description },
-                  { title: personality.ActionPlan2_Summary, description: personality.ActionPlan2_Description },
-                  { title: personality.ActionPlan3_Summary, description: personality.ActionPlan3_Description }
+                  { title: personalityData.ActionPlan1_Summary, description: personalityData.ActionPlan1_Description },
+                  { title: personalityData.ActionPlan2_Summary, description: personalityData.ActionPlan2_Description },
+                  { title: personalityData.ActionPlan3_Summary, description: personalityData.ActionPlan3_Description }
                 ].filter(plan => plan.title && plan.description).map((plan: any, idx: number) => (
                   <div key={idx} className="border-l-4 border-blue-500 pl-6">
                     <div className="flex items-start space-x-3 mb-2">
