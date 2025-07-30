@@ -195,7 +195,6 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-2">{personalityName}</h3>
-              <p className="text-sm text-gray-500">XX% of people are {personalityName} like you</p>
             </div>
           </div>
 
