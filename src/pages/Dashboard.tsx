@@ -36,6 +36,7 @@ export default function Dashboard() {
 
     try {
       const parsedProfile = JSON.parse(savedProfile);
+      console.log('Parsed profile:', parsedProfile);
       setProfile(parsedProfile);
       setAdvisorSummary(savedSummary || '');
     } catch (error) {
@@ -63,7 +64,8 @@ export default function Dashboard() {
     );
   }
 
-  if (!profile || !profile.personalityData) {
+  if (!profile || !profile.personalityData || !Array.isArray(profile.personalityData)) {
+    console.error('Profile data missing or invalid:', profile);
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
