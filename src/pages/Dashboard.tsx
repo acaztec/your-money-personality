@@ -7,15 +7,24 @@ import { MessageCircle, ChevronLeft, ChevronRight, User, Brain } from 'lucide-re
 // Markdown to HTML converter
 const convertMarkdownToHTML = (markdown: string): string => {
   return markdown
-    .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold text-gray-900 mb-3">$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-gray-900 mb-4">$1</h2>')
-    .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-gray-900 mb-4">$1</h1>')
-    .replace(/^\*\*(.*?)\*\*/gm, '<strong class="font-semibold">$1</strong>')
-    .replace(/^\*(.*?)\*/gm, '<em class="italic">$1</em>')
-    .replace(/^- (.*$)/gm, '<li class="ml-4">• $1</li>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/^(?!<[h|l|p])/gm, '<p class="mb-4">')
-    .replace(/(?<!>)$/gm, '</p>');
+    // Headers
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    // Bold and italic
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Lists
+    .replace(/^- (.*$)/gm, '<li>$1</li>')
+    // Paragraphs
+    .split('\n\n')
+    .map(paragraph => {
+      if (paragraph.startsWith('<h') || paragraph.startsWith('<li')) {
+        return paragraph;
+      }
+      return paragraph.trim() ? `<p>${paragraph}</p>` : '';
+    })
+    .join('\n');
 };
 
 export default function Dashboard() {
@@ -147,33 +156,6 @@ export default function Dashboard() {
           </div>
         </div>
       )
-    },
-    {
-      id: 2,
-      title: 'AI Financial Advisor Summary',
-      icon: Brain,
-      content: (
-        <div className="space-y-6">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-8 h-8 text-blue-600" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
-            <p className="text-lg text-gray-600">
-              Professional insights for your financial advisor based on your personality assessment
-            </p>
-          </div>
-
-          <div className="card">
-            <div 
-              className="prose prose-gray max-w-none"
-              dangerouslySetInnerHTML={{ 
-                __html: convertMarkdownToHTML(advisorSummary || 'This is a prototype - AI advisor summary would appear here in the final version.') 
-              }}
-            />
-          </div>
-        </div>
-      )
     }
   ];
 
@@ -276,6 +258,35 @@ export default function Dashboard() {
       });
     });
   }
+
+  // Add AI Financial Advisor Summary as the last chapter
+  chapters.push({
+    id: chapters.length + 1,
+    title: 'AI Financial Advisor Summary',
+    icon: Brain,
+    content: (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+            <MessageCircle className="w-8 h-8 text-blue-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
+          <p className="text-lg text-gray-600">
+            Professional insights for your financial advisor based on your personality assessment
+          </p>
+        </div>
+
+        <div className="card">
+          <div 
+            className="prose prose-gray max-w-none [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-4 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-3 [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-2 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
+            dangerouslySetInnerHTML={{ 
+              __html: convertMarkdownToHTML(advisorSummary || 'This is a prototype - AI advisor summary would appear here in the final version.') 
+            }}
+          />
+        </div>
+      </div>
+    )
+  });
 
   const currentChapterData = chapters.find(c => c.id === currentChapter);
   const totalChapters = chapters.length;
