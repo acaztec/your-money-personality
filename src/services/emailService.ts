@@ -1,8 +1,4 @@
-import { Resend } from 'resend';
 import { EmailNotification } from '../types';
-
-// Initialize Resend with API key
-const resend = new Resend('re_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4');
 
 export class EmailService {
   static async sendAssessmentInvitation(
@@ -15,11 +11,17 @@ export class EmailService {
     try {
       const clientDisplayName = clientName || 'there';
       
-      const { data, error } = await resend.emails.send({
-        from: 'Money Personality <noreply@resend.dev>',
-        to: [clientEmail],
-        subject: `${advisorName} is asking you to discover your Money Personality!`,
-        html: `
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer re_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Money Personality <onboarding@resend.dev>',
+          to: [clientEmail],
+          subject: `${advisorName} is asking you to discover your Money Personality!`,
+          html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 40px;">
@@ -53,14 +55,17 @@ export class EmailService {
               This email was sent by iGrad Enrich Money Personality Assessment
             </p>
           </div>
-        `,
+          `,
+        }),
       });
 
-      if (error) {
-        console.error('Resend error:', error);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Resend error:', response.status, errorText);
         return false;
       }
 
+      const data = await response.json();
       console.log('Email sent successfully:', data);
       return true;
     } catch (error) {
@@ -78,11 +83,17 @@ export class EmailService {
     try {
       const clientDisplayName = clientName || 'Your client';
       
-      const { data, error } = await resend.emails.send({
-        from: 'Money Personality <noreply@resend.dev>',
-        to: [advisorEmail],
-        subject: `Money Personality Assessment Completed${clientName ? ` - ${clientName}` : ''}`,
-        html: `
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer re_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Money Personality <onboarding@resend.dev>',
+          to: [advisorEmail],
+          subject: `Money Personality Assessment Completed${clientName ? ` - ${clientName}` : ''}`,
+          html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 40px;">
@@ -118,14 +129,17 @@ export class EmailService {
               This email was sent by iGrad Enrich Money Personality Assessment
             </p>
           </div>
-        `,
+          `,
+        }),
       });
 
-      if (error) {
-        console.error('Resend error:', error);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Resend error:', response.status, errorText);
         return false;
       }
 
+      const data = await response.json();
       console.log('Completion notification sent successfully:', data);
       return true;
     } catch (error) {
