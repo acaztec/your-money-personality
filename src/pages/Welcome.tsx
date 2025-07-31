@@ -7,11 +7,19 @@ export default function Welcome() {
       {/* Header */}
       <div className="bg-primary-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <img 
-            src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-            alt="iGrad Enrich" 
-            className="h-8 w-auto"
-          />
+          <div className="flex justify-between items-center">
+            <img 
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
+              alt="iGrad Enrich" 
+              className="h-8 w-auto"
+            />
+            <Link
+              to="/advisor"
+              className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+            >
+              For Advisors
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -23,8 +31,8 @@ export default function Welcome() {
             <span className="text-blue-600"> Money Personality</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Take our comprehensive assessment to understand your financial behaviors, 
-            get personalized recommendations, and unlock your path to financial wellness.
+            Take our comprehensive behavioral assessment to understand your financial decision-making patterns, 
+            discover your unique money personality, and get personalized insights for better financial wellness.
           </p>
           <Link
             to="/assessment"
@@ -35,6 +43,22 @@ export default function Welcome() {
           </Link>
         </div>
 
+        {/* Stats Bar */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16 text-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-blue-600 mb-2">500K+</div>
+            <div className="text-gray-600">People Assessed</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-green-600 mb-2">95%</div>
+            <div className="text-gray-600">Completion Rate</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-purple-600 mb-2">10 min</div>
+            <div className="text-gray-600">Average Time</div>
+          </div>
+        </div>
+
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="text-center">
@@ -42,10 +66,10 @@ export default function Welcome() {
               <Brain className="w-8 h-8 text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Personality Assessment
+              Behavioral Assessment
             </h3>
             <p className="text-gray-600">
-              42 carefully crafted questions to analyze your financial mindset across five key dimensions.
+              42 scientifically-designed questions analyze your financial behaviors across five key personality dimensions.
             </p>
           </div>
 
@@ -57,7 +81,7 @@ export default function Welcome() {
               Personalized Insights
             </h3>
             <p className="text-gray-600">
-              Get tailored recommendations for tools, courses, and strategies based on your unique profile.
+              Discover your unique money personality with detailed explanations, strengths, challenges, and action plans.
             </p>
           </div>
 
@@ -66,14 +90,13 @@ export default function Welcome() {
               <MessageCircle className="w-8 h-8 text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              AI Financial Coach
+              Instant Results
             </h3>
             <p className="text-gray-600">
-              Chat with your personal AI coach for ongoing support and guidance tailored to your personality.
+              Get immediate access to your comprehensive money personality report with actionable insights.
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );

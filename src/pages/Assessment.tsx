@@ -1,15 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
 import { generateAdvisorSummary } from '../services/aiService';
+import { AssessmentService } from '../services/assessmentService';
 import questionsData from '../data/questions.json';
 
 export default function Assessment() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(new Array(questionsData.length).fill(4));
   const [isCompleting, setIsCompleting] = useState(false);
+  const [advisorAssessmentId, setAdvisorAssessmentId] = useState<string | null>(null);
+  const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
+
+  useEffect(() => {
+    // Check if this is an advisor-shared assessment
+    const advisorId = searchParams.get('advisor');
+    if (advisorId) {
+      const assessment = AssessmentService.getAssessment(advisorId);
+      if (assessment) {
+        setAdvisorAssessmentId(advisorId);
+        setAdvisorInfo({
+          name: assessment.advisorName,
+          email: assessment.advisorEmail
+        });
+      }
+    }
+  }, [searchParams]);
 
   const handleAnswerChange = (value: number) => {
     const newAnswers = [...answers];
@@ -28,20 +47,35 @@ export default function Assessment() {
         // Calculate profile
         const profile = calculateProfile(answers);
         
-        // Generate AI advisor summary
-        const advisorSummary = await generateAdvisorSummary(profile, answers);
+        // If this is an advisor assessment, complete it and notify advisor
+        if (advisorAssessmentId) {
+          await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+        }
+        
+        // Generate AI advisor summary (only for non-advisor assessments for now)
+        let advisorSummary = '';
+        if (!advisorAssessmentId) {
+          advisorSummary = await generateAdvisorSummary(profile, answers);
+        }
         
         // Save to localStorage
         localStorage.setItem('userProfile', JSON.stringify(profile));
         localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-        localStorage.setItem('advisorSummary', advisorSummary);
+        if (advisorSummary) {
+          localStorage.setItem('advisorSummary', advisorSummary);
+        }
         
         // Navigate to dashboard
         navigate('/dashboard');
       } catch (error) {
         console.error('Error completing assessment:', error);
-        // Still navigate even if AI summary fails
+        // Still navigate even if something fails
         const profile = calculateProfile(answers);
+        
+        if (advisorAssessmentId) {
+          await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+        }
+        
         localStorage.setItem('userProfile', JSON.stringify(profile));
         localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
         navigate('/dashboard');
@@ -74,13 +108,34 @@ export default function Assessment() {
       {/* Header */}
       <div className="bg-primary-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <img 
-            src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-            alt="iGrad Enrich" 
-            className="h-8 w-auto"
-          />
+          <div className="flex justify-between items-center">
+            <img 
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
+              alt="iGrad Enrich" 
+              className="h-8 w-auto"
+            />
+            {advisorInfo && (
+              <div className="text-primary-100 text-sm">
+                Shared by {advisorInfo.name}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Advisor Welcome Message */}
+      {advisorInfo && (
+        <div className="bg-blue-50 border-b border-blue-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="text-center">
+              <p className="text-blue-800">
+                <strong>{advisorInfo.name}</strong> has invited you to discover your Money Personality! 
+                This assessment will help them better understand your financial behaviors and provide more personalized guidance.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Assessment Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

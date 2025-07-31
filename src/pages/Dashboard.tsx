@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Profile } from '../types';
 import { MessageCircle, ChevronLeft, ChevronRight, User, Brain } from 'lucide-react';
+import { AssessmentService } from '../services/assessmentService';
 
 // Markdown to HTML converter
 const convertMarkdownToHTML = (markdown: string): string => {
@@ -29,16 +30,32 @@ const convertMarkdownToHTML = (markdown: string): string => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [advisorSummary, setAdvisorSummary] = useState<string>('');
   const [currentChapter, setCurrentChapter] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isAdvisorAssessment, setIsAdvisorAssessment] = useState(false);
+  const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
     console.log('Dashboard useEffect running...');
     
     const savedProfile = localStorage.getItem('userProfile');
     const savedSummary = localStorage.getItem('advisorSummary');
+    
+    // Check if this came from an advisor assessment
+    const advisorId = searchParams.get('advisor');
+    if (advisorId) {
+      const assessment = AssessmentService.getAssessment(advisorId);
+      if (assessment) {
+        setIsAdvisorAssessment(true);
+        setAdvisorInfo({
+          name: assessment.advisorName,
+          email: assessment.advisorEmail
+        });
+      }
+    }
     
     console.log('Saved profile:', savedProfile);
     console.log('Saved summary:', savedSummary);
@@ -60,7 +77,7 @@ export default function Dashboard() {
       navigate('/');
       return;
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   if (loading) {
     return (
@@ -184,6 +201,14 @@ export default function Dashboard() {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+              {isAdvisorAssessment && advisorInfo && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800">
+                    <strong>{advisorInfo.name}</strong> will receive a notification that you've completed your assessment 
+                    and can access your results to provide more personalized financial guidance.
+                  </p>
+                </div>
+              )}
                 <User className="w-8 h-8 text-blue-600" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
@@ -259,34 +284,36 @@ export default function Dashboard() {
     });
   }
 
-  // Add AI Financial Advisor Summary as the last chapter
-  chapters.push({
-    id: chapters.length + 1,
-    title: 'AI Financial Advisor Summary',
-    icon: Brain,
-    content: (
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
-            <MessageCircle className="w-8 h-8 text-blue-600" />
+  // Add AI Financial Advisor Summary as the last chapter (only for non-advisor assessments)
+  if (!isAdvisorAssessment && advisorSummary) {
+    chapters.push({
+      id: chapters.length + 1,
+      title: 'AI Financial Advisor Summary',
+      icon: Brain,
+      content: (
+        <div className="space-y-6">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+              <MessageCircle className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
+            <p className="text-lg text-gray-600">
+              Professional insights for your financial advisor based on your personality assessment
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
-          <p className="text-lg text-gray-600">
-            Professional insights for your financial advisor based on your personality assessment
-          </p>
-        </div>
 
-        <div className="card">
-          <div 
-            className="prose prose-gray max-w-none [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-4 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-3 [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-2 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
-            dangerouslySetInnerHTML={{ 
-              __html: convertMarkdownToHTML(advisorSummary || 'This is a prototype - AI advisor summary would appear here in the final version.') 
-            }}
-          />
+          <div className="card">
+            <div 
+              className="prose prose-gray max-w-none [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-4 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-3 [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-2 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
+              dangerouslySetInnerHTML={{ 
+                __html: convertMarkdownToHTML(advisorSummary) 
+              }}
+            />
+          </div>
         </div>
-      </div>
-    )
-  });
+      )
+    });
+  }
 
   const currentChapterData = chapters.find(c => c.id === currentChapter);
   const totalChapters = chapters.length;

@@ -39,3 +39,23 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
+
+export interface AdvisorAssessment {
+  id: string;
+  advisorName: string;
+  advisorEmail: string;
+  clientEmail: string;
+  clientName?: string;
+  status: 'sent' | 'completed' | 'viewed';
+  sentAt: Date;
+  completedAt?: Date;
+  assessmentLink: string;
+  results?: Profile;
+}
+
+export interface EmailNotification {
+  to: string;
+  subject: string;
+  content: string;
+  type: 'assessment_invitation' | 'completion_notification';
+}

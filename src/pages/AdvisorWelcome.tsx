@@ -1,0 +1,300 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3 } from 'lucide-react';
+import { AssessmentService } from '../services/assessmentService';
+
+export default function AdvisorWelcome() {
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
+  const [shareError, setShareError] = useState('');
+  const [formData, setFormData] = useState({
+    advisorName: '',
+    advisorEmail: '',
+    clientEmail: '',
+    clientName: ''
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleShareAssessment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSharing(true);
+    setShareError('');
+    setShareSuccess(false);
+
+    const result = await AssessmentService.shareAssessment(
+      formData.advisorName,
+      formData.advisorEmail,
+      formData.clientEmail,
+      formData.clientName || undefined
+    );
+
+    setIsSharing(false);
+
+    if (result.success) {
+      setShareSuccess(true);
+      setFormData({
+        advisorName: formData.advisorName,
+        advisorEmail: formData.advisorEmail,
+        clientEmail: '',
+        clientName: ''
+      });
+    } else {
+      setShareError(result.error || 'Failed to share assessment');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+      {/* Header */}
+      <div className="bg-primary-600 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <img 
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
+              alt="iGrad Enrich" 
+              className="h-8 w-auto"
+            />
+            <Link
+              to="/"
+              className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+            >
+              For Individuals
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            Discover Your Client's
+            <span className="text-blue-600"> Money Personality</span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Unlock the emotional side of your clients' financial decisions. Understand their behavioral patterns, 
+            build deeper trust, and provide more personalized financial guidance with our proven assessment.
+          </p>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16 text-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-blue-600 mb-2">500K+</div>
+            <div className="text-gray-600">Assessments Completed</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-green-600 mb-2">95%</div>
+            <div className="text-gray-600">Completion Rate</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-3xl font-bold text-purple-600 mb-2">10 min</div>
+            <div className="text-gray-600">Average Time</div>
+          </div>
+        </div>
+
+        {/* Share Assessment Form */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-16">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Share Assessment with Client</h2>
+            <p className="text-gray-600">Send a personalized invitation to your client to complete their Money Personality assessment</p>
+          </div>
+
+          {shareSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <p className="text-green-800 font-medium">Assessment invitation sent successfully!</p>
+              </div>
+              <p className="text-green-700 text-sm mt-1">Your client will receive an email with the assessment link.</p>
+            </div>
+          )}
+
+          {shareError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 font-medium">Error: {shareError}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleShareAssessment} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="advisorName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  id="advisorName"
+                  name="advisorName"
+                  required
+                  value={formData.advisorName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="John Smith"
+                />
+              </div>
+              <div>
+                <label htmlFor="advisorEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Email *
+                </label>
+                <input
+                  type="email"
+                  id="advisorEmail"
+                  name="advisorEmail"
+                  required
+                  value={formData.advisorEmail}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="john@advisorfirm.com"
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                  Client Email *
+                </label>
+                <input
+                  type="email"
+                  id="clientEmail"
+                  name="clientEmail"
+                  required
+                  value={formData.clientEmail}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="client@email.com"
+                />
+              </div>
+              <div>
+                <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Client Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  id="clientName"
+                  name="clientName"
+                  value={formData.clientName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="Jane Doe"
+                />
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={isSharing}
+                className={`inline-flex items-center px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 ${
+                  isSharing
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {isSharing ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5 mr-3" />
+                    Share Assessment
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Features */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="text-center">
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Brain className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Behavioral Analysis
+            </h3>
+            <p className="text-gray-600">
+              42 scientifically-designed questions reveal your client's financial personality across five key dimensions.
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <MessageCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              AI-Powered Insights
+            </h3>
+            <p className="text-gray-600">
+              Get detailed advisor-specific recommendations on how to communicate and work effectively with each client.
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Users className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Deeper Client Relationships
+            </h3>
+            <p className="text-gray-600">
+              Build trust and rapport by understanding the emotional drivers behind your clients' financial decisions.
+            </p>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">How It Works</h2>
+          
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                1
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Share Assessment</h4>
+              <p className="text-gray-600 text-sm">Send personalized invitation to your client via email</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                2
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Client Completes</h4>
+              <p className="text-gray-600 text-sm">Client takes 10-minute assessment at their convenience</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                3
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Get Notified</h4>
+              <p className="text-gray-600 text-sm">Receive email notification when assessment is complete</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                4
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Access Insights</h4>
+              <p className="text-gray-600 text-sm">Review detailed results and AI-powered advisor recommendations</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
