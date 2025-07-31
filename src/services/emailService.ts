@@ -11,12 +11,9 @@ export class EmailService {
     try {
       const clientDisplayName = clientName || 'there';
       
-      console.log('Sending email with API key:', 're_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4'.substring(0, 10) + '...');
-      
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer re_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -61,22 +58,13 @@ export class EmailService {
         }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Resend error details:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
+        console.error('Email API error:', response.status, errorText);
         return false;
       }
 
       const data = await response.json();
-      console.log('Email sent successfully:', data);
       return true;
     } catch (error) {
       console.error('Error sending assessment invitation:', error);
@@ -93,10 +81,9 @@ export class EmailService {
     try {
       const clientDisplayName = clientName || 'Your client';
       
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer re_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -145,12 +132,11 @@ export class EmailService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Resend error:', response.status, errorText);
+        console.error('Email API error:', response.status, errorText);
         return false;
       }
 
       const data = await response.json();
-      console.log('Completion notification sent successfully:', data);
       return true;
     } catch (error) {
       console.error('Error sending completion notification:', error);
