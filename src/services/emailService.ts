@@ -11,6 +11,8 @@ export class EmailService {
     try {
       const clientDisplayName = clientName || 'there';
       
+      console.log('Sending email with API key:', 're_2JwkQ3uD_GY9yh4jdoVgjd7eM4imMWRc4'.substring(0, 10) + '...');
+      
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -59,9 +61,17 @@ export class EmailService {
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Resend error:', response.status, errorText);
+        console.error('Resend error details:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
         return false;
       }
 
