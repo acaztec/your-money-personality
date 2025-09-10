@@ -20,17 +20,17 @@ export default function Welcome() {
       </div>
 
       {/* Header with glassmorphism */}
-      <div className="glass-card border-0 border-b border-white/20">
+      <div className="professional-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <img 
               src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
               alt="iGrad Enrich" 
-              className="h-10 w-auto floating-element"
+              className="h-10 w-auto static-element"
             />
             <Link
               to="/advisor"
-              className="nav-link text-sm font-medium"
+              className="text-white hover:text-blue-100 transition-colors duration-200 text-sm font-medium"
             >
               For Advisors
             </Link>
@@ -44,7 +44,7 @@ export default function Welcome() {
           {/* Left column - Text content */}
           <div className="space-y-8">
             <div className="space-y-6">
-              <h1 className="text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Discover Your
                 <span className="block bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
                   Money Personality
@@ -71,16 +71,16 @@ export default function Welcome() {
             {/* Mini stats */}
             <div className="flex items-center space-x-8 pt-8">
               <div className="text-center">
-                <div className="stat-number text-3xl font-bold">500K+</div>
-                <div className="text-gray-600 text-sm">Assessments</div>
+                <div className="professional-stat text-2xl font-bold">500K+</div>
+                <div className="text-gray-600 text-sm font-medium">Assessments</div>
               </div>
               <div className="text-center">
-                <div className="stat-number text-3xl font-bold">95%</div>
-                <div className="text-gray-600 text-sm">Complete</div>
+                <div className="professional-stat text-2xl font-bold">95%</div>
+                <div className="text-gray-600 text-sm font-medium">Complete</div>
               </div>
               <div className="text-center">
-                <div className="stat-number text-3xl font-bold">10min</div>
-                <div className="text-gray-600 text-sm">Duration</div>
+                <div className="professional-stat text-2xl font-bold">10min</div>
+                <div className="text-gray-600 text-sm font-medium">Duration</div>
               </div>
             </div>
           </div>
@@ -94,10 +94,10 @@ export default function Welcome() {
                   <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
                     <Brain className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-gray-900">
                     42 Questions
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm">
                     Scientifically designed to analyze your financial behaviors across five key dimensions
                   </p>
                 </div>
@@ -123,10 +123,10 @@ export default function Welcome() {
       {/* Features Section with unique grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Why Take This Assessment?
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Get deep insights into your financial psychology with our research-backed approach
           </p>
         </div>
@@ -157,10 +157,10 @@ export default function Welcome() {
                 <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center group-hover:rotate-12 transition-transform duration-300`}>
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed text-sm">
                   {feature.description}
                 </p>
               </div>
@@ -172,10 +172,10 @@ export default function Welcome() {
       {/* CTA Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <div className="modern-card space-y-8">
-          <h2 className="text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900">
             Ready to Discover Your Money Personality?
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Join over 500,000 people who have gained valuable insights into their financial behaviors
           </p>
           <Link to="/assessment" className="btn-primary inline-flex">

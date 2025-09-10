@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
 /* Ensure Tailwind is working */
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Roboto', system-ui, sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -25,11 +25,18 @@ body {
 
 /* Glassmorphism effect */
 .glass-card {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Professional header */
+.professional-header {
+  background: #2563eb;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Modern card with subtle animations */
@@ -65,6 +72,11 @@ body {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
   100% { transform: translateY(0px); }
+}
+
+/* Remove floating animation for professional version */
+.static-element {
+  animation: none;
 }
 
 /* Unique progress bar */
@@ -164,18 +176,15 @@ body {
   width: 100%;
 }
 
-/* Stats counter animation */
-.stat-number {
-  background: linear-gradient(45deg, #2563eb, #22c55e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-text 3s ease-in-out infinite;
+/* Professional stats - solid colors */
+.professional-stat {
+  color: #2563eb;
+  font-weight: 700;
 }
 
-@keyframes gradient-text {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* Professional text colors */
+.professional-text {
+  color: #1f2937;
 }
 
 /* Floating particles background */

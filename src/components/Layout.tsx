@@ -14,11 +14,11 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen animated-bg">
-      <nav className="glass-card border-0 border-b border-white/20">
+      <nav className="professional-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
-              <Link to="/" className="hover:opacity-80 transition-opacity duration-200 floating-element">
+              <Link to="/" className="hover:opacity-80 transition-opacity duration-200 static-element">
                 <img 
                   src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
                   alt="iGrad Enrich" 
@@ -30,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`nav-link text-sm font-medium ${
+                    className={`text-white hover:text-blue-100 transition-colors duration-200 text-sm font-medium ${
                       location.pathname === item.path
                         ? 'text-white'
                         : ''

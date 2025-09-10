@@ -89,15 +89,15 @@ export default function Assessment() {
           <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
             <Brain className="w-10 h-10 text-white animate-pulse" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Analyzing Your Results</h2>
-          <p className="text-gray-600 leading-relaxed">
+          <h2 className="text-2xl font-bold text-gray-900">Analyzing Your Results</h2>
+          <p className="text-gray-600 leading-relaxed text-sm">
             Our AI is processing your responses and creating your personalized money personality profile...
           </p>
           <div className="flex justify-center space-x-1">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-3 h-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full animate-bounce"
+                className="w-3 h-3 bg-primary-500 rounded-full animate-bounce"
                 style={{ animationDelay: `${i * 0.2}s` }}
               />
             ))}
@@ -125,16 +125,16 @@ export default function Assessment() {
       </div>
 
       {/* Header */}
-      <div className="glass-card border-0 border-b border-white/20">
+      <div className="professional-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <img 
               src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
               alt="iGrad Enrich" 
-              className="h-10 w-auto floating-element"
+              className="h-10 w-auto static-element"
             />
             {advisorInfo && (
-              <div className="flex items-center space-x-2 text-primary-100">
+              <div className="flex items-center space-x-2 text-white">
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Shared by {advisorInfo.name}</span>
               </div>
@@ -145,10 +145,10 @@ export default function Assessment() {
 
       {/* Advisor Welcome Banner */}
       {advisorInfo && (
-        <div className="glass-card border-0 border-b border-blue-200/30 bg-gradient-to-r from-blue-50/80 to-accent-50/80">
+        <div className="bg-blue-50 border-b border-blue-200">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="text-center">
-              <p className="text-blue-900 font-medium leading-relaxed">
+              <p className="text-blue-800 font-medium leading-relaxed">
                 <strong>{advisorInfo.name}</strong> has invited you to discover your Money Personality! 
                 This assessment will help them understand your financial behaviors and provide 
                 more personalized guidance tailored to your unique personality.

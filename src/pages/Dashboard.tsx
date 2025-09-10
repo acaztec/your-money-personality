@@ -88,8 +88,8 @@ export default function Dashboard() {
       <Layout>
         <div className="min-h-screen animated-bg flex items-center justify-center">
           <div className="modern-card text-center space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Assessment Not Found</h2>
-            <p className="text-gray-600">Please complete the assessment to see your results.</p>
+            <h2 className="text-xl font-bold text-gray-900">Assessment Not Found</h2>
+            <p className="text-gray-600 text-sm">Please complete the assessment to see your results.</p>
             <button
               onClick={() => navigate('/assessment')}
               className="btn-primary"
@@ -124,9 +124,9 @@ export default function Dashboard() {
             <div className="modern-card space-y-6">
               <div className="flex items-center space-x-3">
                 <Target className="w-6 h-6 text-primary-600" />
-                <h3 className="text-2xl font-bold text-gray-900">The Purpose</h3>
+                <h3 className="text-xl font-bold text-gray-900">The Purpose</h3>
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-700 leading-relaxed">
                 Your financial wellness goes beyond numbers in your bank account. It involves goal-setting, 
                 decision-making under pressure, and navigating complex choices. This behavioral assessment 
                 reveals the unique psychological patterns that drive your money decisions.
@@ -143,9 +143,9 @@ export default function Dashboard() {
             <div className="modern-card space-y-6">
               <div className="flex items-center space-x-3">
                 <Brain className="w-6 h-6 text-accent-600" />
-                <h3 className="text-2xl font-bold text-gray-900">The Science</h3>
+                <h3 className="text-xl font-bold text-gray-900">The Science</h3>
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-700 leading-relaxed">
                 This groundbreaking analysis represents the first behavioral finance assessment of its kind 
                 in financial wellness programs. Developed in collaboration with experts led by a Ph.D. in 
                 Behavioral Economics, it translates complex psychological research into practical, 
@@ -156,9 +156,9 @@ export default function Dashboard() {
             <div className="modern-card space-y-6">
               <div className="flex items-center space-x-3">
                 <Lightbulb className="w-6 h-6 text-yellow-600" />
-                <h3 className="text-2xl font-bold text-gray-900">Your Analysis</h3>
+                <h3 className="text-xl font-bold text-gray-900">Your Analysis</h3>
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-700 leading-relaxed">
                 Based on your responses, our advanced analysis engine evaluated your financial behaviors 
                 across multiple psychological dimensions. You'll discover your dominant personality traits, 
                 natural strengths, potential challenges, and personalized strategies to optimize your 
@@ -202,8 +202,8 @@ export default function Dashboard() {
               <div className="w-24 h-24 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-6">
                 <User className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">{category.toUpperCase()}</h2>
-              <div className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personality®</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 {personalityName}
               </div>
               
