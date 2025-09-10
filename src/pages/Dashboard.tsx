@@ -70,7 +70,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen animated-bg flex items-center justify-center">
+        <div className="min-h-screen professional-bg flex items-center justify-center">
           <div className="modern-card text-center space-y-6">
             <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
               <Brain className="w-10 h-10 text-white animate-pulse" />
@@ -86,7 +86,7 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <Layout>
-        <div className="min-h-screen animated-bg flex items-center justify-center">
+        <div className="min-h-screen professional-bg flex items-center justify-center">
           <div className="modern-card text-center space-y-6">
             <h2 className="text-xl font-bold text-gray-900">Assessment Not Found</h2>
             <p className="text-gray-600 text-sm">Please complete the assessment to see your results.</p>
@@ -334,7 +334,7 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen animated-bg">
+      <div className="min-h-screen professional-bg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Progress Header */}
           <div className="modern-card mb-8">

@@ -108,21 +108,7 @@ export default function Assessment() {
   }
 
   return (
-    <div className="min-h-screen animated-bg relative overflow-hidden">
-      {/* Floating particles background */}
-      <div className="particles-bg">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 25}s`,
-              animationDuration: `${20 + Math.random() * 10}s`
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen professional-bg">
 
       {/* Header */}
       <div className="professional-header">

@@ -3,21 +3,7 @@ import { Brain, TrendingUp, MessageCircle, ArrowRight, Sparkles, Target, Clock }
 
 export default function Welcome() {
   return (
-    <div className="min-h-screen animated-bg relative overflow-hidden">
-      {/* Floating particles background */}
-      <div className="particles-bg">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 25}s`,
-              animationDuration: `${20 + Math.random() * 10}s`
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen professional-bg">
 
       {/* Header with glassmorphism */}
       <div className="professional-header">
@@ -89,7 +75,7 @@ export default function Welcome() {
           <div className="relative">
             <div className="relative z-10">
               {/* Main floating card */}
-              <div className="modern-card floating-element">
+              <div className="modern-card">
                 <div className="text-center space-y-6">
                   <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
                     <Brain className="w-10 h-10 text-white" />
@@ -104,10 +90,10 @@ export default function Welcome() {
               </div>
 
               {/* Smaller floating elements */}
-              <div className="absolute -top-4 -right-4 modern-card p-4 floating-element" style={{ animationDelay: '2s' }}>
+              <div className="absolute -top-4 -right-4 modern-card p-4">
                 <Target className="w-8 h-8 text-primary-600" />
               </div>
-              <div className="absolute -bottom-4 -left-4 modern-card p-4 floating-element" style={{ animationDelay: '4s' }}>
+              <div className="absolute -bottom-4 -left-4 modern-card p-4">
                 <Clock className="w-8 h-8 text-accent-600" />
               </div>
             </div>
