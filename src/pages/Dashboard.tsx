@@ -2,22 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Profile } from '../types';
-import { MessageCircle, ChevronLeft, ChevronRight, User, Brain } from 'lucide-react';
+import { MessageCircle, ChevronLeft, ChevronRight, User, Brain, Award, Target, Lightbulb } from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
 // Markdown to HTML converter
 const convertMarkdownToHTML = (markdown: string): string => {
   return markdown
-    // Headers
     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
     .replace(/^## (.*$)/gm, '<h2>$1</h2>')
     .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-    // Bold and italic
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Lists
     .replace(/^- (.*$)/gm, '<li>$1</li>')
-    // Paragraphs
     .split('\n\n')
     .map(paragraph => {
       if (paragraph.startsWith('<h') || paragraph.startsWith('<li')) {
@@ -39,12 +35,9 @@ export default function Dashboard() {
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
-    console.log('Dashboard useEffect running...');
-    
     const savedProfile = localStorage.getItem('userProfile');
     const savedSummary = localStorage.getItem('advisorSummary');
     
-    // Check if this came from an advisor assessment
     const advisorId = searchParams.get('advisor');
     if (advisorId) {
       const assessment = AssessmentService.getAssessment(advisorId);
@@ -57,18 +50,13 @@ export default function Dashboard() {
       }
     }
     
-    console.log('Saved profile:', savedProfile);
-    console.log('Saved summary:', savedSummary);
-    
     if (!savedProfile) {
-      console.log('No saved profile found, redirecting to home');
       navigate('/');
       return;
     }
 
     try {
       const parsedProfile = JSON.parse(savedProfile);
-      console.log('Parsed profile:', parsedProfile);
       setProfile(parsedProfile);
       setAdvisorSummary(savedSummary || '');
       setLoading(false);
@@ -82,13 +70,13 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-bounce mb-4">
-              <div className="w-16 h-16 bg-primary-500 rounded-full mx-auto"></div>
+        <div className="min-h-screen animated-bg flex items-center justify-center">
+          <div className="modern-card text-center space-y-6">
+            <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+              <Brain className="w-10 h-10 text-white animate-pulse" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Your Results</h2>
-            <p className="text-gray-600">Please wait while we load your money personality...</p>
+            <h2 className="text-2xl font-bold text-gray-900">Analyzing Your Results</h2>
+            <p className="text-gray-600">Creating your personalized money personality profile...</p>
           </div>
         </div>
       </Layout>
@@ -98,10 +86,10 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No Assessment Found</h2>
-            <p className="text-gray-600 mb-6">Please take the assessment first to see your results.</p>
+        <div className="min-h-screen animated-bg flex items-center justify-center">
+          <div className="modern-card text-center space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Assessment Not Found</h2>
+            <p className="text-gray-600">Please complete the assessment to see your results.</p>
             <button
               onClick={() => navigate('/assessment')}
               className="btn-primary"
@@ -114,61 +102,73 @@ export default function Dashboard() {
     );
   }
 
-  console.log('Profile data for rendering:', profile);
-  console.log('Profile personalities:', profile.personalities);
-  console.log('Profile personalityData:', profile.personalityData);
-
   // Create chapters based on personality data
   const chapters = [
     {
       id: 1,
-      title: 'Overview',
+      title: 'Your Profile',
       icon: User,
       content: (
         <div className="space-y-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Money Personality®</h2>
-            <p className="text-lg text-gray-600">
-              Understand the "why" behind your money decisions with our behavioral assessment.
+          <div className="text-center mb-10">
+            <div className="w-24 h-24 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-6">
+              <User className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Your Money Personality®</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Understanding the psychology behind your financial decisions
             </p>
           </div>
 
-          <div className="space-y-8">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Why</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Managing your finances is about more than just your money in the bank. 
-                It involves setting goals, evaluating choices, and high stakes! Like most things in life, 
-                your unique personality and behaviors are an important piece. This analysis will help you 
-                better understand the "why" behind your financial decision making, while recommending positive changes.
+          <div className="grid gap-8">
+            <div className="modern-card space-y-6">
+              <div className="flex items-center space-x-3">
+                <Target className="w-6 h-6 text-primary-600" />
+                <h3 className="text-2xl font-bold text-gray-900">The Purpose</h3>
+              </div>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                Your financial wellness goes beyond numbers in your bank account. It involves goal-setting, 
+                decision-making under pressure, and navigating complex choices. This behavioral assessment 
+                reveals the unique psychological patterns that drive your money decisions.
               </p>
-              <p className="text-gray-600 text-sm">
-                Please remember, your financial personality and behaviors depend on complex factors and may change over time. 
-                As such, this analysis is to be taken as suggestion only. For individualized advice consult a financial professional.
+              <div className="bg-gradient-to-r from-primary-50 to-accent-50 p-6 rounded-xl border border-primary-100">
+                <p className="text-gray-600 text-sm italic">
+                  Remember: Your financial personality may evolve over time based on life experiences. 
+                  This analysis provides insights for self-improvement and should complement, not replace, 
+                  professional financial advice.
+                </p>
+              </div>
+            </div>
+
+            <div className="modern-card space-y-6">
+              <div className="flex items-center space-x-3">
+                <Brain className="w-6 h-6 text-accent-600" />
+                <h3 className="text-2xl font-bold text-gray-900">The Science</h3>
+              </div>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                This groundbreaking analysis represents the first behavioral finance assessment of its kind 
+                in financial wellness programs. Developed in collaboration with experts led by a Ph.D. in 
+                Behavioral Economics, it translates complex psychological research into practical, 
+                actionable insights about your financial personality.
               </p>
             </div>
 
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The Science</h3>
-              <p className="text-gray-700 leading-relaxed">
-                This analysis (and the science behind it) is the first of its kind in a financial wellness program. 
-                It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics. 
-                Our goal is to help you understand - in simple, practical terms - the unique characteristics of your 
-                personality that affect your financial decision making.
+            <div className="modern-card space-y-6">
+              <div className="flex items-center space-x-3">
+                <Lightbulb className="w-6 h-6 text-yellow-600" />
+                <h3 className="text-2xl font-bold text-gray-900">Your Analysis</h3>
+              </div>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                Based on your responses, our advanced analysis engine evaluated your financial behaviors 
+                across multiple psychological dimensions. You'll discover your dominant personality traits, 
+                natural strengths, potential challenges, and personalized strategies to optimize your 
+                financial decision-making.
               </p>
-            </div>
-
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">The How</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Based on your earlier responses, our analysis engine assessed the influences on your financial 
-                behaviors across a range of categories.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Our analysis looks at different components of your money personality, with explanations of your 
-                dominant traits, strengths, challenges, and even a few tips and tricks to make your money 
-                personality work for you. Enjoy!
-              </p>
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
+                <p className="text-gray-800 font-medium">
+                  Explore each section to unlock insights about different aspects of your money personality!
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -176,103 +176,117 @@ export default function Dashboard() {
     }
   ];
 
-  // Add personality-specific chapters only if we have valid data
+  // Add personality-specific chapters
   if (profile.personalityData && Array.isArray(profile.personalityData)) {
     profile.personalityData.forEach((personalityData: any, index: number) => {
       const personalityName = profile.personalities[index];
       
-      // Get the category for this personality type
       const getPersonalityCategory = (personalityName: string) => {
         if (['Future Focused', 'Present Focused'].includes(personalityName)) return 'Focus';
         if (['Apprehensive', 'Cautious', 'Relaxed'].includes(personalityName)) return 'Emotions';
         if (['Confident', 'Optimistic', 'Skeptical'].includes(personalityName)) return 'Outlook';
         if (['Independent', 'Social', 'Elusive'].includes(personalityName)) return 'Influence';
         if (['Organized', 'Fun Seeking', 'Change Seeking'].includes(personalityName)) return 'Bonus';
-        return 'Unknown';
+        return 'Personality';
       };
 
       const category = getPersonalityCategory(personalityName);
 
       chapters.push({
         id: chapters.length + 1,
-        title: category,
+        title: `${category}: ${personalityName}`,
         icon: User,
         content: (
           <div className="space-y-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
+            <div className="text-center mb-10">
+              <div className="w-24 h-24 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-6">
+                <User className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">{category.toUpperCase()}</h2>
+              <div className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-4">
+                {personalityName}
+              </div>
+              
               {isAdvisorAssessment && advisorInfo && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-blue-800">
-                    <strong>{advisorInfo.name}</strong> will receive a notification that you've completed your assessment 
-                    and can access your results to provide more personalized financial guidance.
+                <div className="modern-card border-l-4 border-primary-500 mb-8">
+                  <p className="text-primary-800 font-medium">
+                    <strong>{advisorInfo.name}</strong> will receive notification of your completed assessment 
+                    and can use these insights to provide more personalized financial guidance.
                   </p>
                 </div>
               )}
-                <User className="w-8 h-8 text-blue-600" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Your {category.toUpperCase()} Type</h2>
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-blue-600 mb-2">{personalityName}</h3>
-              </div>
             </div>
 
             <div className="space-y-8">
-              <div className="card">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Summary</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {personalityData.description}
-                </p>
-              </div>
-
-              <div className="card">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">What It Means</h3>
-                <p className="text-gray-700 leading-relaxed">
+              <div className="modern-card space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                  <MessageCircle className="w-6 h-6 text-primary-600" />
+                  <span>What This Means</span>
+                </h3>
+                <p className="text-gray-700 leading-relaxed text-lg">
                   {personalityData.description}
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="card">
-                  <h3 className="text-xl font-semibold text-green-600 mb-4">3 Biggest Strengths</h3>
+                <div className="modern-card border-l-4 border-green-500">
+                  <h3 className="text-xl font-bold text-green-700 mb-6 flex items-center space-x-2">
+                    <Award className="w-6 h-6" />
+                    <span>Your Strengths</span>
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">When you're {personalityName}, you excel at:</p>
                   <div className="space-y-4">
-                    <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
                     {personalityData.strengths?.map((strength: string, idx: number) => (
-                      <div key={idx} className="border-l-4 border-green-500 pl-4">
-                        <p className="text-sm font-medium text-green-600 mb-1">Strength</p>
-                        <p className="text-gray-700">{strength}</p>
+                      <div key={idx} className="flex space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                          <span className="text-green-600 font-bold text-sm">{idx + 1}</span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{strength}</p>
                       </div>
                     )) || []}
                   </div>
                 </div>
 
-                <div className="card">
-                  <h3 className="text-xl font-semibold text-orange-600 mb-4">3 Biggest Challenges</h3>
+                <div className="modern-card border-l-4 border-orange-500">
+                  <h3 className="text-xl font-bold text-orange-700 mb-6 flex items-center space-x-2">
+                    <Target className="w-6 h-6" />
+                    <span>Growth Areas</span>
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">Areas for mindful attention:</p>
                   <div className="space-y-4">
-                    <p className="text-sm text-gray-500 mb-3">When you're {personalityName}...</p>
                     {personalityData.challenges?.map((challenge: string, idx: number) => (
-                      <div key={idx} className="border-l-4 border-orange-500 pl-4">
-                        <p className="text-sm font-medium text-orange-600 mb-1">Challenge</p>
-                        <p className="text-gray-700">{challenge}</p>
+                      <div key={idx} className="flex space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center mt-0.5">
+                          <span className="text-orange-600 font-bold text-sm">{idx + 1}</span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{challenge}</p>
                       </div>
                     )) || []}
                   </div>
                 </div>
               </div>
 
-              <div className="card">
-                <h3 className="text-xl font-semibold text-blue-600 mb-6">Action Items</h3>
-                <p className="text-sm text-gray-500 mb-6">When you're {personalityName}...</p>
-                <div className="space-y-6">
+              <div className="modern-card">
+                <h3 className="text-2xl font-bold text-primary-700 mb-6 flex items-center space-x-3">
+                  <Lightbulb className="w-6 h-6" />
+                  <span>Personalized Action Plan</span>
+                </h3>
+                <p className="text-sm text-gray-600 mb-6">Strategies tailored for your {personalityName} personality:</p>
+                <div className="space-y-8">
                   {personalityData.actionPlans?.map((plan: any, idx: number) => (
-                    <div key={idx} className="border-l-4 border-blue-500 pl-6">
-                      <div className="flex items-start space-x-3 mb-2">
-                        <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
-                          {idx + 1}
-                        </span>
-                        <h4 className="text-lg font-medium text-gray-900">{plan.title}</h4>
+                    <div key={idx} className="relative">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                          <span className="text-white font-bold text-lg">{idx + 1}</span>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-lg font-bold text-gray-900">{plan.title}</h4>
+                          <p className="text-gray-700 leading-relaxed">{plan.description}</p>
+                        </div>
                       </div>
-                      <p className="text-gray-700 leading-relaxed ml-9">{plan.description}</p>
+                      {idx < (personalityData.actionPlans?.length - 1) && (
+                        <div className="ml-6 mt-4 h-8 w-0.5 bg-gradient-to-b from-primary-200 to-transparent"></div>
+                      )}
                     </div>
                   )) || []}
                 </div>
@@ -284,27 +298,27 @@ export default function Dashboard() {
     });
   }
 
-  // Add AI Financial Advisor Summary as the last chapter (only for non-advisor assessments)
+  // Add AI advisor summary chapter
   if (!isAdvisorAssessment && advisorSummary) {
     chapters.push({
       id: chapters.length + 1,
-      title: 'AI Financial Advisor Summary',
+      title: 'AI Advisor Insights',
       icon: Brain,
       content: (
-        <div className="space-y-6">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-8 h-8 text-blue-600" />
+        <div className="space-y-8">
+          <div className="text-center mb-10">
+            <div className="w-24 h-24 mx-auto morph-shape bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
+              <Brain className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Professional insights for your financial advisor based on your personality assessment
             </p>
           </div>
 
-          <div className="card">
+          <div className="modern-card">
             <div 
-              className="prose prose-gray max-w-none [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-4 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-3 [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-2 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
+              className="prose prose-lg max-w-none [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-4 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-3 [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-3 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
               dangerouslySetInnerHTML={{ 
                 __html: convertMarkdownToHTML(advisorSummary) 
               }}
@@ -320,19 +334,23 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
+      <div className="min-h-screen animated-bg">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Progress Header */}
+          <div className="modern-card mb-8">
+            <div className="flex justify-between items-center text-sm font-medium text-gray-600 mb-4">
               <span>Chapter {currentChapter} of {totalChapters}</span>
-              <span>{Math.round((currentChapter / totalChapters) * 100)}% Complete</span>
+              <span className="stat-number text-lg font-bold">
+                {Math.round((currentChapter / totalChapters) * 100)}%
+              </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentChapter / totalChapters) * 100}%` }}
-              />
+            <div className="relative">
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  className="progress-bar h-3 transition-all duration-500"
+                  style={{ width: `${(currentChapter / totalChapters) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
 
@@ -341,21 +359,21 @@ export default function Dashboard() {
             <button
               onClick={() => setCurrentChapter(Math.max(1, currentChapter - 1))}
               disabled={currentChapter === 1}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                 currentChapter === 1
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                  : 'btn-secondary hover:scale-105'
               }`}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
               <span>Previous</span>
             </button>
 
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center justify-center space-x-2">
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center justify-center space-x-3">
                 {currentChapterData && (
                   <>
-                    <currentChapterData.icon className="w-6 h-6" />
+                    <currentChapterData.icon className="w-8 h-8 text-primary-600" />
                     <span>{currentChapterData.title}</span>
                   </>
                 )}
@@ -365,38 +383,54 @@ export default function Dashboard() {
             <button
               onClick={() => setCurrentChapter(Math.min(totalChapters, currentChapter + 1))}
               disabled={currentChapter === totalChapters}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                 currentChapter === totalChapters
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'btn-primary'
+                  : 'btn-primary hover:scale-105 group'
               }`}
             >
               <span>Next</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className={`w-5 h-5 ${currentChapter !== totalChapters ? 'group-hover:translate-x-1' : ''} transition-transform`} />
             </button>
           </div>
 
           {/* Chapter Content */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="modern-card mb-8">
             {currentChapterData?.content}
           </div>
 
-          {/* Chapter List */}
-          <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">All Chapters</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Chapter Navigation Grid */}
+          <div className="modern-card">
+            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+              <MessageCircle className="w-6 h-6 text-primary-600" />
+              <span>All Chapters</span>
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {chapters.map((chapter) => (
                 <button
                   key={chapter.id}
                   onClick={() => setCurrentChapter(chapter.id)}
-                  className={`flex items-center space-x-3 p-3 rounded-lg text-left transition-colors duration-200 ${
-                    currentChapter === chapter.id
-                      ? 'bg-primary-50 text-primary-700 border border-primary-200'
-                      : 'hover:bg-gray-50 text-gray-700'
+                  className={`chapter-nav p-4 text-left transition-all duration-300 ${
+                    currentChapter === chapter.id ? 'active' : ''
                   }`}
                 >
-                  <chapter.icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm font-medium">{chapter.title}</span>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                      currentChapter === chapter.id 
+                        ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      <chapter.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-sm">
+                        {chapter.title}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Chapter {chapter.id}
+                      </div>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>

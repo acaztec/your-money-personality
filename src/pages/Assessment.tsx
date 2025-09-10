@@ -4,6 +4,7 @@ import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
 import { generateAdvisorSummary } from '../services/aiService';
 import { AssessmentService } from '../services/assessmentService';
+import { Brain, Sparkles } from 'lucide-react';
 import questionsData from '../data/questions.json';
 
 export default function Assessment() {
@@ -16,7 +17,6 @@ export default function Assessment() {
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
-    // Check if this is an advisor-shared assessment
     const advisorId = searchParams.get('advisor');
     if (advisorId) {
       const assessment = AssessmentService.getAssessment(advisorId);
@@ -40,36 +40,29 @@ export default function Assessment() {
     if (currentQuestion < questionsData.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Complete assessment
       setIsCompleting(true);
       
       try {
-        // Calculate profile
         const profile = calculateProfile(answers);
         
-        // If this is an advisor assessment, complete it and notify advisor
         if (advisorAssessmentId) {
           await AssessmentService.completeAssessment(advisorAssessmentId, profile);
         }
         
-        // Generate AI advisor summary (only for non-advisor assessments for now)
         let advisorSummary = '';
         if (!advisorAssessmentId) {
           advisorSummary = await generateAdvisorSummary(profile, answers);
         }
         
-        // Save to localStorage
         localStorage.setItem('userProfile', JSON.stringify(profile));
         localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
         if (advisorSummary) {
           localStorage.setItem('advisorSummary', advisorSummary);
         }
         
-        // Navigate to dashboard
         navigate('/dashboard');
       } catch (error) {
         console.error('Error completing assessment:', error);
-        // Still navigate even if something fails
         const profile = calculateProfile(answers);
         
         if (advisorAssessmentId) {
@@ -91,46 +84,74 @@ export default function Assessment() {
 
   if (isCompleting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-bounce mb-4">
-            <div className="w-16 h-16 bg-primary-500 rounded-full mx-auto"></div>
+      <div className="min-h-screen animated-bg flex items-center justify-center">
+        <div className="modern-card text-center space-y-6 max-w-md">
+          <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+            <Brain className="w-10 h-10 text-white animate-pulse" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Results</h2>
-          <p className="text-gray-600">Please wait while we calculate your money personality...</p>
+          <h2 className="text-3xl font-bold text-gray-900">Analyzing Your Results</h2>
+          <p className="text-gray-600 leading-relaxed">
+            Our AI is processing your responses and creating your personalized money personality profile...
+          </p>
+          <div className="flex justify-center space-x-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-3 h-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen animated-bg relative overflow-hidden">
+      {/* Floating particles background */}
+      <div className="particles-bg">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 25}s`,
+              animationDuration: `${20 + Math.random() * 10}s`
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="bg-primary-600 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="glass-card border-0 border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <img 
               src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
               alt="iGrad Enrich" 
-              className="h-8 w-auto"
+              className="h-10 w-auto floating-element"
             />
             {advisorInfo && (
-              <div className="text-primary-100 text-sm">
-                Shared by {advisorInfo.name}
+              <div className="flex items-center space-x-2 text-primary-100">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-sm font-medium">Shared by {advisorInfo.name}</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Advisor Welcome Message */}
+      {/* Advisor Welcome Banner */}
       {advisorInfo && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="glass-card border-0 border-b border-blue-200/30 bg-gradient-to-r from-blue-50/80 to-accent-50/80">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="text-center">
-              <p className="text-blue-800">
+              <p className="text-blue-900 font-medium leading-relaxed">
                 <strong>{advisorInfo.name}</strong> has invited you to discover your Money Personality! 
-                This assessment will help them better understand your financial behaviors and provide more personalized guidance.
+                This assessment will help them understand your financial behaviors and provide 
+                more personalized guidance tailored to your unique personality.
               </p>
             </div>
           </div>
@@ -138,7 +159,7 @@ export default function Assessment() {
       )}
 
       {/* Assessment Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex justify-center">
           <AssessmentCard
             question={questionsData[currentQuestion]}
