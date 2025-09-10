@@ -33,7 +33,7 @@ body {
 
 /* Modern card with subtle animations */
 .modern-card {
-  @apply bg-white rounded-2xl shadow-lg border border-gray-200 p-8 transition-all duration-300 hover:shadow-xl;
+  @apply bg-gray-50 rounded-2xl shadow-lg border border-gray-200 p-8 transition-all duration-300 hover:shadow-xl;
 }
 
 /* Unique button styles */
@@ -43,7 +43,7 @@ body {
 }
 
 .btn-secondary {
-  @apply relative inline-flex items-center px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-lg border border-gray-300;
+  @apply relative inline-flex items-center px-8 py-4 bg-gray-50 hover:bg-gray-100 text-gray-900 font-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200;
 }
 
 /* Remove floating animation for professional version */
