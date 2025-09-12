@@ -263,10 +263,16 @@ export default function AdvisorLogin() {
             {isSignup && (
               <div className="mt-4 p-4 bg-amber-50 rounded-lg">
                 <p className="text-amber-800 text-sm">
-                  <strong>Note:</strong> You may need to check your email to verify your account before signing in.
+                  <strong>Note:</strong> If you get an authentication error, please try logging in with your new credentials.
                 </p>
               </div>
             )}
+
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-blue-800 text-sm">
+                <strong>Demo Account:</strong> For testing, you can use email <code>test@advisor.com</code> with password <code>password123</code>
+              </p>
+            </div>
           </div>
         </div>
       </div>
