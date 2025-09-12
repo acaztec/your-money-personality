@@ -83,28 +83,11 @@ export class AuthService {
         return { success: false, error: 'Signup failed' }
       }
 
-      // Wait for the session to be fully established
-      let retries = 0
-      let session = null
-      
-      while (!session && retries < 10) {
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
-        session = currentSession
-        if (!session) {
-          await new Promise(resolve => setTimeout(resolve, 200))
-          retries++
-        }
-      }
-
-      if (!session) {
-        return { success: false, error: 'Failed to establish authentication session' }
-      }
-
-      // Create advisor profile
+      // Create advisor profile using the newly created user ID
       const { data: profileData, error: profileError } = await supabase
         .from('advisor_profiles')
         .insert({
-          user_id: session.user.id,
+          user_id: authData.user.id,
           name: data.name,
           company: data.company || null
         })
@@ -113,17 +96,13 @@ export class AuthService {
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
-        // If it's an RLS error, provide more context
-        if (profileError.code === '42501') {
-          return { success: false, error: 'Authentication error during profile creation. Please try logging in.' }
-        }
         return { success: false, error: profileError.message }
       }
 
       const advisor: Advisor = {
         id: profileData.id,
         user_id: profileData.user_id,
-        email: session.user.email!,
+        email: authData.user.email!,
         name: profileData.name,
         company: profileData.company,
         created_at: profileData.created_at

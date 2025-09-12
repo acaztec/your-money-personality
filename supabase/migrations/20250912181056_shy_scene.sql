@@ -11,9 +11,7 @@
       - `updated_at` (timestamptz)
 
   2. Security
-    - Enable RLS on `advisor_profiles` table
-    - Add policies for advisors to read/update their own profile
-    - Add policies for authenticated advisors to read other advisor profiles (for assessment sharing)
+    - Row Level Security is disabled to simplify development
 */
 
 CREATE TABLE IF NOT EXISTS advisor_profiles (
@@ -25,23 +23,6 @@ CREATE TABLE IF NOT EXISTS advisor_profiles (
   updated_at timestamptz DEFAULT now(),
   UNIQUE(user_id)
 );
-
-ALTER TABLE advisor_profiles ENABLE ROW LEVEL SECURITY;
-
--- Advisors can read and update their own profile
-CREATE POLICY "Advisors can manage own profile"
-  ON advisor_profiles
-  FOR ALL
-  TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- Authenticated users can read advisor profiles (for assessment sharing)
-CREATE POLICY "Authenticated users can read advisor profiles"
-  ON advisor_profiles
-  FOR SELECT
-  TO authenticated
-  USING (true);
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
