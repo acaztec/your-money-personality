@@ -63,17 +63,6 @@ export class AuthService {
     error?: string 
   }> {
     try {
-      // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from('advisor_profiles')
-        .select('id')
-        .eq('name', data.name)
-        .single()
-
-      if (existingUser) {
-        return { success: false, error: 'An advisor with this name already exists' }
-      }
-
       // Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -94,6 +83,9 @@ export class AuthService {
         return { success: false, error: 'Signup failed' }
       }
 
+      // Wait a moment for the auth state to be fully established
+      await new Promise(resolve => setTimeout(resolve, 100))
+
       // Create advisor profile
       const { data: profileData, error: profileError } = await supabase
         .from('advisor_profiles')
@@ -106,9 +98,8 @@ export class AuthService {
         .single()
 
       if (profileError) {
-        // Clean up auth user if profile creation fails
-        await supabase.auth.admin.deleteUser(authData.user.id)
-        return { success: false, error: 'Failed to create advisor profile' }
+        console.error('Profile creation error:', profileError)
+        return { success: false, error: `Failed to create advisor profile: ${profileError.message}` }
       }
 
       const advisor: Advisor = {
