@@ -191,21 +191,27 @@ export class AuthService {
 
   static async getAdvisorProfile(userId: string): Promise<Advisor | null> {
     try {
+      console.log('Fetching advisor profile for userId:', userId)
+      
       const { data, error } = await supabase
         .from('advisor_profiles')
         .select('*')
         .eq('user_id', userId)
         .single()
 
+      console.log('Advisor profile query result:', { data, error })
+
       if (error || !data) {
+        console.log('No advisor profile found or error:', error)
         return null
       }
 
       // Get user email
       const user = await this.getCurrentUser()
+      console.log('Current user for profile:', user?.email)
       if (!user) return null
 
-      return {
+      const advisor = {
         id: data.id,
         user_id: data.user_id,
         email: user.email!,
@@ -213,6 +219,9 @@ export class AuthService {
         company: data.company,
         created_at: data.created_at
       }
+      
+      console.log('Returning advisor profile:', advisor)
+      return advisor
     } catch (error) {
       console.error('Error getting advisor profile:', error)
       return null
