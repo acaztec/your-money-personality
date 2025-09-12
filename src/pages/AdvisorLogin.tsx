@@ -255,7 +255,15 @@ export default function AdvisorLogin() {
             {!isSignup && (
               <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                 <p className="text-blue-800 text-sm">
-                  <strong>Demo Account:</strong> Use any email with password "password123" to test the system.
+                  <strong>New User?</strong> Create an account to get started with the Money Personality assessment platform.
+                </p>
+              </div>
+            )}
+
+            {isSignup && (
+              <div className="mt-4 p-4 bg-amber-50 rounded-lg">
+                <p className="text-amber-800 text-sm">
+                  <strong>Note:</strong> You may need to check your email to verify your account before signing in.
                 </p>
               </div>
             )}

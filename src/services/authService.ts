@@ -1,137 +1,229 @@
+import { supabase } from '../lib/supabase'
+import type { User } from '@supabase/supabase-js'
+
 export interface Advisor {
-  id: string;
-  email: string;
-  name: string;
-  company?: string;
-  createdAt: Date;
+  id: string
+  email: string
+  name: string
+  company?: string | null
+  user_id: string
+  created_at: string
 }
 
 export interface LoginCredentials {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface SignupData {
-  email: string;
-  password: string;
-  name: string;
-  company?: string;
+  email: string
+  password: string
+  name: string
+  company?: string
 }
 
 export class AuthService {
-  private static readonly STORAGE_KEY = 'advisor_auth';
-  private static readonly ADVISORS_KEY = 'advisors_db';
-
-  static generateAdvisorId(): string {
-    return 'advisor_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-  }
-
-  static async login(credentials: LoginCredentials): Promise<{ success: boolean; advisor?: Advisor; error?: string }> {
+  static async login(credentials: LoginCredentials): Promise<{ 
+    success: boolean
+    advisor?: Advisor
+    error?: string 
+  }> {
     try {
-      const advisors = this.getAllAdvisors();
-      const advisor = advisors.find(a => a.email === credentials.email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      })
 
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'Login failed' }
+      }
+
+      // Get advisor profile
+      const advisor = await this.getAdvisorProfile(data.user.id)
       if (!advisor) {
-        return { success: false, error: 'Invalid email or password' };
+        return { success: false, error: 'Advisor profile not found' }
       }
 
-      // In a real app, you'd verify the password hash
-      // For this demo, we'll just check if password is not empty
-      if (!credentials.password || credentials.password.length < 6) {
-        return { success: false, error: 'Invalid email or password' };
-      }
-
-      // Store auth session
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
-        advisorId: advisor.id,
-        email: advisor.email,
-        loginTime: Date.now()
-      }));
-
-      return { success: true, advisor };
+      return { success: true, advisor }
     } catch (error) {
-      return { success: false, error: 'Login failed. Please try again.' };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Login failed' 
+      }
     }
   }
 
-  static async signup(data: SignupData): Promise<{ success: boolean; advisor?: Advisor; error?: string }> {
+  static async signup(data: SignupData): Promise<{ 
+    success: boolean
+    advisor?: Advisor
+    error?: string 
+  }> {
     try {
-      const advisors = this.getAllAdvisors();
-      
-      // Check if email already exists
-      if (advisors.find(a => a.email === data.email)) {
-        return { success: false, error: 'An account with this email already exists' };
+      // Check if user already exists
+      const { data: existingUser } = await supabase
+        .from('advisor_profiles')
+        .select('id')
+        .eq('name', data.name)
+        .single()
+
+      if (existingUser) {
+        return { success: false, error: 'An advisor with this name already exists' }
       }
 
-      // Create new advisor
-      const newAdvisor: Advisor = {
-        id: this.generateAdvisorId(),
+      // Sign up user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+            company: data.company || null
+          }
+        }
+      })
+
+      if (authError) {
+        return { success: false, error: authError.message }
+      }
+
+      if (!authData.user) {
+        return { success: false, error: 'Signup failed' }
+      }
+
+      // Create advisor profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('advisor_profiles')
+        .insert({
+          user_id: authData.user.id,
+          name: data.name,
+          company: data.company || null
+        })
+        .select()
+        .single()
+
+      if (profileError) {
+        // Clean up auth user if profile creation fails
+        await supabase.auth.admin.deleteUser(authData.user.id)
+        return { success: false, error: 'Failed to create advisor profile' }
+      }
+
+      const advisor: Advisor = {
+        id: profileData.id,
+        user_id: profileData.user_id,
+        email: authData.user.email!,
+        name: profileData.name,
+        company: profileData.company,
+        created_at: profileData.created_at
+      }
+
+      return { success: true, advisor }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Signup failed' 
+      }
+    }
+  }
+
+  static async logout(): Promise<void> {
+    await supabase.auth.signOut()
+  }
+
+  static async getCurrentUser(): Promise<User | null> {
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  }
+
+  static async getCurrentAdvisor(): Promise<Advisor | null> {
+    try {
+      const user = await this.getCurrentUser()
+      if (!user) return null
+
+      return await this.getAdvisorProfile(user.id)
+    } catch (error) {
+      console.error('Error getting current advisor:', error)
+      return null
+    }
+  }
+
+  static async isAuthenticated(): Promise<boolean> {
+    const { data: { session } } = await supabase.auth.getSession()
+    return !!session
+  }
+
+  static async getAdvisorProfile(userId: string): Promise<Advisor | null> {
+    try {
+      const { data, error } = await supabase
+        .from('advisor_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+
+      if (error || !data) {
+        return null
+      }
+
+      // Get user email
+      const user = await this.getCurrentUser()
+      if (!user) return null
+
+      return {
+        id: data.id,
+        user_id: data.user_id,
+        email: user.email!,
         name: data.name,
         company: data.company,
-        createdAt: new Date()
-      };
-
-      // Save advisor
-      advisors.push(newAdvisor);
-      localStorage.setItem(this.ADVISORS_KEY, JSON.stringify(advisors));
-
-      // Store auth session
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
-        advisorId: newAdvisor.id,
-        email: newAdvisor.email,
-        loginTime: Date.now()
-      }));
-
-      return { success: true, advisor: newAdvisor };
+        created_at: data.created_at
+      }
     } catch (error) {
-      return { success: false, error: 'Signup failed. Please try again.' };
+      console.error('Error getting advisor profile:', error)
+      return null
     }
   }
 
-  static logout(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
-  }
-
-  static getCurrentAdvisor(): Advisor | null {
+  static async getAdvisorById(advisorId: string): Promise<Advisor | null> {
     try {
-      const authData = localStorage.getItem(this.STORAGE_KEY);
-      if (!authData) return null;
+      const { data, error } = await supabase
+        .from('advisor_profiles')
+        .select('*')
+        .eq('id', advisorId)
+        .single()
 
-      const { advisorId } = JSON.parse(authData);
-      const advisors = this.getAllAdvisors();
-      return advisors.find(a => a.id === advisorId) || null;
+      if (error || !data) {
+        return null
+      }
+
+      // Get user details
+      const { data: userData } = await supabase.auth.admin.getUserById(data.user_id)
+      if (!userData.user) return null
+
+      return {
+        id: data.id,
+        user_id: data.user_id,
+        email: userData.user.email!,
+        name: data.name,
+        company: data.company,
+        created_at: data.created_at
+      }
     } catch (error) {
-      return null;
+      console.error('Error getting advisor by ID:', error)
+      return null
     }
   }
 
-  static isAuthenticated(): boolean {
-    try {
-      const authData = localStorage.getItem(this.STORAGE_KEY);
-      if (!authData) return false;
-
-      const { loginTime } = JSON.parse(authData);
-      const dayInMs = 24 * 60 * 60 * 1000;
-      
-      // Session expires after 24 hours
-      return Date.now() - loginTime < dayInMs;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private static getAllAdvisors(): Advisor[] {
-    try {
-      const stored = localStorage.getItem(this.ADVISORS_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
-  static getAdvisorById(advisorId: string): Advisor | null {
-    const advisors = this.getAllAdvisors();
-    return advisors.find(a => a.id === advisorId) || null;
+  // Listen to auth state changes
+  static onAuthStateChange(callback: (advisor: Advisor | null) => void) {
+    return supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const advisor = await this.getAdvisorProfile(session.user.id)
+        callback(advisor)
+      } else {
+        callback(null)
+      }
+    })
   }
 }

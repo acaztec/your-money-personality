@@ -1,5 +1,6 @@
 import { AdvisorAssessment, Profile } from '../types';
 import { EmailService } from './emailService';
+import { AuthService } from './authService';
 
 export class AssessmentService {
   private static readonly STORAGE_KEY = 'advisor_assessments';
@@ -19,6 +20,12 @@ export class AssessmentService {
     clientName?: string
   ): Promise<{ success: boolean; assessmentId?: string; error?: string }> {
     try {
+      // Verify advisor is authenticated
+      const currentAdvisor = await AuthService.getCurrentAdvisor();
+      if (!currentAdvisor || currentAdvisor.email !== advisorEmail) {
+        return { success: false, error: 'Unauthorized: Please log in again' };
+      }
+
       const assessmentId = this.generateAssessmentId();
       const assessmentLink = this.generateAssessmentLink(assessmentId);
 

@@ -1,75 +1,90 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthService, Advisor, LoginCredentials, SignupData } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { AuthService, Advisor, LoginCredentials, SignupData } from '../services/authService'
 
 interface AuthContextType {
-  advisor: Advisor | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
-  signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  advisor: Advisor | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>
+  signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>
+  logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 interface AuthProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [advisor, setAdvisor] = useState<Advisor | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [advisor, setAdvisor] = useState<Advisor | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session on app load
-    const currentAdvisor = AuthService.getCurrentAdvisor();
-    if (currentAdvisor && AuthService.isAuthenticated()) {
-      setAdvisor(currentAdvisor);
+    // Check initial auth state
+    const initAuth = async () => {
+      try {
+        const currentAdvisor = await AuthService.getCurrentAdvisor()
+        setAdvisor(currentAdvisor)
+      } catch (error) {
+        console.error('Error checking auth state:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    setIsLoading(false);
-  }, []);
+
+    initAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = AuthService.onAuthStateChange((advisor) => {
+      setAdvisor(advisor)
+      setIsLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const login = async (credentials: LoginCredentials) => {
-    const result = await AuthService.login(credentials);
+    const result = await AuthService.login(credentials)
     if (result.success && result.advisor) {
-      setAdvisor(result.advisor);
+      setAdvisor(result.advisor)
     }
-    return { success: result.success, error: result.error };
-  };
+    return { success: result.success, error: result.error }
+  }
 
   const signup = async (data: SignupData) => {
-    const result = await AuthService.signup(data);
+    const result = await AuthService.signup(data)
     if (result.success && result.advisor) {
-      setAdvisor(result.advisor);
+      setAdvisor(result.advisor)
     }
-    return { success: result.success, error: result.error };
-  };
+    return { success: result.success, error: result.error }
+  }
 
-  const logout = () => {
-    AuthService.logout();
-    setAdvisor(null);
-  };
+  const logout = async () => {
+    await AuthService.logout()
+    setAdvisor(null)
+  }
 
   const value: AuthContextType = {
     advisor,
-    isAuthenticated: !!advisor && AuthService.isAuthenticated(),
+    isAuthenticated: !!advisor,
     isLoading,
     login,
     signup,
     logout
-  };
+  }
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider')
   }
-  return context;
+  return context
 }
