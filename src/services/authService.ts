@@ -95,15 +95,15 @@ export class AuthService {
   static async signup(data: SignupData): Promise<{ 
     success: boolean
     advisor?: Advisor
-    needsEmailConfirmation?: boolean
     error?: string 
   }> {
     try {
-      // Sign up user - check if email confirmation is required
+      // Sign up user with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: undefined, // Disable email confirmation
           data: {
             name: data.name,
             company: data.company || null
@@ -119,24 +119,14 @@ export class AuthService {
         return { success: false, error: 'Signup failed' }
       }
 
-      // Check if email confirmation is required
-      if (!authData.session && authData.user && !authData.user.email_confirmed_at) {
-        return { 
-          success: false,
-          needsEmailConfirmation: true,
-          error: 'Please check your email and click the confirmation link before proceeding.' 
-        }
-      }
-
-      // If we have a session, the user is immediately available
       if (!authData.session) {
         return { 
           success: false, 
-          error: 'User created but session not available. Please try logging in.' 
+          error: 'Signup failed - no session created' 
         }
       }
 
-      // Create advisor profile using the authenticated user ID
+      // Create advisor profile immediately
       const { data: profileData, error: profileError } = await supabase
         .from('advisor_profiles')
         .insert({
@@ -149,10 +139,6 @@ export class AuthService {
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
-        // Handle foreign key constraint specifically
-        if (profileError.code === '23503') {
-          return { success: false, error: 'User authentication incomplete. Please try logging in instead.' }
-        }
         return { success: false, error: `Profile creation failed: ${profileError.message}` }
       }
 

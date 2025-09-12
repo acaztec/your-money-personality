@@ -10,11 +10,8 @@ export default function AdvisorLogin() {
   
   const [isSignup, setIsSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState('');
   
   const [formData, setFormData] = useState({
     email: '',
@@ -32,7 +29,6 @@ export default function AdvisorLogin() {
     });
     setError('');
     setSuccess('');
-    setNeedsEmailConfirmation(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,10 +55,6 @@ export default function AdvisorLogin() {
         if (result.success) {
           setSuccess('Account created successfully! Redirecting...');
           setTimeout(() => navigate(from), 1500);
-        } else if (result.needsEmailConfirmation) {
-          setNeedsEmailConfirmation(true);
-          setPendingEmail(formData.email);
-          setError(result.error || 'Email confirmation required');
         } else {
           setError(result.error || 'Signup failed');
         }
@@ -83,22 +75,6 @@ export default function AdvisorLogin() {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleResendEmail = async () => {
-    setIsResending(true);
-    setError('');
-    setSuccess('');
-
-    const result = await resendConfirmationEmail(pendingEmail);
-    
-    setIsResending(false);
-    
-    if (result.success) {
-      setSuccess('Confirmation email resent! Please check your inbox.');
-    } else {
-      setError(result.error || 'Failed to resend email');
     }
   };
 
@@ -149,21 +125,6 @@ export default function AdvisorLogin() {
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <p className="text-red-800 text-sm">{error}</p>
                 </div>
-                {needsEmailConfirmation && (
-                  <div className="mt-3">
-                    <button
-                      onClick={handleResendEmail}
-                      disabled={isResending}
-                      className={`text-sm font-medium ${
-                        isResending 
-                          ? 'text-gray-500 cursor-not-allowed'
-                          : 'text-blue-600 hover:text-blue-700'
-                      }`}
-                    >
-                      {isResending ? 'Resending...' : 'Resend confirmation email'}
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
@@ -256,16 +217,14 @@ export default function AdvisorLogin() {
 
               <button
                 type="submit"
-                disabled={isLoading || needsEmailConfirmation}
+                disabled={isLoading}
                 className={`w-full flex items-center justify-center px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                  isLoading || needsEmailConfirmation
+                  isLoading
                     ? 'bg-gray-400 text-white cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {needsEmailConfirmation ? (
-                  'Please confirm your email first'
-                ) : isLoading ? (
+                {isLoading ? (
                   <>
                     <div className="animate-spin w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
                     {isSignup ? 'Creating Account...' : 'Signing In...'}
@@ -301,24 +260,15 @@ export default function AdvisorLogin() {
               </div>
             )}
 
-            {isSignup && (
-              <div className="mt-4 p-4 bg-amber-50 rounded-lg">
-                <p className="text-amber-800 text-sm">
-                  <strong>Email Confirmation:</strong> Check your email for a confirmation link. 
-                  If it expires, use the "Resend\" button above.
-                </p>
-              </div>
-            )}
-
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-blue-800 text-sm">
                 <strong>Demo Account:</strong> For testing, you can use email <code>test@advisor.com</code> with password <code>password123</code>
               </p>
             </div>
 
-            <div className="mt-4 p-4 bg-amber-50 rounded-lg">
+            <div className="mt-4 p-4 bg-green-50 rounded-lg">
               <p className="text-amber-800 text-sm">
-                <strong>Important:</strong> Make sure email confirmations are disabled in your Supabase project settings for seamless signup, or check your email for confirmation if enabled.
+                <strong>Instant Access:</strong> Email confirmation is disabled - you can signup and start using the platform immediately!
               </p>
             </div>
           </div>

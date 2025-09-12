@@ -6,8 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>
-  signup: (data: SignupData) => Promise<{ success: boolean; needsEmailConfirmation?: boolean; error?: string }>
-  resendConfirmationEmail: (email: string) => Promise<{ success: boolean; error?: string }>
+  signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
 }
 
@@ -65,11 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (result.success && result.advisor) {
       setAdvisor(result.advisor)
     }
-    return { success: result.success, needsEmailConfirmation: result.needsEmailConfirmation, error: result.error }
-  }
-
-  const resendConfirmationEmail = async (email: string) => {
-    return await AuthService.resendConfirmationEmail(email)
+    return { success: result.success, error: result.error }
   }
 
   const logout = async () => {
@@ -83,7 +78,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     login,
     signup,
-    resendConfirmationEmail,
     logout
   }
 
