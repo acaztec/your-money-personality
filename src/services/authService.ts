@@ -50,7 +50,7 @@ export class AuthService {
       }
 
       // Get advisor profile
-      const advisor = await this.getAdvisorProfile(data.user.id)
+      let advisor = await this.getAdvisorProfile(data.user.id)
       
       // If no advisor profile exists but user is confirmed, create it from user metadata
       if (!advisor && data.user.email_confirmed_at) {
@@ -208,8 +208,14 @@ export class AuthService {
   }
 
   static async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
+    // Use getSession instead of getUser to avoid network call and
+    // restore the user directly from the persisted session. This
+    // prevents issues where an expired or invalid session in
+    // localStorage causes getUser to throw and leave the app stuck
+    // in a loading state after refresh or opening a new tab.
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session) return null
+    return session.user ?? null
   }
 
   static async getCurrentAdvisor(): Promise<Advisor | null> {
