@@ -35,6 +35,13 @@ export class AuthService {
       })
 
       if (error) {
+        // Handle specific email confirmation error
+        if (error.message.includes('Email not confirmed')) {
+          return { 
+            success: false, 
+            error: 'Please check your email and click the confirmation link before logging in.' 
+          }
+        }
         return { success: false, error: error.message }
       }
 
@@ -98,12 +105,12 @@ export class AuthService {
     error?: string 
   }> {
     try {
-      // Sign up user with email confirmation disabled
+      // Sign up user and force email confirmation to be bypassed
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: undefined, // Disable email confirmation
+          emailRedirectTo: `${window.location.origin}/advisor/dashboard`,
           data: {
             name: data.name,
             company: data.company || null
@@ -119,10 +126,22 @@ export class AuthService {
         return { success: false, error: 'Signup failed' }
       }
 
-      if (!authData.session) {
+      // Handle case where session might not be created due to email confirmation
+      if (!authData.session && !authData.user.email_confirmed_at) {
         return { 
           success: false, 
-          error: 'Signup failed - no session created' 
+          error: 'Account created but requires email confirmation. Please check your email and then login.' 
+        }
+      }
+      
+      // If user exists but no session (unconfirmed), try to sign them in
+      if (!authData.session) {
+        console.log('No session from signup, attempting to sign in user...')
+        const signInResult = await this.login({ email: data.email, password: data.password })
+        if (signInResult.success) {
+          return { success: true, advisor: signInResult.advisor }
+        } else {
+          return { success: false, error: signInResult.error || 'Account created but login failed' }
         }
       }
 

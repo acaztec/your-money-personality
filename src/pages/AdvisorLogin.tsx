@@ -266,9 +266,9 @@ export default function AdvisorLogin() {
               </p>
             </div>
 
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
+            <div className="mt-4 p-4 bg-amber-50 rounded-lg">
               <p className="text-amber-800 text-sm">
-                <strong>Instant Access:</strong> Email confirmation is disabled - you can signup and start using the platform immediately!
+                <strong>Note:</strong> You may need to confirm your email after signup. Check your inbox and click the confirmation link, then return here to login.
               </p>
             </div>
           </div>
