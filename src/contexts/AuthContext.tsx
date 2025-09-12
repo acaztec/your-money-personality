@@ -28,11 +28,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentAdvisor = await AuthService.getCurrentAdvisor()
         if (mounted) {
           setAdvisor(currentAdvisor)
-          setIsLoading(false)
         }
       } catch (error) {
         if (mounted) {
           setAdvisor(null)
+        }
+      } finally {
+        if (mounted) {
           setIsLoading(false)
         }
       }
@@ -45,11 +47,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (session?.user) {
         try {
           const advisor = await AuthService.getAdvisorProfile(session.user.id)
+          if (advisor) {
+            AuthService.storeAdvisorProfile(advisor)
+          } else {
+            AuthService.clearStoredAdvisorProfile()
+          }
           setAdvisor(advisor)
         } catch (error) {
+          AuthService.clearStoredAdvisorProfile()
           setAdvisor(null)
         }
       } else {
+        AuthService.clearStoredAdvisorProfile()
         setAdvisor(null)
       }
 

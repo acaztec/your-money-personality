@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
+const ADVISOR_STORAGE_KEY = 'advisor_profile'
+
 export interface Advisor {
   id: string
   email: string
@@ -23,6 +25,30 @@ export interface SignupData {
 }
 
 export class AuthService {
+  static storeAdvisorProfile(advisor: Advisor) {
+    try {
+      localStorage.setItem(ADVISOR_STORAGE_KEY, JSON.stringify(advisor))
+    } catch (err) {
+      console.error('Failed to store advisor profile:', err)
+    }
+  }
+
+  static getStoredAdvisorProfile(): Advisor | null {
+    try {
+      const data = localStorage.getItem(ADVISOR_STORAGE_KEY)
+      return data ? JSON.parse(data) : null
+    } catch {
+      return null
+    }
+  }
+
+  static clearStoredAdvisorProfile() {
+    try {
+      localStorage.removeItem(ADVISOR_STORAGE_KEY)
+    } catch {
+      // ignore
+    }
+  }
   static async login(credentials: LoginCredentials): Promise<{ 
     success: boolean
     advisor?: Advisor
@@ -50,7 +76,7 @@ export class AuthService {
       }
 
       // Get advisor profile
-      const advisor = await this.getAdvisorProfile(data.user.id)
+      let advisor = await this.getAdvisorProfile(data.user.id)
       
       // If no advisor profile exists but user is confirmed, create it from user metadata
       if (!advisor && data.user.email_confirmed_at) {
@@ -89,6 +115,7 @@ export class AuthService {
         return { success: false, error: 'Advisor profile not found and could not be created' }
       }
 
+      this.storeAdvisorProfile(advisor)
       return { success: true, advisor }
     } catch (error) {
       console.error('Login error:', error)
@@ -170,6 +197,8 @@ export class AuthService {
         created_at: profileData.created_at
       }
 
+      this.storeAdvisorProfile(advisor)
+
       return { success: true, advisor }
     } catch (error) {
       console.error('Signup error:', error)
@@ -205,11 +234,18 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     await supabase.auth.signOut()
+    this.clearStoredAdvisorProfile()
   }
 
   static async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
+    // Use getSession instead of getUser to avoid network call and
+    // restore the user directly from the persisted session. This
+    // prevents issues where an expired or invalid session in
+    // localStorage causes getUser to throw and leave the app stuck
+    // in a loading state after refresh or opening a new tab.
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session) return null
+    return session.user ?? null
   }
 
   static async getCurrentAdvisor(): Promise<Advisor | null> {
@@ -217,7 +253,16 @@ export class AuthService {
       const user = await this.getCurrentUser()
       if (!user) return null
 
-      return await this.getAdvisorProfile(user.id)
+      const cached = this.getStoredAdvisorProfile()
+      if (cached && cached.user_id === user.id) {
+        return cached
+      }
+
+      const advisor = await this.getAdvisorProfile(user.id)
+      if (advisor) {
+        this.storeAdvisorProfile(advisor)
+      }
+      return advisor
     } catch (error) {
       console.error('Error getting current advisor:', error)
       return null
@@ -242,7 +287,7 @@ export class AuthService {
       console.log('Advisor profile query result:', { data, error })
 
       if (error || !data) {
-        if (error.code === 'PGRST116') {
+        if (error?.code === 'PGRST116') {
           // No rows returned - this is expected for new users
           console.log('No advisor profile found (expected for new users)')
           return null
