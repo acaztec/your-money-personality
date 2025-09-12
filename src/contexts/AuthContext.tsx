@@ -21,17 +21,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Listen for auth state changes first - this handles initial session restoration
+    let mounted = true
+
+    const restoreSession = async () => {
+      try {
+        const currentAdvisor = await AuthService.getCurrentAdvisor()
+        if (mounted) {
+          setAdvisor(currentAdvisor)
+        }
+      } catch (error) {
+        console.error('Error restoring session:', error)
+        if (mounted) {
+          setAdvisor(null)
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    restoreSession()
+
+    // Listen for auth state changes
     const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email, 'User ID:', session?.user?.id)
-      
+
       if (session?.user) {
         try {
           console.log('Attempting to fetch advisor profile for user:', session.user.id)
           const advisor = await AuthService.getAdvisorProfile(session.user.id)
           console.log('Advisor profile result:', advisor)
           setAdvisor(advisor)
-          
+
           if (!advisor) {
             console.warn('No advisor profile found for user:', session.user.id)
           }
@@ -43,12 +65,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('No session, setting advisor to null')
         setAdvisor(null)
       }
-      
+
       console.log('Setting isLoading to false')
       setIsLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const login = async (credentials: LoginCredentials) => {
