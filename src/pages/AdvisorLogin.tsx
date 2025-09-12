@@ -305,7 +305,7 @@ export default function AdvisorLogin() {
               <div className="mt-4 p-4 bg-amber-50 rounded-lg">
                 <p className="text-amber-800 text-sm">
                   <strong>Email Confirmation:</strong> Check your email for a confirmation link. 
-                  If it expires, use the "Resend" button above.
+                  If it expires, use the "Resend\" button above.
                 </p>
               </div>
             )}
