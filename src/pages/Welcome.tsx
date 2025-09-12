@@ -18,7 +18,7 @@ export default function Welcome() {
               to="/advisor"
               className="text-white hover:text-blue-100 transition-colors duration-200 text-sm font-medium"
             >
-              For Advisors
+              Advisor Login
             </Link>
           </div>
         </div>

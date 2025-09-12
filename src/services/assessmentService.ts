@@ -41,6 +41,7 @@ export class AssessmentService {
         advisorName,
         advisorEmail,
         clientEmail,
+        clientName,
         assessmentLink
       );
 

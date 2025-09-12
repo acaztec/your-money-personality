@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3 } from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
 export default function AdvisorWelcome() {
+  const { advisor } = useAuth();
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [shareError, setShareError] = useState('');
   const [formData, setFormData] = useState({
-    advisorName: '',
-    advisorEmail: '',
+    advisorName: advisor?.name || '',
+    advisorEmail: advisor?.email || '',
     clientEmail: '',
     clientName: ''
   });
@@ -39,8 +41,8 @@ export default function AdvisorWelcome() {
     if (result.success) {
       setShareSuccess(true);
       setFormData({
-        advisorName: formData.advisorName,
-        advisorEmail: formData.advisorEmail,
+        advisorName: advisor?.name || '',
+        advisorEmail: advisor?.email || '',
         clientEmail: '',
         clientName: ''
       });
@@ -60,12 +62,20 @@ export default function AdvisorWelcome() {
               alt="iGrad Enrich" 
               className="h-8 w-auto"
             />
-            <Link
-              to="/"
-              className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
-            >
-              For Individuals
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/advisor/dashboard"
+                className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/"
+                className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+              >
+                For Individuals
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -136,9 +146,10 @@ export default function AdvisorWelcome() {
                   id="advisorName"
                   name="advisorName"
                   required
+                  readOnly
                   value={formData.advisorName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-gray-50"
                   placeholder="John Smith"
                 />
               </div>
@@ -151,9 +162,10 @@ export default function AdvisorWelcome() {
                   id="advisorEmail"
                   name="advisorEmail"
                   required
+                  readOnly
                   value={formData.advisorEmail}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-gray-50"
                   placeholder="john@advisorfirm.com"
                 />
               </div>
