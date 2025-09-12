@@ -19,6 +19,7 @@ import {
 export default function AdvisorDashboard() {
   const { advisor, logout } = useAuth();
   const [assessments, setAssessments] = useState<AdvisorAssessment[]>([]);
+  const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadAssessments = () => {
@@ -28,8 +29,15 @@ export default function AdvisorDashboard() {
     }
   };
 
+  const loadAssessmentResults = async () => {
+    if (advisor) {
+      const results = await AssessmentService.getAssessmentResultsForAdvisor(advisor.email);
+      setAssessmentResults(results);
+    }
+  };
   useEffect(() => {
     loadAssessments();
+    loadAssessmentResults();
     setIsLoading(false);
   }, [advisor]);
 
@@ -40,6 +48,7 @@ export default function AdvisorDashboard() {
       if (e.key === 'advisor_assessments') {
         console.log('🔄 Refreshing assessments due to storage change');
         loadAssessments();
+        loadAssessmentResults();
       }
     };
 
@@ -49,6 +58,7 @@ export default function AdvisorDashboard() {
     const handleCustomStorageChange = () => {
       console.log('🔄 Custom storage event - refreshing assessments');
       loadAssessments();
+      loadAssessmentResults();
     };
     
     window.addEventListener('localStorageUpdate', handleCustomStorageChange);
@@ -61,6 +71,9 @@ export default function AdvisorDashboard() {
     logout();
   };
 
+  const handleViewResults = (assessmentId: string) => {
+    window.open(`/dashboard?advisor=${assessmentId}`, '_blank');
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen professional-bg flex items-center justify-center">
@@ -74,8 +87,9 @@ export default function AdvisorDashboard() {
     );
   }
 
-  const completedAssessments = assessments.filter(a => a.status === 'completed');
+  const completedAssessments = assessmentResults;
   const pendingAssessments = assessments.filter(a => a.status === 'sent');
+  const totalAssessments = assessments.length;
 
   return (
     <div className="min-h-screen professional-bg">
@@ -132,7 +146,7 @@ export default function AdvisorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{assessments.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalAssessments}</p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
             </div>
@@ -163,7 +177,7 @@ export default function AdvisorDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Completion Rate</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {assessments.length > 0 ? Math.round((completedAssessments.length / assessments.length) * 100) : 0}%
+                  {totalAssessments > 0 ? Math.round((completedAssessments.length / totalAssessments) * 100) : 0}%
                 </p>
               </div>
               <BarChart3 className="w-8 h-8 text-purple-600" />
@@ -171,11 +185,11 @@ export default function AdvisorDashboard() {
           </div>
         </div>
 
-        {/* Assessments Table */}
+        {/* Assessment Results Table */}
         <div className="modern-card">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Client Assessments</h2>
-            {assessments.length === 0 && (
+            <h2 className="text-xl font-bold text-gray-900">Completed Assessments</h2>
+            {completedAssessments.length === 0 && (
               <Link
                 to="/advisor/share"
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -185,12 +199,12 @@ export default function AdvisorDashboard() {
             )}
           </div>
 
-          {assessments.length === 0 ? (
+          {completedAssessments.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No assessments yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No completed assessments yet</h3>
               <p className="text-gray-600 mb-6">
-                Start by sharing the Money Personality assessment with your clients.
+                Once clients complete their assessments, their results will appear here.
               </p>
               <Link to="/advisor/share" className="btn-primary">
                 <Plus className="w-5 h-5 mr-2" />
@@ -203,14 +217,81 @@ export default function AdvisorDashboard() {
                 <thead className="border-b border-gray-200">
                   <tr>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900">Client</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Sent</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Personality Types</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900">Completed</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {assessments.map((assessment) => (
+                  {completedAssessments.map((result) => (
+                    <tr key={result.id} className="hover:bg-gray-50">
+                      <td className="py-4 px-4">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {result.client_name || 'Anonymous Client'}
+                          </div>
+                          <div className="text-sm text-gray-600">{result.client_email}</div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex flex-wrap gap-1">
+                          {result.profile?.personalities?.slice(0, 2).map((personality: string, idx: number) => (
+                            <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {personality}
+                            </span>
+                          ))}
+                          {result.profile?.personalities?.length > 2 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              +{result.profile.personalities.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          {new Date(result.completed_at).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleViewResults(result.assessment_id)}
+                            className="text-blue-600 hover:text-blue-700 p-1"
+                            title="View Results"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Pending Assessments Section */}
+        {pendingAssessments.length > 0 && (
+          <div className="modern-card mt-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Pending Assessments</h2>
+              <span className="text-sm text-gray-500">{pendingAssessments.length} waiting for completion</span>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-gray-200">
+                  <tr>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Client</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Sent</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {pendingAssessments.map((assessment) => (
                     <tr key={assessment.id} className="hover:bg-gray-50">
                       <td className="py-4 px-4">
                         <div>
@@ -221,22 +302,9 @@ export default function AdvisorDashboard() {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          assessment.status === 'completed' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {assessment.status === 'completed' ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Completed
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="w-3 h-3 mr-1" />
-                              Pending
-                            </>
-                          )}
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Pending
                         </span>
                       </td>
                       <td className="py-4 px-4 text-sm text-gray-600">
@@ -245,38 +313,18 @@ export default function AdvisorDashboard() {
                           {new Date(assessment.sentAt).toLocaleDateString()}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
-                        {assessment.completedAt ? (
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            {new Date(assessment.completedAt).toLocaleDateString()}
-                          </div>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center space-x-2">
-                          {assessment.status === 'completed' ? (
-                            <button
-                              onClick={() => window.open(`/dashboard?advisor=${assessment.id}`, '_blank')}
-                              className="text-blue-600 hover:text-blue-700 p-1"
-                              title="View Results"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(assessment.assessmentLink);
-                                alert('Assessment link copied to clipboard!');
-                              }}
-                              className="text-gray-600 hover:text-gray-700 p-1"
-                              title="Copy Link"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(assessment.assessmentLink);
+                              alert('Assessment link copied to clipboard!');
+                            }}
+                            className="text-gray-600 hover:text-gray-700 p-1"
+                            title="Copy Link"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -284,8 +332,8 @@ export default function AdvisorDashboard() {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

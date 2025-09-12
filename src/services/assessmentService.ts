@@ -1,6 +1,7 @@
 import { AdvisorAssessment, Profile } from '../types';
 import { EmailService } from './emailService';
 import { AuthService } from './authService';
+import { supabase } from '../lib/supabase';
 
 export class AssessmentService {
   private static readonly STORAGE_KEY = 'advisor_assessments';
@@ -81,6 +82,27 @@ export class AssessmentService {
 
       console.log('✅ Found assessment:', assessment);
       
+      // Save results to Supabase database
+      const assessmentAnswers = JSON.parse(localStorage.getItem('assessmentAnswers') || '[]');
+      
+      const { error: dbError } = await supabase
+        .from('assessment_results')
+        .insert({
+          assessment_id: assessmentId,
+          advisor_email: assessment.advisorEmail,
+          client_email: assessment.clientEmail,
+          client_name: assessment.clientName,
+          answers: assessmentAnswers,
+          profile: results
+        });
+
+      if (dbError) {
+        console.error('❌ Failed to save assessment results to database:', dbError);
+        throw new Error(`Failed to save results: ${dbError.message}`);
+      }
+
+      console.log('✅ Assessment results saved to database');
+      
       // Update assessment with results
       const updatedAssessment: AdvisorAssessment = {
         ...assessment,
@@ -130,6 +152,45 @@ export class AssessmentService {
     }
   }
 
+  static async getAssessmentResultsForAdvisor(advisorEmail: string): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('advisor_email', advisorEmail)
+        .order('completed_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching assessment results:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error getting assessment results for advisor:', error);
+      return [];
+    }
+  }
+
+  static async getAssessmentResult(assessmentId: string): Promise<any | null> {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('assessment_id', assessmentId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching assessment result:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error getting assessment result:', error);
+      return null;
+    }
+  }
   static getAssessment(assessmentId: string): AdvisorAssessment | null {
     try {
       const assessments = this.getAllAssessments();

@@ -111,8 +111,8 @@ export class EmailService {
             </ul>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${window.location.origin}/advisor-portal" style="background-color: #22c55e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                View Results
+              <a href="${window.location.origin}/advisor/dashboard" style="background-color: #22c55e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                View Dashboard
               </a>
             </div>
             

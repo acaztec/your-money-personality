@@ -42,6 +42,41 @@ export type Database = {
           updated_at?: string
         }
       }
+      assessment_results: {
+        Row: {
+          id: string
+          assessment_id: string
+          advisor_email: string
+          client_email: string
+          client_name: string | null
+          answers: any
+          profile: any
+          completed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          assessment_id: string
+          advisor_email: string
+          client_email: string
+          client_name?: string | null
+          answers: any
+          profile: any
+          completed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          assessment_id?: string
+          advisor_email?: string
+          client_email?: string
+          client_name?: string | null
+          answers?: any
+          profile?: any
+          completed_at?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

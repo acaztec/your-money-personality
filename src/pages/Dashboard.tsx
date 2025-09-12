@@ -35,20 +35,47 @@ export default function Dashboard() {
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
+    const advisorId = searchParams.get('advisor');
+    
+    if (advisorId) {
+      // This is an advisor viewing results - load from database
+      loadAssessmentResultFromDatabase(advisorId);
+    } else {
+      // This is a regular user viewing their own results - load from localStorage
+      loadUserProfileFromStorage();
+    }
+  }, [navigate, searchParams]);
+
+  const loadAssessmentResultFromDatabase = async (assessmentId: string) => {
+    try {
+      const result = await AssessmentService.getAssessmentResult(assessmentId);
+      if (result) {
+        setProfile(result.profile);
+        setIsAdvisorAssessment(true);
+        
+        // Get advisor info from the local assessment data
+        const assessment = AssessmentService.getAssessment(assessmentId);
+        if (assessment) {
+          setAdvisorInfo({
+            name: assessment.advisorName,
+            email: assessment.advisorEmail
+          });
+        }
+      } else {
+        navigate('/');
+        return;
+      }
+    } catch (error) {
+      console.error('Error loading assessment result:', error);
+      navigate('/');
+      return;
+    }
+    setLoading(false);
+  };
+
+  const loadUserProfileFromStorage = () => {
     const savedProfile = localStorage.getItem('userProfile');
     const savedSummary = localStorage.getItem('advisorSummary');
-    
-    const advisorId = searchParams.get('advisor');
-    if (advisorId) {
-      const assessment = AssessmentService.getAssessment(advisorId);
-      if (assessment) {
-        setIsAdvisorAssessment(true);
-        setAdvisorInfo({
-          name: assessment.advisorName,
-          email: assessment.advisorEmail
-        });
-      }
-    }
     
     if (!savedProfile) {
       navigate('/');
@@ -65,7 +92,7 @@ export default function Dashboard() {
       navigate('/');
       return;
     }
-  }, [navigate, searchParams]);
+  };
 
   if (loading) {
     return (
