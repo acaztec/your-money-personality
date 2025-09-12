@@ -45,28 +45,36 @@ export default function Assessment() {
       try {
         const profile = calculateProfile(answers);
         
+        // ALWAYS save user profile first
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+        localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
+        
+        // If this is an advisor assessment, update the status
         if (advisorAssessmentId) {
+          console.log('Completing advisor assessment:', advisorAssessmentId);
           const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
           
           if (!completed) {
-            throw new Error('Failed to mark assessment as completed');
+            console.error('Failed to mark assessment as completed, but continuing...');
           }
+        } else {
+          console.log('No advisor assessment ID - individual assessment');
         }
         
+        // Generate advisor summary for non-advisor assessments
         let advisorSummary = '';
         if (!advisorAssessmentId) {
+          console.log('Generating AI advisor summary...');
           advisorSummary = await generateAdvisorSummary(profile, answers);
-        }
-        
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-        if (advisorSummary) {
-          localStorage.setItem('advisorSummary', advisorSummary);
+          if (advisorSummary) {
+            localStorage.setItem('advisorSummary', advisorSummary);
+          }
         }
         
         // Small delay to ensure storage events fire
         setTimeout(() => navigate('/dashboard'), 100);
       } catch (error) {
+        console.error('Assessment completion error:', error);
         // Fallback - still save user profile even if advisor notification fails
         const profile = calculateProfile(answers);        
         localStorage.setItem('userProfile', JSON.stringify(profile));

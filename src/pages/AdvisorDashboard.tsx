@@ -36,12 +36,24 @@ export default function AdvisorDashboard() {
   useEffect(() => {
     // Listen for storage changes to refresh assessments
     const handleStorageChange = (e: StorageEvent) => {
+      console.log('📡 Storage event detected:', e.key);
       if (e.key === 'advisor_assessments') {
+        console.log('🔄 Refreshing assessments due to storage change');
         loadAssessments();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom storage events (for same-window updates)
+    const handleCustomStorageChange = () => {
+      console.log('🔄 Custom storage event - refreshing assessments');
+      loadAssessments();
+    };
+    
+    window.addEventListener('localStorageUpdate', handleCustomStorageChange);
+    
+      window.removeEventListener('localStorageUpdate', handleCustomStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [advisor]);
 

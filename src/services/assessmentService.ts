@@ -71,11 +71,16 @@ export class AssessmentService {
     results: Profile
   ): Promise<boolean> {
     try {
+      console.log('🔄 Starting assessment completion for ID:', assessmentId);
+      
       const assessment = this.getAssessment(assessmentId);
       if (!assessment) {
+        console.error('❌ Assessment not found:', assessmentId);
         throw new Error(`Assessment not found: ${assessmentId}`);
       }
 
+      console.log('✅ Found assessment:', assessment);
+      
       // Update assessment with results
       const updatedAssessment: AdvisorAssessment = {
         ...assessment,
@@ -84,27 +89,40 @@ export class AssessmentService {
         results
       };
 
+      console.log('💾 Saving updated assessment:', updatedAssessment);
       this.saveAssessment(updatedAssessment);
       
+      // Verify the save worked
+      const savedAssessment = this.getAssessment(assessmentId);
+      console.log('🔍 Verification - saved assessment:', savedAssessment);
+      
       // Force a storage event to trigger dashboard refresh
+      console.log('📡 Dispatching storage event for dashboard refresh');
       window.dispatchEvent(new StorageEvent('storage', {
         key: this.STORAGE_KEY,
         newValue: localStorage.getItem(this.STORAGE_KEY),
         storageArea: localStorage
       }));
+      
+      // Also dispatch a custom event for same-window updates
+      window.dispatchEvent(new CustomEvent('localStorageUpdate'));
 
       // Send completion notification to advisor
       try {
+        console.log('📧 Sending completion notification to advisor:', assessment.advisorEmail);
         await EmailService.sendCompletionNotification(
           assessment.advisorEmail,
           assessment.advisorName,
           assessment.clientEmail,
           assessment.clientName
         );
+        console.log('✅ Email notification sent successfully');
       } catch (emailError) {
+        console.error('❌ Email notification failed (but continuing):', emailError);
         // Don't fail the whole completion if email fails
       }
 
+      console.log('🎉 Assessment completion successful');
       return true;
     } catch (error) {
       console.error('Error completing assessment:', error);
@@ -142,18 +160,23 @@ export class AssessmentService {
       
       if (existingIndex >= 0) {
         assessments[existingIndex] = assessment;
-        console.log('Updated existing assessment at index:', existingIndex);
+        console.log('📝 Updated existing assessment at index:', existingIndex, assessment);
       } else {
         assessments.push(assessment);
-        console.log('Added new assessment, total count:', assessments.length);
+        console.log('➕ Added new assessment, total count:', assessments.length, assessment);
       }
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(assessments));
-      console.log('Saved assessments to localStorage:', assessments);
+      console.log('💾 Saved assessments to localStorage - total:', assessments.length);
       
       // Verify the save worked
       const verified = localStorage.getItem(this.STORAGE_KEY);
-      console.log('Verified localStorage content:', verified);
+      if (verified) {
+        const parsedVerification = JSON.parse(verified);
+        console.log('✅ Save verification successful - count:', parsedVerification.length);
+      } else {
+        console.error('❌ Save verification failed - no data in localStorage');
+      }
     } catch (error) {
       console.error('Error saving assessment:', error);
     }
