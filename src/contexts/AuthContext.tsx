@@ -22,10 +22,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true
+    let timeoutId: NodeJS.Timeout
 
     const restoreSession = async () => {
       try {
+        console.log('Starting session restoration...')
         const currentAdvisor = await AuthService.getCurrentAdvisor()
+        console.log('Current advisor result:', currentAdvisor)
         if (mounted) {
           setAdvisor(currentAdvisor)
         }
@@ -36,10 +39,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } finally {
         if (mounted) {
+          console.log('Session restoration complete, setting isLoading to false')
           setIsLoading(false)
         }
       }
     }
+
+    // Set a timeout to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.log('Auth timeout - forcing isLoading to false')
+        setIsLoading(false)
+      }
+    }, 10000) // 10 second timeout
 
     restoreSession()
 
@@ -68,10 +80,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       console.log('Setting isLoading to false')
       setIsLoading(false)
+      
+      // Clear timeout since we got a definitive result
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     })
 
     return () => {
       mounted = false
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       subscription.unsubscribe()
     }
   }, [])
