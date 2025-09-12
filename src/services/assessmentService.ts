@@ -71,15 +71,11 @@ export class AssessmentService {
     results: Profile
   ): Promise<boolean> {
     try {
-      console.log('Completing assessment:', assessmentId);
       const assessment = this.getAssessment(assessmentId);
       if (!assessment) {
-        console.error('Assessment not found for ID:', assessmentId);
         throw new Error(`Assessment not found: ${assessmentId}`);
       }
 
-      console.log('Found assessment:', assessment);
-      
       // Update assessment with results
       const updatedAssessment: AdvisorAssessment = {
         ...assessment,
@@ -88,12 +84,14 @@ export class AssessmentService {
         results
       };
 
-      console.log('Updating assessment to:', updatedAssessment);
       this.saveAssessment(updatedAssessment);
       
-      // Verify it was saved
-      const savedAssessment = this.getAssessment(assessmentId);
-      console.log('Verified saved assessment:', savedAssessment);
+      // Force a storage event to trigger dashboard refresh
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: this.STORAGE_KEY,
+        newValue: localStorage.getItem(this.STORAGE_KEY),
+        storageArea: localStorage
+      }));
 
       // Send completion notification to advisor
       try {
@@ -103,9 +101,7 @@ export class AssessmentService {
           assessment.clientEmail,
           assessment.clientName
         );
-        console.log('Email notification sent successfully');
       } catch (emailError) {
-        console.warn('Failed to send email notification:', emailError);
         // Don't fail the whole completion if email fails
       }
 

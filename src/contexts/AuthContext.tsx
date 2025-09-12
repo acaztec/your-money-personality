@@ -22,76 +22,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true
-    let timeoutId: NodeJS.Timeout
 
     const restoreSession = async () => {
       try {
-        console.log('Starting session restoration...')
         const currentAdvisor = await AuthService.getCurrentAdvisor()
-        console.log('Current advisor result:', currentAdvisor)
         if (mounted) {
           setAdvisor(currentAdvisor)
+          setIsLoading(false)
         }
       } catch (error) {
-        console.error('Error restoring session:', error)
         if (mounted) {
           setAdvisor(null)
-        }
-      } finally {
-        if (mounted) {
-          console.log('Session restoration complete, setting isLoading to false')
           setIsLoading(false)
         }
       }
     }
 
-    // Set a timeout to prevent infinite loading
-    timeoutId = setTimeout(() => {
-      if (mounted) {
-        console.log('Auth timeout - forcing isLoading to false')
-        setIsLoading(false)
-      }
-    }, 10000) // 10 second timeout
-
     restoreSession()
 
     // Listen for auth state changes
     const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email, 'User ID:', session?.user?.id)
-
       if (session?.user) {
         try {
-          console.log('Attempting to fetch advisor profile for user:', session.user.id)
           const advisor = await AuthService.getAdvisorProfile(session.user.id)
-          console.log('Advisor profile result:', advisor)
           setAdvisor(advisor)
-
-          if (!advisor) {
-            console.warn('No advisor profile found for user:', session.user.id)
-          }
         } catch (error) {
-          console.error('Error getting advisor profile:', error)
           setAdvisor(null)
         }
       } else {
-        console.log('No session, setting advisor to null')
         setAdvisor(null)
       }
 
-      console.log('Setting isLoading to false')
       setIsLoading(false)
-      
-      // Clear timeout since we got a definitive result
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
     })
 
     return () => {
       mounted = false
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
       subscription.unsubscribe()
     }
   }, [])

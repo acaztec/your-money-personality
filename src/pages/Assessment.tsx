@@ -44,21 +44,17 @@ export default function Assessment() {
       
       try {
         const profile = calculateProfile(answers);
-        console.log('Assessment completion - advisorAssessmentId:', advisorAssessmentId);
         
         if (advisorAssessmentId) {
-          console.log('Attempting to complete advisor assessment...');
           const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
-          console.log('Assessment completion result:', completed);
           
           if (!completed) {
-            console.error('Failed to complete assessment!');
+            throw new Error('Failed to mark assessment as completed');
           }
         }
         
         let advisorSummary = '';
         if (!advisorAssessmentId) {
-          console.log('Generating advisor summary for individual user...');
           advisorSummary = await generateAdvisorSummary(profile, answers);
         }
         
@@ -68,20 +64,14 @@ export default function Assessment() {
           localStorage.setItem('advisorSummary', advisorSummary);
         }
         
-        navigate('/dashboard');
+        // Small delay to ensure storage events fire
+        setTimeout(() => navigate('/dashboard'), 100);
       } catch (error) {
-        console.error('Error completing assessment:', error);
-        const profile = calculateProfile(answers);
-        
-        if (advisorAssessmentId) {
-          console.log('Error fallback - attempting to complete assessment anyway...');
-          const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
-          console.log('Fallback completion result:', completed);
-        }
-        
+        // Fallback - still save user profile even if advisor notification fails
+        const profile = calculateProfile(answers);        
         localStorage.setItem('userProfile', JSON.stringify(profile));
         localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-        navigate('/dashboard');
+        setTimeout(() => navigate('/dashboard'), 100);
       }
     }
   };

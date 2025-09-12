@@ -21,14 +21,28 @@ export default function AdvisorDashboard() {
   const [assessments, setAssessments] = useState<AdvisorAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const loadAssessments = () => {
     if (advisor) {
-      console.log('Loading assessments for advisor:', advisor.email);
       const advisorAssessments = AssessmentService.getAssessmentsForAdvisor(advisor.email);
-      console.log('Loaded advisor assessments:', advisorAssessments);
       setAssessments(advisorAssessments);
     }
+  };
+
+  useEffect(() => {
+    loadAssessments();
     setIsLoading(false);
+  }, [advisor]);
+
+  useEffect(() => {
+    // Listen for storage changes to refresh assessments
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'advisor_assessments') {
+        loadAssessments();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [advisor]);
 
   const handleLogout = () => {
