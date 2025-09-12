@@ -23,7 +23,9 @@ export default function AdvisorDashboard() {
 
   useEffect(() => {
     if (advisor) {
+      console.log('Loading assessments for advisor:', advisor.email);
       const advisorAssessments = AssessmentService.getAssessmentsForAdvisor(advisor.email);
+      console.log('Loaded advisor assessments:', advisorAssessments);
       setAssessments(advisorAssessments);
     }
     setIsLoading(false);

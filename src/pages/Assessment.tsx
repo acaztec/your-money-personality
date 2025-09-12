@@ -44,13 +44,21 @@ export default function Assessment() {
       
       try {
         const profile = calculateProfile(answers);
+        console.log('Assessment completion - advisorAssessmentId:', advisorAssessmentId);
         
         if (advisorAssessmentId) {
-          await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+          console.log('Attempting to complete advisor assessment...');
+          const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+          console.log('Assessment completion result:', completed);
+          
+          if (!completed) {
+            console.error('Failed to complete assessment!');
+          }
         }
         
         let advisorSummary = '';
         if (!advisorAssessmentId) {
+          console.log('Generating advisor summary for individual user...');
           advisorSummary = await generateAdvisorSummary(profile, answers);
         }
         
@@ -66,7 +74,9 @@ export default function Assessment() {
         const profile = calculateProfile(answers);
         
         if (advisorAssessmentId) {
-          await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+          console.log('Error fallback - attempting to complete assessment anyway...');
+          const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+          console.log('Fallback completion result:', completed);
         }
         
         localStorage.setItem('userProfile', JSON.stringify(profile));

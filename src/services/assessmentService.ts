@@ -71,11 +71,15 @@ export class AssessmentService {
     results: Profile
   ): Promise<boolean> {
     try {
+      console.log('Completing assessment:', assessmentId);
       const assessment = this.getAssessment(assessmentId);
       if (!assessment) {
-        throw new Error('Assessment not found');
+        console.error('Assessment not found for ID:', assessmentId);
+        throw new Error(`Assessment not found: ${assessmentId}`);
       }
 
+      console.log('Found assessment:', assessment);
+      
       // Update assessment with results
       const updatedAssessment: AdvisorAssessment = {
         ...assessment,
@@ -84,15 +88,26 @@ export class AssessmentService {
         results
       };
 
+      console.log('Updating assessment to:', updatedAssessment);
       this.saveAssessment(updatedAssessment);
+      
+      // Verify it was saved
+      const savedAssessment = this.getAssessment(assessmentId);
+      console.log('Verified saved assessment:', savedAssessment);
 
       // Send completion notification to advisor
-      await EmailService.sendCompletionNotification(
-        assessment.advisorEmail,
-        assessment.advisorName,
-        assessment.clientEmail,
-        assessment.clientName
-      );
+      try {
+        await EmailService.sendCompletionNotification(
+          assessment.advisorEmail,
+          assessment.advisorName,
+          assessment.clientEmail,
+          assessment.clientName
+        );
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.warn('Failed to send email notification:', emailError);
+        // Don't fail the whole completion if email fails
+      }
 
       return true;
     } catch (error) {
@@ -104,6 +119,7 @@ export class AssessmentService {
   static getAssessment(assessmentId: string): AdvisorAssessment | null {
     try {
       const assessments = this.getAllAssessments();
+      console.log('Looking for assessment ID:', assessmentId, 'in assessments:', assessments.map(a => a.id));
       return assessments.find(a => a.id === assessmentId) || null;
     } catch (error) {
       console.error('Error getting assessment:', error);
@@ -114,7 +130,9 @@ export class AssessmentService {
   static getAllAssessments(): AdvisorAssessment[] {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const assessments = stored ? JSON.parse(stored) : [];
+      console.log('getAllAssessments returning:', assessments);
+      return assessments;
     } catch (error) {
       console.error('Error getting assessments:', error);
       return [];
@@ -128,11 +146,18 @@ export class AssessmentService {
       
       if (existingIndex >= 0) {
         assessments[existingIndex] = assessment;
+        console.log('Updated existing assessment at index:', existingIndex);
       } else {
         assessments.push(assessment);
+        console.log('Added new assessment, total count:', assessments.length);
       }
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(assessments));
+      console.log('Saved assessments to localStorage:', assessments);
+      
+      // Verify the save worked
+      const verified = localStorage.getItem(this.STORAGE_KEY);
+      console.log('Verified localStorage content:', verified);
     } catch (error) {
       console.error('Error saving assessment:', error);
     }
@@ -141,7 +166,11 @@ export class AssessmentService {
   static getAssessmentsForAdvisor(advisorEmail: string): AdvisorAssessment[] {
     try {
       const assessments = this.getAllAssessments();
-      return assessments.filter(a => a.advisorEmail === advisorEmail);
+      console.log('Getting assessments for advisor:', advisorEmail);
+      console.log('All assessments:', assessments);
+      const filtered = assessments.filter(a => a.advisorEmail === advisorEmail);
+      console.log('Filtered assessments for advisor:', filtered);
+      return filtered;
     } catch (error) {
       console.error('Error getting advisor assessments:', error);
       return [];
