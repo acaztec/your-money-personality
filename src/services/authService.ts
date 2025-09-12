@@ -60,6 +60,7 @@ export class AuthService {
   static async signup(data: SignupData): Promise<{ 
     success: boolean
     advisor?: Advisor
+    needsEmailConfirmation?: boolean
     error?: string 
   }> {
     try {
@@ -86,7 +87,8 @@ export class AuthService {
       // Check if email confirmation is required
       if (!authData.session && authData.user && !authData.user.email_confirmed_at) {
         return { 
-          success: false, 
+          success: false,
+          needsEmailConfirmation: true,
           error: 'Please check your email and click the confirmation link before proceeding.' 
         }
       }
@@ -134,6 +136,29 @@ export class AuthService {
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Signup failed' 
+      }
+    }
+  }
+
+  static async resendConfirmationEmail(email: string): Promise<{
+    success: boolean
+    error?: string
+  }> {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email
+      })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to resend email'
       }
     }
   }

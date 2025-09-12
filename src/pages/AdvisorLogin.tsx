@@ -6,12 +6,15 @@ import { User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 export default function AdvisorLogin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signup } = useAuth();
+  const { login, signup, resendConfirmationEmail } = useAuth();
   
   const [isSignup, setIsSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   
   const [formData, setFormData] = useState({
     email: '',
@@ -29,6 +32,7 @@ export default function AdvisorLogin() {
     });
     setError('');
     setSuccess('');
+    setNeedsEmailConfirmation(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +59,10 @@ export default function AdvisorLogin() {
         if (result.success) {
           setSuccess('Account created successfully! Redirecting...');
           setTimeout(() => navigate(from), 1500);
+        } else if (result.needsEmailConfirmation) {
+          setNeedsEmailConfirmation(true);
+          setPendingEmail(formData.email);
+          setError(result.error || 'Email confirmation required');
         } else {
           setError(result.error || 'Signup failed');
         }
@@ -75,6 +83,22 @@ export default function AdvisorLogin() {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    setError('');
+    setSuccess('');
+
+    const result = await resendConfirmationEmail(pendingEmail);
+    
+    setIsResending(false);
+    
+    if (result.success) {
+      setSuccess('Confirmation email resent! Please check your inbox.');
+    } else {
+      setError(result.error || 'Failed to resend email');
     }
   };
 
@@ -125,6 +149,21 @@ export default function AdvisorLogin() {
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <p className="text-red-800 text-sm">{error}</p>
                 </div>
+                {needsEmailConfirmation && (
+                  <div className="mt-3">
+                    <button
+                      onClick={handleResendEmail}
+                      disabled={isResending}
+                      className={`text-sm font-medium ${
+                        isResending 
+                          ? 'text-gray-500 cursor-not-allowed'
+                          : 'text-blue-600 hover:text-blue-700'
+                      }`}
+                    >
+                      {isResending ? 'Resending...' : 'Resend confirmation email'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -217,14 +256,16 @@ export default function AdvisorLogin() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || needsEmailConfirmation}
                 className={`w-full flex items-center justify-center px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                  isLoading
+                  isLoading || needsEmailConfirmation
                     ? 'bg-gray-400 text-white cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {isLoading ? (
+                {needsEmailConfirmation ? (
+                  'Please confirm your email first'
+                ) : isLoading ? (
                   <>
                     <div className="animate-spin w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
                     {isSignup ? 'Creating Account...' : 'Signing In...'}
@@ -263,7 +304,8 @@ export default function AdvisorLogin() {
             {isSignup && (
               <div className="mt-4 p-4 bg-amber-50 rounded-lg">
                 <p className="text-amber-800 text-sm">
-                  <strong>Note:</strong> If you get an authentication error, please try logging in with your new credentials.
+                  <strong>Email Confirmation:</strong> Check your email for a confirmation link. 
+                  If it expires, use the "Resend" button above.
                 </p>
               </div>
             )}
