@@ -44,12 +44,47 @@ export class AuthService {
 
       // Get advisor profile
       const advisor = await this.getAdvisorProfile(data.user.id)
+      
+      // If no advisor profile exists but user is confirmed, create it from user metadata
+      if (!advisor && data.user.email_confirmed_at) {
+        console.log('Creating missing advisor profile for confirmed user:', data.user.id)
+        
+        const name = data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Advisor'
+        const company = data.user.user_metadata?.company || null
+        
+        const { data: profileData, error: profileError } = await supabase
+          .from('advisor_profiles')
+          .insert({
+            user_id: data.user.id,
+            name: name,
+            company: company
+          })
+          .select()
+          .single()
+        
+        if (!profileError && profileData) {
+          advisor = {
+            id: profileData.id,
+            user_id: profileData.user_id,
+            email: data.user.email!,
+            name: profileData.name,
+            company: profileData.company,
+            created_at: profileData.created_at
+          }
+          console.log('Created advisor profile successfully:', advisor)
+        } else {
+          console.error('Failed to create advisor profile:', profileError)
+          return { success: false, error: 'Failed to create advisor profile' }
+        }
+      }
+      
       if (!advisor) {
-        return { success: false, error: 'Advisor profile not found' }
+        return { success: false, error: 'Advisor profile not found and could not be created' }
       }
 
       return { success: true, advisor }
     } catch (error) {
+      console.error('Login error:', error)
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Login failed' 
@@ -202,6 +237,11 @@ export class AuthService {
       console.log('Advisor profile query result:', { data, error })
 
       if (error || !data) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - this is expected for new users
+          console.log('No advisor profile found (expected for new users)')
+          return null
+        }
         console.log('No advisor profile found or error:', error)
         return null
       }
