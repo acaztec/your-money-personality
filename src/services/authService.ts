@@ -63,7 +63,7 @@ export class AuthService {
     error?: string 
   }> {
     try {
-      // Sign up user
+      // Sign up user - check if email confirmation is required
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -83,11 +83,27 @@ export class AuthService {
         return { success: false, error: 'Signup failed' }
       }
 
-      // Create advisor profile using the newly created user ID
+      // Check if email confirmation is required
+      if (!authData.session && authData.user && !authData.user.email_confirmed_at) {
+        return { 
+          success: false, 
+          error: 'Please check your email and click the confirmation link before proceeding.' 
+        }
+      }
+
+      // If we have a session, the user is immediately available
+      if (!authData.session) {
+        return { 
+          success: false, 
+          error: 'User created but session not available. Please try logging in.' 
+        }
+      }
+
+      // Create advisor profile using the authenticated user ID
       const { data: profileData, error: profileError } = await supabase
         .from('advisor_profiles')
         .insert({
-          user_id: authData.user.id,
+          user_id: authData.session.user.id,
           name: data.name,
           company: data.company || null
         })
@@ -96,13 +112,17 @@ export class AuthService {
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
-        return { success: false, error: profileError.message }
+        // Handle foreign key constraint specifically
+        if (profileError.code === '23503') {
+          return { success: false, error: 'User authentication incomplete. Please try logging in instead.' }
+        }
+        return { success: false, error: `Profile creation failed: ${profileError.message}` }
       }
 
       const advisor: Advisor = {
         id: profileData.id,
         user_id: profileData.user_id,
-        email: authData.user.email!,
+        email: authData.session.user.email!,
         name: profileData.name,
         company: profileData.company,
         created_at: profileData.created_at

@@ -273,6 +273,12 @@ export default function AdvisorLogin() {
                 <strong>Demo Account:</strong> For testing, you can use email <code>test@advisor.com</code> with password <code>password123</code>
               </p>
             </div>
+
+            <div className="mt-4 p-4 bg-amber-50 rounded-lg">
+              <p className="text-amber-800 text-sm">
+                <strong>Important:</strong> Make sure email confirmations are disabled in your Supabase project settings for seamless signup, or check your email for confirmation if enabled.
+              </p>
+            </div>
           </div>
         </div>
       </div>
