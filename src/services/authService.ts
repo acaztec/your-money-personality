@@ -250,14 +250,7 @@ export class AuthService {
   }
 
   // Listen to auth state changes
-  static onAuthStateChange(callback: (advisor: Advisor | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const advisor = await this.getAdvisorProfile(session.user.id)
-        callback(advisor)
-      } else {
-        callback(null)
-      }
-    })
+  static onAuthStateChange(callback: (event: any, session: any) => void) {
+    return supabase.auth.onAuthStateChange(callback)
   }
 }

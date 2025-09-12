@@ -22,23 +22,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check initial auth state
-    const initAuth = async () => {
-      try {
-        const currentAdvisor = await AuthService.getCurrentAdvisor()
-        setAdvisor(currentAdvisor)
-      } catch (error) {
-        console.error('Error checking auth state:', error)
-      } finally {
-        setIsLoading(false)
+    // Listen for auth state changes first - this handles initial session restoration
+    const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email)
+      
+      if (session?.user) {
+        try {
+          const advisor = await AuthService.getAdvisorProfile(session.user.id)
+          setAdvisor(advisor)
+        } catch (error) {
+          console.error('Error getting advisor profile:', error)
+          setAdvisor(null)
+        }
+      } else {
+        setAdvisor(null)
       }
-    }
-
-    initAuth()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = AuthService.onAuthStateChange((advisor) => {
-      setAdvisor(advisor)
+      
       setIsLoading(false)
     })
 
