@@ -96,6 +96,8 @@ export default function Assessment() {
         });
       }
     }
+  }, [searchParams]);
+  */
 
   const handleAnswerChange = (value: number) => {
     const newAnswers = [...answers];
