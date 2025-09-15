@@ -7,6 +7,7 @@ export class EmailService {
     advisorName: string,
     advisorEmail: string,
     clientEmail: string,
+    assessmentLink: string,
     clientName?: string,
   ): Promise<boolean> {
     try {

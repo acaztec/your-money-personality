@@ -150,6 +150,7 @@ export class AssessmentService {
         advisorEmail,
         clientEmail,
         assessmentLink,
+        assessmentLink,
         clientName
       );
 
