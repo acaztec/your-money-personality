@@ -221,7 +221,6 @@ export default function Assessment() {
               </p>
               {friendInfo.personalNote && (
                 <p className="text-emerald-700 text-sm italic">{friendInfo.personalNote}</p>
-              </p>
               )}
             </div>
           </div>
