@@ -111,6 +111,10 @@ export default function Dashboard() {
       const result = await AssessmentService.getAssessmentResult(assessmentId);
       if (result) {
         setProfile(result.profile);
+        // Set advisor summary from database result for advisor assessments
+        if (result.advisor_summary) {
+          setAdvisorSummary(result.advisor_summary);
+        }
         setIsAdvisorAssessment(true);
         
         // Get advisor info from the local assessment data
@@ -456,10 +460,10 @@ export default function Dashboard() {
   }
 
   // Add AI advisor summary chapter
-  if (!isAdvisorAssessment && advisorSummary) {
+  if (advisorSummary) {
     chapters.push({
       id: chapters.length + 1,
-      title: 'AI Advisor Insights',
+      title: isAdvisorAssessment ? 'AI Advisor Summary' : 'AI Advisor Insights',
       icon: Brain,
       content: (
         <div className="space-y-8">
@@ -467,9 +471,14 @@ export default function Dashboard() {
             <div className="w-24 h-24 mx-auto morph-shape bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
               <Brain className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">AI Financial Advisor Summary</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              {isAdvisorAssessment ? 'AI Advisor Summary' : 'AI Financial Advisor Summary'}
+            </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Professional insights for your financial advisor based on your personality assessment
+              {isAdvisorAssessment 
+                ? 'Professional insights about this client based on their personality assessment'
+                : 'Professional insights for your financial advisor based on your personality assessment'
+              }
             </p>
           </div>
 
