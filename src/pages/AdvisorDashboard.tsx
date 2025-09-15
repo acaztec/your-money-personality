@@ -13,7 +13,8 @@ import {
   BarChart3, 
   Calendar,
   ExternalLink,
-  LogOut
+  LogOut,
+  Trash2
 } from 'lucide-react';
 
 export default function AdvisorDashboard() {
@@ -21,6 +22,13 @@ export default function AdvisorDashboard() {
   const [assessments, setAssessments] = useState<AdvisorAssessment[]>([]);
   const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; assessmentId: string; clientName?: string }>({
+    isOpen: false,
+    assessmentId: '',
+    clientName: ''
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const loadAssessments = () => {
     // Keep the localStorage version for now, but we could switch to database version
@@ -74,6 +82,40 @@ export default function AdvisorDashboard() {
 
   const handleViewResults = (assessmentId: string) => {
     window.open(`/dashboard?advisor=${assessmentId}`, '_blank');
+  };
+
+  const handleDeleteClick = (assessmentId: string, clientName?: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      assessmentId,
+      clientName
+    });
+    setDeleteError('');
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm.assessmentId) return;
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    const result = await AssessmentService.deleteAssessment(deleteConfirm.assessmentId);
+    
+    setIsDeleting(false);
+    
+    if (result.success) {
+      // Reload data after successful deletion
+      loadAssessments();
+      loadAssessmentResults();
+      setDeleteConfirm({ isOpen: false, assessmentId: '', clientName: '' });
+    } else {
+      setDeleteError(result.error || 'Failed to delete assessment');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ isOpen: false, assessmentId: '', clientName: '' });
+    setDeleteError('');
   };
   if (isLoading) {
     return (
@@ -263,6 +305,13 @@ export default function AdvisorDashboard() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(result.assessment_id, result.client_name)}
+                            className="text-red-600 hover:text-red-700 p-1"
+                            title="Delete Assessment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -326,6 +375,13 @@ export default function AdvisorDashboard() {
                           >
                             <ExternalLink className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(assessment.id, assessment.clientName)}
+                            className="text-red-600 hover:text-red-700 p-1"
+                            title="Delete Assessment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -336,6 +392,64 @@ export default function AdvisorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Delete Assessment</h3>
+                  <p className="text-sm text-gray-600">This action cannot be undone</p>
+                </div>
+              </div>
+
+              <p className="text-gray-700 mb-6">
+                Are you sure you want to delete the assessment for{' '}
+                <strong>{deleteConfirm.clientName || 'this client'}</strong>? This will permanently 
+                remove all assessment data and results.
+              </p>
+
+              {deleteError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 text-sm">{deleteError}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center space-x-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

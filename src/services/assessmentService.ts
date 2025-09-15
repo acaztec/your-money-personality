@@ -383,6 +383,53 @@ export class AssessmentService {
     }
   }
 
+  static async deleteAssessment(assessmentId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Delete from database first - assessment results
+      const { error: resultsError } = await supabase
+        .from('assessment_results')
+        .delete()
+        .eq('assessment_id', assessmentId);
+
+      if (resultsError) {
+        console.error('Failed to delete assessment results:', resultsError);
+        // Don't fail completely if this doesn't exist
+      }
+
+      // Delete from database - advisor assessments
+      const { error: assessmentError } = await supabase
+        .from('advisor_assessments')
+        .delete()
+        .eq('id', assessmentId);
+
+      if (assessmentError) {
+        console.error('Failed to delete advisor assessment:', assessmentError);
+        // Don't fail completely if this doesn't exist
+      }
+
+      // Delete from localStorage for backward compatibility
+      const assessments = this.getAllAssessments();
+      const filteredAssessments = assessments.filter(a => a.id !== assessmentId);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredAssessments));
+
+      // Trigger storage events to update UI
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: this.STORAGE_KEY,
+        newValue: localStorage.getItem(this.STORAGE_KEY),
+        storageArea: localStorage
+      }));
+      window.dispatchEvent(new CustomEvent('localStorageUpdate'));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting assessment:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to delete assessment' 
+      };
+    }
+  }
+
   // Update method to get assessments for advisor dashboard
   static async getAssessmentsForAdvisorFromDatabase(advisorEmail: string): Promise<DatabaseAdvisorAssessment[]> {
     try {
