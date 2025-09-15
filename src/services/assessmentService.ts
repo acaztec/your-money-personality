@@ -1,10 +1,13 @@
-import { AdvisorAssessment, Profile } from '../types';
+import { AdvisorAssessment, FriendAssessmentShare, Profile } from '../types';
 import { EmailService } from './emailService';
 import { AuthService } from './authService';
 import { supabase } from '../lib/supabase';
+import { getOrCreateUserId } from '../utils/userIdentity';
+import { generateCompatibilityInsights } from '../utils/compatibilityInsights';
 
 export class AssessmentService {
   private static readonly STORAGE_KEY = 'advisor_assessments';
+  private static readonly FRIEND_STORAGE_KEY = 'friend_assessments';
 
   static generateAssessmentId(): string {
     return 'assess_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -12,6 +15,72 @@ export class AssessmentService {
 
   static generateAssessmentLink(assessmentId: string): string {
     return `${window.location.origin}/assessment?advisor=${assessmentId}`;
+  }
+
+  static generateFriendAssessmentId(): string {
+    return 'friend_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+  }
+
+  static generateFriendAssessmentLink(assessmentId: string): string {
+    return `${window.location.origin}/assessment?share=${assessmentId}`;
+  }
+
+  static async shareAssessmentWithFriend(
+    sharerName: string,
+    sharerEmail: string,
+    recipientEmail: string,
+    relationship: string,
+    sharerProfile: Profile,
+    personalNote?: string,
+    recipientName?: string
+  ): Promise<{ success: boolean; shareId?: string; error?: string }> {
+    try {
+      if (!sharerProfile) {
+        return { success: false, error: 'Your profile is required before sharing the assessment.' };
+      }
+
+      const sharerId = getOrCreateUserId();
+      const shareId = this.generateFriendAssessmentId();
+      const assessmentLink = this.generateFriendAssessmentLink(shareId);
+
+      const share: FriendAssessmentShare = {
+        id: shareId,
+        sharerId,
+        sharerName,
+        sharerEmail,
+        recipientEmail,
+        recipientName,
+        relationship,
+        personalNote,
+        status: 'sent',
+        sentAt: new Date(),
+        assessmentLink,
+        sharerProfile
+      };
+
+      this.saveFriendAssessment(share);
+
+      const emailSent = await EmailService.sendFriendAssessmentInvitation(
+        sharerName,
+        sharerEmail,
+        recipientEmail,
+        assessmentLink,
+        relationship,
+        personalNote
+      );
+
+      if (!emailSent) {
+        throw new Error('Failed to send invitation email');
+      }
+
+      return { success: true, shareId };
+    } catch (error) {
+      console.error('Error sharing assessment with friend:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
   }
 
   static async shareAssessment(
@@ -152,6 +221,53 @@ export class AssessmentService {
     }
   }
 
+  static async completeFriendAssessment(
+    assessmentId: string,
+    results: Profile
+  ): Promise<boolean> {
+    try {
+      const share = this.getFriendAssessment(assessmentId);
+      if (!share) {
+        throw new Error('Shared assessment not found');
+      }
+
+      const compatibility = generateCompatibilityInsights(share.sharerProfile, results);
+
+      const updatedShare: FriendAssessmentShare = {
+        ...share,
+        status: 'completed',
+        completedAt: new Date(),
+        recipientProfile: results,
+        compatibility
+      };
+
+      this.saveFriendAssessment(updatedShare);
+
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: this.FRIEND_STORAGE_KEY,
+        newValue: localStorage.getItem(this.FRIEND_STORAGE_KEY),
+        storageArea: localStorage
+      }));
+      window.dispatchEvent(new CustomEvent('localStorageUpdate'));
+
+      try {
+        await EmailService.sendFriendCompletionNotification(
+          share.sharerEmail,
+          share.sharerName,
+          share.recipientEmail,
+          compatibility
+        );
+      } catch (error) {
+        console.error('Error sending friend completion notification:', error);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error completing friend assessment:', error);
+      return false;
+    }
+  }
+
   static async getAssessmentResultsForAdvisor(advisorEmail: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
@@ -214,6 +330,21 @@ export class AssessmentService {
     }
   }
 
+  private static getAllFriendAssessments(): FriendAssessmentShare[] {
+    try {
+      const stored = localStorage.getItem(this.FRIEND_STORAGE_KEY);
+      const assessments = stored ? JSON.parse(stored) : [];
+      return assessments.map((assessment: FriendAssessmentShare) => ({
+        ...assessment,
+        sentAt: assessment.sentAt ? new Date(assessment.sentAt) : undefined,
+        completedAt: assessment.completedAt ? new Date(assessment.completedAt) : undefined
+      }));
+    } catch (error) {
+      console.error('Error getting friend assessments:', error);
+      return [];
+    }
+  }
+
   static saveAssessment(assessment: AdvisorAssessment): void {
     try {
       const assessments = this.getAllAssessments();
@@ -243,6 +374,23 @@ export class AssessmentService {
     }
   }
 
+  private static saveFriendAssessment(assessment: FriendAssessmentShare): void {
+    try {
+      const assessments = this.getAllFriendAssessments();
+      const existingIndex = assessments.findIndex(a => a.id === assessment.id);
+
+      if (existingIndex >= 0) {
+        assessments[existingIndex] = assessment;
+      } else {
+        assessments.push(assessment);
+      }
+
+      localStorage.setItem(this.FRIEND_STORAGE_KEY, JSON.stringify(assessments));
+    } catch (error) {
+      console.error('Error saving friend assessment:', error);
+    }
+  }
+
   static getAssessmentsForAdvisor(advisorEmail: string): AdvisorAssessment[] {
     try {
       const assessments = this.getAllAssessments();
@@ -254,6 +402,27 @@ export class AssessmentService {
     } catch (error) {
       console.error('Error getting advisor assessments:', error);
       return [];
+    }
+  }
+
+  static getFriendAssessmentsForUser(): FriendAssessmentShare[] {
+    try {
+      const sharerId = getOrCreateUserId();
+      const assessments = this.getAllFriendAssessments();
+      return assessments.filter(a => a.sharerId === sharerId);
+    } catch (error) {
+      console.error('Error getting friend assessments for user:', error);
+      return [];
+    }
+  }
+
+  static getFriendAssessment(assessmentId: string): FriendAssessmentShare | null {
+    try {
+      const assessments = this.getAllFriendAssessments();
+      return assessments.find(a => a.id === assessmentId) || null;
+    } catch (error) {
+      console.error('Error getting friend assessment:', error);
+      return null;
     }
   }
 }
