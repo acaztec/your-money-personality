@@ -1,7 +1,7 @@
 import { Profile } from '../types';
 
 // Question to category mapping based on the algorithm
-const QUESTION_CATEGORIES = {
+export const QUESTION_CATEGORIES = {
   // Focus questions (1-6)
   1: 'Focus', 2: 'Focus', 3: 'Focus', 4: 'Focus', 5: 'Focus', 6: 'Focus',
   // Emotions questions (7-15)
@@ -568,6 +568,7 @@ export function calculateProfile(answers: number[]): Profile {
     riskTolerance: 0, // Legacy field
     personalities: personalities,
     personalityScores: categorySums,
-    personalityData: personalityData
+    personalityData: personalityData,
+    descriptions: personalityData.map(data => data?.description || '')
   };
 }
