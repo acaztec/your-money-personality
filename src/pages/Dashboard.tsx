@@ -474,8 +474,13 @@ export default function Dashboard() {
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               {isAdvisorAssessment ? 'AI Advisor Summary' : 'AI Financial Advisor Summary'}
             </h2>
+              {isAdvisorAssessment ? 'AI Advisor Summary' : 'AI Financial Advisor Summary'}
+            </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {isAdvisorAssessment 
+                ? 'Professional insights about this client based on their personality assessment'
+                : 'Professional insights for your financial advisor based on your personality assessment'
+              }
                 ? 'Professional insights about this client based on their personality assessment'
                 : 'Professional insights for your financial advisor based on your personality assessment'
               }

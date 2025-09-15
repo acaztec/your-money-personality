@@ -8,7 +8,7 @@ export class EmailService {
     advisorEmail: string,
     clientEmail: string,
     clientName?: string,
-    assessmentLink: string,
+    clientName?: string,
   ): Promise<boolean> {
     try {
       const clientDisplayName = clientName || 'there';
@@ -179,7 +179,7 @@ export class EmailService {
             <p>The assessment only takes about 10 minutes. Once you are finished, you'll both receive a compatibility breakdown that highlights strengths, watch-outs, and conversation starters tailored to your results.</p>
 
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${assessmentLink}" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+              <a href="${assessmentLink}" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; text-align: center;">
                 Take Assessment Now
               </a>
             </div>
