@@ -26,6 +26,56 @@ export default function Assessment() {
     const advisorId = searchParams.get('advisor');
     const friendId = searchParams.get('share');
 
+    const loadAssessmentInfo = async () => {
+      if (advisorId) {
+        console.log('🔍 Looking up advisor assessment:', advisorId);
+        
+        // Try to get assessment from database first
+        const assessment = await AssessmentService.getAssessmentFromDatabase(advisorId);
+        if (assessment) {
+          console.log('✅ Found assessment in database:', assessment);
+          setAdvisorAssessmentId(advisorId);
+          setAdvisorInfo({
+            name: assessment.advisor_name,
+            email: assessment.advisor_email
+          });
+        } else {
+          console.log('❌ Assessment not found in database, checking localStorage...');
+          // Fall back to localStorage for backward compatibility
+          const localAssessment = AssessmentService.getAssessment(advisorId);
+          if (localAssessment) {
+            console.log('✅ Found assessment in localStorage:', localAssessment);
+            setAdvisorAssessmentId(advisorId);
+            setAdvisorInfo({
+              name: localAssessment.advisorName,
+              email: localAssessment.advisorEmail
+            });
+          } else {
+            console.log('❌ Assessment not found anywhere');
+          }
+        }
+      } else if (friendId) {
+        const share = AssessmentService.getFriendAssessment(friendId);
+        if (share) {
+          setFriendAssessmentId(friendId);
+          setFriendInfo({
+            sharerName: share.sharerName,
+            relationship: share.relationship,
+            personalNote: share.personalNote
+          });
+        }
+      }
+    };
+
+    loadAssessmentInfo();
+  }, [searchParams]);
+
+  // Remove the old useEffect and replace with the above
+  /* 
+  useEffect(() => {
+    const advisorId = searchParams.get('advisor');
+    const friendId = searchParams.get('share');
+
     if (advisorId) {
       const assessment = AssessmentService.getAssessment(advisorId);
       if (assessment) {
@@ -46,7 +96,6 @@ export default function Assessment() {
         });
       }
     }
-  }, [searchParams]);
 
   const handleAnswerChange = (value: number) => {
     const newAnswers = [...answers];

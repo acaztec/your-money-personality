@@ -5,6 +5,18 @@ import { supabase } from '../lib/supabase';
 import { getOrCreateUserId } from '../utils/userIdentity';
 import { generateCompatibilityInsights } from '../utils/compatibilityInsights';
 
+interface DatabaseAdvisorAssessment {
+  id: string;
+  advisor_email: string;
+  advisor_name: string;
+  client_email: string;
+  client_name?: string;
+  status: 'sent' | 'completed';
+  assessment_link: string;
+  sent_at: string;
+  completed_at?: string;
+}
+
 export class AssessmentService {
   private static readonly STORAGE_KEY = 'advisor_assessments';
   private static readonly FRIEND_STORAGE_KEY = 'friend_assessments';
@@ -99,7 +111,26 @@ export class AssessmentService {
       const assessmentId = this.generateAssessmentId();
       const assessmentLink = this.generateAssessmentLink(assessmentId);
 
-      const assessment: AdvisorAssessment = {
+      // Save to database first
+      const { error: dbError } = await supabase
+        .from('advisor_assessments')
+        .insert({
+          id: assessmentId,
+          advisor_email: advisorEmail,
+          advisor_name: advisorName,
+          client_email: clientEmail,
+          client_name: clientName,
+          status: 'sent',
+          assessment_link: assessmentLink
+        });
+
+      if (dbError) {
+        console.error('Failed to save assessment to database:', dbError);
+        throw new Error(`Failed to save assessment: ${dbError.message}`);
+      }
+
+      // Also save to localStorage for backward compatibility
+      const localAssessment: AdvisorAssessment = {
         id: assessmentId,
         advisorName,
         advisorEmail,
@@ -110,8 +141,7 @@ export class AssessmentService {
         assessmentLink
       };
 
-      // Save assessment to storage
-      this.saveAssessment(assessment);
+      this.saveAssessment(localAssessment);
 
       // Send email invitation
       const emailSent = await EmailService.sendAssessmentInvitation(
@@ -143,7 +173,21 @@ export class AssessmentService {
     try {
       console.log('🔄 Starting assessment completion for ID:', assessmentId);
       
-      const assessment = this.getAssessment(assessmentId);
+      // Try to get assessment from database first, then fall back to localStorage
+      let assessment = await this.getAssessmentFromDatabase(assessmentId);
+      if (!assessment) {
+        console.log('Assessment not found in database, checking localStorage...');
+        const localAssessment = this.getAssessment(assessmentId);
+        if (localAssessment) {
+          assessment = {
+            advisor_email: localAssessment.advisorEmail,
+            advisor_name: localAssessment.advisorName,
+            client_email: localAssessment.clientEmail,
+            client_name: localAssessment.clientName
+          };
+        }
+      }
+      
       if (!assessment) {
         console.error('❌ Assessment not found:', assessmentId);
         throw new Error(`Assessment not found: ${assessmentId}`);
@@ -158,9 +202,9 @@ export class AssessmentService {
         .from('assessment_results')
         .insert({
           assessment_id: assessmentId,
-          advisor_email: assessment.advisorEmail,
-          client_email: assessment.clientEmail,
-          client_name: assessment.clientName,
+          advisor_email: assessment.advisor_email,
+          client_email: assessment.client_email,
+          client_name: assessment.client_name,
           answers: assessmentAnswers,
           profile: results
         });
@@ -172,21 +216,32 @@ export class AssessmentService {
 
       console.log('✅ Assessment results saved to database');
       
-      // Update assessment with results
-      const updatedAssessment: AdvisorAssessment = {
-        ...assessment,
-        status: 'completed',
-        completedAt: new Date(),
-        results
-      };
+      // Update assessment status in database
+      const { error: updateError } = await supabase
+        .from('advisor_assessments')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', assessmentId);
 
-      console.log('💾 Saving updated assessment:', updatedAssessment);
-      this.saveAssessment(updatedAssessment);
-      
-      // Verify the save worked
-      const savedAssessment = this.getAssessment(assessmentId);
-      console.log('🔍 Verification - saved assessment:', savedAssessment);
-      
+      if (updateError) {
+        console.error('❌ Failed to update assessment status:', updateError);
+        // Don't fail the whole operation for this
+      }
+
+      // Also update localStorage for backward compatibility
+      const localAssessment = this.getAssessment(assessmentId);
+      if (localAssessment) {
+        const updatedAssessment: AdvisorAssessment = {
+          ...localAssessment,
+          status: 'completed',
+          completedAt: new Date(),
+          results
+        };
+        this.saveAssessment(updatedAssessment);
+      }
+
       // Force a storage event to trigger dashboard refresh
       console.log('📡 Dispatching storage event for dashboard refresh');
       window.dispatchEvent(new StorageEvent('storage', {
@@ -200,12 +255,12 @@ export class AssessmentService {
 
       // Send completion notification to advisor
       try {
-        console.log('📧 Sending completion notification to advisor:', assessment.advisorEmail);
+        console.log('📧 Sending completion notification to advisor:', assessment.advisor_email);
         await EmailService.sendCompletionNotification(
-          assessment.advisorEmail,
-          assessment.advisorName,
-          assessment.clientEmail,
-          assessment.clientName
+          assessment.advisor_email,
+          assessment.advisor_name,
+          assessment.client_email,
+          assessment.client_name
         );
         console.log('✅ Email notification sent successfully');
       } catch (emailError) {
@@ -284,6 +339,53 @@ export class AssessmentService {
       return data || [];
     } catch (error) {
       console.error('Error getting assessment results for advisor:', error);
+      return [];
+    }
+  }
+
+  // New method to get assessment from database
+  static async getAssessmentFromDatabase(assessmentId: string): Promise<{
+    advisor_email: string;
+    advisor_name: string;
+    client_email: string;
+    client_name?: string;
+  } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('advisor_assessments')
+        .select('advisor_email, advisor_name, client_email, client_name')
+        .eq('id', assessmentId)
+        .single();
+
+      if (error || !data) {
+        console.log('Assessment not found in database:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error getting assessment from database:', error);
+      return null;
+    }
+  }
+
+  // Update method to get assessments for advisor dashboard
+  static async getAssessmentsForAdvisorFromDatabase(advisorEmail: string): Promise<DatabaseAdvisorAssessment[]> {
+    try {
+      const { data, error } = await supabase
+        .from('advisor_assessments')
+        .select('*')
+        .eq('advisor_email', advisorEmail)
+        .order('sent_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching advisor assessments:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error getting advisor assessments from database:', error);
       return [];
     }
   }

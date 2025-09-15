@@ -23,6 +23,7 @@ export default function AdvisorDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   const loadAssessments = () => {
+    // Keep the localStorage version for now, but we could switch to database version
     if (advisor) {
       const advisorAssessments = AssessmentService.getAssessmentsForAdvisor(advisor.email);
       setAssessments(advisorAssessments);
