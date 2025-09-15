@@ -211,17 +211,6 @@ export class AssessmentService {
         advisorSummary = 'AI advisor summary could not be generated at this time.';
       }
       
-      // Generate AI advisor summary for advisor assessments
-      console.log('🤖 Generating AI advisor summary for advisor assessment...');
-      let advisorSummary = '';
-      try {
-        advisorSummary = await generateAdvisorSummary(results, assessmentAnswers);
-        console.log('✅ AI advisor summary generated successfully');
-      } catch (error) {
-        console.error('❌ Failed to generate AI advisor summary:', error);
-        advisorSummary = 'AI advisor summary could not be generated at this time.';
-      }
-      
       const { error: dbError } = await supabase
         .from('assessment_results')
         .insert({
@@ -231,7 +220,6 @@ export class AssessmentService {
           client_name: assessment.client_name,
           answers: assessmentAnswers,
           profile: results,
-          advisor_summary: advisorSummary
           advisor_summary: advisorSummary
         });
 
