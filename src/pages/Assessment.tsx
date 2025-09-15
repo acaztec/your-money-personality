@@ -15,9 +15,17 @@ export default function Assessment() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [advisorAssessmentId, setAdvisorAssessmentId] = useState<string | null>(null);
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
+  const [friendAssessmentId, setFriendAssessmentId] = useState<string | null>(null);
+  const [friendInfo, setFriendInfo] = useState<{
+    sharerName: string;
+    relationship: string;
+    personalNote?: string;
+  } | null>(null);
 
   useEffect(() => {
     const advisorId = searchParams.get('advisor');
+    const friendId = searchParams.get('share');
+
     if (advisorId) {
       const assessment = AssessmentService.getAssessment(advisorId);
       if (assessment) {
@@ -25,6 +33,16 @@ export default function Assessment() {
         setAdvisorInfo({
           name: assessment.advisorName,
           email: assessment.advisorEmail
+        });
+      }
+    } else if (friendId) {
+      const share = AssessmentService.getFriendAssessment(friendId);
+      if (share) {
+        setFriendAssessmentId(friendId);
+        setFriendInfo({
+          sharerName: share.sharerName,
+          relationship: share.relationship,
+          personalNote: share.personalNote
         });
       }
     }
@@ -53,17 +71,24 @@ export default function Assessment() {
         if (advisorAssessmentId) {
           console.log('Completing advisor assessment:', advisorAssessmentId);
           const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
-          
+
           if (!completed) {
             console.error('Failed to mark assessment as completed, but continuing...');
           }
+        } else if (friendAssessmentId) {
+          console.log('Completing shared assessment:', friendAssessmentId);
+          const completed = await AssessmentService.completeFriendAssessment(friendAssessmentId, profile);
+
+          if (!completed) {
+            console.error('Failed to mark friend assessment as completed, but continuing...');
+          }
         } else {
-          console.log('No advisor assessment ID - individual assessment');
+          console.log('No advisor or share ID - individual assessment');
         }
-        
+
         // Generate advisor summary for non-advisor assessments
         let advisorSummary = '';
-        if (!advisorAssessmentId) {
+        if (!advisorAssessmentId && !friendAssessmentId) {
           console.log('Generating AI advisor summary...');
           advisorSummary = await generateAdvisorSummary(profile, answers);
           if (advisorSummary) {
@@ -122,15 +147,25 @@ export default function Assessment() {
       <div className="professional-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
-            <img 
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-              alt="iGrad Enrich" 
+            <img
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              alt="iGrad Enrich"
               className="h-10 w-auto static-element"
             />
-            {advisorInfo && (
-              <div className="flex items-center space-x-2 text-white">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">Shared by {advisorInfo.name}</span>
+            {(advisorInfo || friendInfo) && (
+              <div className="flex items-center space-x-4">
+                {advisorInfo && (
+                  <div className="flex items-center space-x-2 text-white">
+                    <Sparkles className="w-4 h-4" />
+                    <span className="text-sm font-medium">Shared by {advisorInfo.name}</span>
+                  </div>
+                )}
+                {friendInfo && (
+                  <div className="flex items-center space-x-2 text-white">
+                    <Sparkles className="w-4 h-4" />
+                    <span className="text-sm font-medium">Partner invite from {friendInfo.sharerName}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -147,6 +182,24 @@ export default function Assessment() {
                 This assessment will help them understand your financial behaviors and provide 
                 more personalized guidance tailored to your unique personality.
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {friendInfo && (
+        <div className="bg-emerald-50 border-b border-emerald-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="text-center space-y-2">
+              <p className="text-emerald-900 font-medium leading-relaxed">
+                <strong>{friendInfo.sharerName}</strong> invited you to take the Money Personality assessment so you can explore how your financial styles work together as {friendInfo.relationship.toLowerCase()}.
+              </p>
+              <p className="text-emerald-800 text-sm">
+                Once you both finish, you'll unlock a compatibility breakdown with strengths, watch-outs, and suggested conversation starters.
+              </p>
+              {friendInfo.personalNote && (
+                <p className="text-emerald-700 text-sm italic">{friendInfo.personalNote}</p>
+              )}
             </div>
           </div>
         </div>

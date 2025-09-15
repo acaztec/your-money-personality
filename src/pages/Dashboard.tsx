@@ -1,8 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { Profile } from '../types';
-import { MessageCircle, ChevronLeft, ChevronRight, User, Brain, Award, Target, Lightbulb } from 'lucide-react';
+import { Profile, FriendAssessmentShare } from '../types';
+import {
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Brain,
+  Award,
+  Target,
+  Lightbulb,
+  Heart,
+  Share2,
+  Link2,
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  AlertTriangle
+} from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
 // Markdown to HTML converter
@@ -33,10 +49,22 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isAdvisorAssessment, setIsAdvisorAssessment] = useState(false);
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
+  const [friendShares, setFriendShares] = useState<FriendAssessmentShare[]>([]);
+  const [shareForm, setShareForm] = useState(() => ({
+    sharerName: typeof window !== 'undefined' ? localStorage.getItem('friendShareName') || '' : '',
+    sharerEmail: typeof window !== 'undefined' ? localStorage.getItem('friendShareEmail') || '' : '',
+    friendEmail: '',
+    friendName: '',
+    relationship: 'Partner or Spouse',
+    personalNote: ''
+  }));
+  const [isSharingWithFriend, setIsSharingWithFriend] = useState(false);
+  const [friendShareFeedback, setFriendShareFeedback] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [expandedShareId, setExpandedShareId] = useState<string | null>(null);
 
   useEffect(() => {
     const advisorId = searchParams.get('advisor');
-    
+
     if (advisorId) {
       // This is an advisor viewing results - load from database
       loadAssessmentResultFromDatabase(advisorId);
@@ -45,6 +73,38 @@ export default function Dashboard() {
       loadUserProfileFromStorage();
     }
   }, [navigate, searchParams]);
+
+  const loadFriendShares = () => {
+    const shares = AssessmentService.getFriendAssessmentsForUser();
+    setFriendShares(shares);
+    setExpandedShareId(prev => {
+      if (prev && shares.some(share => share.id === prev)) {
+        return prev;
+      }
+      const completedShare = shares.find(share => share.status === 'completed');
+      return completedShare ? completedShare.id : null;
+    });
+  };
+
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'friend_assessments') {
+        loadFriendShares();
+      }
+    };
+
+    const handleCustomStorageChange = () => {
+      loadFriendShares();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('localStorageUpdate', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageUpdate', handleCustomStorageChange);
+    };
+  }, []);
 
   const loadAssessmentResultFromDatabase = async (assessmentId: string) => {
     try {
@@ -76,7 +136,7 @@ export default function Dashboard() {
   const loadUserProfileFromStorage = () => {
     const savedProfile = localStorage.getItem('userProfile');
     const savedSummary = localStorage.getItem('advisorSummary');
-    
+
     if (!savedProfile) {
       navigate('/');
       return;
@@ -86,6 +146,7 @@ export default function Dashboard() {
       const parsedProfile = JSON.parse(savedProfile);
       setProfile(parsedProfile);
       setAdvisorSummary(savedSummary || '');
+      loadFriendShares();
       setLoading(false);
     } catch (error) {
       console.error('Error parsing saved profile:', error);
@@ -93,6 +154,75 @@ export default function Dashboard() {
       return;
     }
   };
+
+  const handleFriendShareChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setShareForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFriendShareSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!profile) {
+      setFriendShareFeedback({ type: 'error', message: 'Complete the assessment first to share it with someone else.' });
+      return;
+    }
+
+    if (!shareForm.sharerName || !shareForm.sharerEmail || !shareForm.friendEmail) {
+      setFriendShareFeedback({ type: 'error', message: 'Please add your name, email, and who you want to invite.' });
+      return;
+    }
+
+    setIsSharingWithFriend(true);
+    setFriendShareFeedback(null);
+
+    const result = await AssessmentService.shareAssessmentWithFriend(
+      shareForm.sharerName,
+      shareForm.sharerEmail,
+      shareForm.friendEmail,
+      shareForm.relationship,
+      profile,
+      shareForm.personalNote || undefined,
+      shareForm.friendName || undefined
+    );
+
+    setIsSharingWithFriend(false);
+
+    if (result.success) {
+      setFriendShareFeedback({ type: 'success', message: 'Invitation sent! Your partner will receive an email with the link.' });
+      setShareForm(prev => ({
+        ...prev,
+        friendEmail: '',
+        friendName: '',
+        personalNote: ''
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('friendShareName', shareForm.sharerName);
+        localStorage.setItem('friendShareEmail', shareForm.sharerEmail);
+      }
+      loadFriendShares();
+    } else {
+      setFriendShareFeedback({ type: 'error', message: result.error || 'Unable to send the invitation. Please try again.' });
+    }
+  };
+
+  const handleCopyFriendLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setFriendShareFeedback({ type: 'info', message: 'Invitation link copied to your clipboard.' });
+    } catch (error) {
+      console.error('Clipboard copy failed:', error);
+      setFriendShareFeedback({ type: 'error', message: 'Unable to copy the link. Please try manually copying it.' });
+    }
+  };
+
+  const pendingFriendShares = friendShares.filter(share => share.status === 'sent');
+  const completedFriendShares = friendShares.filter(share => share.status === 'completed');
 
   if (loading) {
     return (
@@ -359,6 +489,18 @@ export default function Dashboard() {
   const currentChapterData = chapters.find(c => c.id === currentChapter);
   const totalChapters = chapters.length;
 
+  const feedbackStyles = {
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    error: 'bg-red-50 border-red-200 text-red-700',
+    info: 'bg-blue-50 border-blue-200 text-blue-700'
+  } as const;
+
+  const feedbackIconMap = {
+    success: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
+    error: <AlertTriangle className="w-5 h-5 text-red-600" />,
+    info: <Sparkles className="w-5 h-5 text-blue-600" />
+  } as const;
+
   return (
     <Layout>
       <div className="min-h-screen professional-bg">
@@ -420,6 +562,312 @@ export default function Dashboard() {
               <ChevronRight className={`w-5 h-5 ${currentChapter !== totalChapters ? 'group-hover:translate-x-1' : ''} transition-transform`} />
             </button>
           </div>
+
+          {!isAdvisorAssessment && profile && (
+            <div className="modern-card mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Couples Compatibility Center</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Invite a partner, spouse, or close friend to compare Money Personalities and unlock AI-powered compatibility insights.
+                    </p>
+                  </div>
+                </div>
+                {(completedFriendShares.length > 0 || pendingFriendShares.length > 0) && (
+                  <div className="flex flex-wrap items-center gap-3">
+                    {completedFriendShares.length > 0 && (
+                      <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-medium">
+                        <Sparkles className="w-4 h-4" />
+                        <span>{completedFriendShares.length} compatibility insight{completedFriendShares.length > 1 ? 's' : ''} ready</span>
+                      </div>
+                    )}
+                    {pendingFriendShares.length > 0 && (
+                      <div className="flex items-center space-x-2 bg-amber-50 border border-amber-100 text-amber-700 px-4 py-2 rounded-lg text-sm font-medium">
+                        <Clock className="w-4 h-4" />
+                        <span>{pendingFriendShares.length} invite{pendingFriendShares.length > 1 ? 's' : ''} in progress</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {friendShareFeedback && (
+                <div className={`mb-6 rounded-xl border px-4 py-3 text-sm ${feedbackStyles[friendShareFeedback.type]}`}>
+                  <div className="flex items-start space-x-3">
+                    {feedbackIconMap[friendShareFeedback.type]}
+                    <p className="leading-relaxed">{friendShareFeedback.message}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid lg:grid-cols-2 gap-8">
+                <form onSubmit={handleFriendShareSubmit} className="space-y-5">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="sharerName" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Your Name *
+                      </label>
+                      <input
+                        id="sharerName"
+                        name="sharerName"
+                        type="text"
+                        required
+                        value={shareForm.sharerName}
+                        onChange={handleFriendShareChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Jordan Lee"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="sharerEmail" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Your Email *
+                      </label>
+                      <input
+                        id="sharerEmail"
+                        name="sharerEmail"
+                        type="email"
+                        required
+                        value={shareForm.sharerEmail}
+                        onChange={handleFriendShareChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="you@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="friendName" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Their Name (optional)
+                      </label>
+                      <input
+                        id="friendName"
+                        name="friendName"
+                        type="text"
+                        value={shareForm.friendName}
+                        onChange={handleFriendShareChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Taylor"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="friendEmail" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Their Email *
+                      </label>
+                      <input
+                        id="friendEmail"
+                        name="friendEmail"
+                        type="email"
+                        required
+                        value={shareForm.friendEmail}
+                        onChange={handleFriendShareChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="partner@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="relationship" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Relationship Focus
+                      </label>
+                      <select
+                        id="relationship"
+                        name="relationship"
+                        value={shareForm.relationship}
+                        onChange={handleFriendShareChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option>Partner or Spouse</option>
+                        <option>Friend</option>
+                        <option>Family Member</option>
+                        <option>Accountability Buddy</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="personalNote" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Add a personal note (optional)
+                    </label>
+                    <textarea
+                      id="personalNote"
+                      name="personalNote"
+                      value={shareForm.personalNote}
+                      onChange={handleFriendShareChange}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="I thought it would be fun to compare our money personalities before our next planning night!"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-xs text-gray-500">
+                      We send a branded email with your name and a secure link. Completion notifications return here automatically.
+                    </p>
+                    <button
+                      type="submit"
+                      disabled={isSharingWithFriend}
+                      className={`inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white transition-colors ${
+                        isSharingWithFriend ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'
+                      }`}
+                    >
+                      {isSharingWithFriend ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-5 h-5 mr-2" />
+                          Share Assessment
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wide">How the couple report works</h3>
+                    <ul className="mt-3 space-y-2 text-sm text-indigo-900 list-disc list-inside">
+                      <li>Your invitee receives a secure link to the Money Personality assessment.</li>
+                      <li>Once both assessments are complete, compatibility insights unlock automatically.</li>
+                      <li>You can revisit this dashboard anytime to review shared strengths and watch-outs.</li>
+                    </ul>
+                  </div>
+
+                  {friendShares.length === 0 ? (
+                    <div className="border border-dashed border-gray-300 rounded-xl p-6 text-center text-sm text-gray-600">
+                      <Sparkles className="w-6 h-6 text-primary-500 mx-auto mb-3" />
+                      <p>Ready to see how your Money Personalities complement each other? Send an invite to get started.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {friendShares.map(share => (
+                        <div key={share.id} className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-gray-500">{share.relationship}</p>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {share.recipientName || 'Invitation in progress'}
+                              </h3>
+                              <p className="text-sm text-gray-600">{share.recipientEmail}</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {share.status === 'completed' ? (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                                  Completed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                  <Clock className="w-4 h-4 mr-1" />
+                                  Waiting
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500 uppercase tracking-wide">
+                            <span>Sent {new Date(share.sentAt).toLocaleDateString()}</span>
+                            {share.status === 'sent' && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopyFriendLink(share.assessmentLink)}
+                                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm normal-case"
+                              >
+                                <Link2 className="w-4 h-4 mr-1" />
+                                Copy invite link
+                              </button>
+                            )}
+                            {share.status === 'completed' && share.compatibility && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedShareId(prev => (prev === share.id ? null : share.id))}
+                                className="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold text-sm normal-case"
+                              >
+                                <Sparkles className="w-4 h-4 mr-1" />
+                                {expandedShareId === share.id ? 'Hide insights' : 'View insights'}
+                              </button>
+                            )}
+                          </div>
+
+                          {share.status === 'completed' && share.compatibility && expandedShareId === share.id && (
+                            <div className="mt-5 space-y-4 text-sm text-gray-700">
+                              <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-3">
+                                <div>
+                                  <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Compatibility score</p>
+                                  <p className="text-2xl font-bold text-emerald-900">
+                                    {share.compatibility.compatibilityScore}
+                                    <span className="text-sm font-medium text-emerald-600 ml-2">{share.compatibility.compatibilityLabel}</span>
+                                  </p>
+                                </div>
+                                <Heart className="w-7 h-7 text-emerald-500" />
+                              </div>
+
+                              {share.compatibility.sharedTraits.length > 0 && (
+                                <div>
+                                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Shared traits</h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {share.compatibility.sharedTraits.map(trait => (
+                                      <span key={trait} className="inline-flex items-center px-3 py-1 rounded-full bg-primary-100 text-primary-700 text-xs font-medium">
+                                        {trait}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              <p className="leading-relaxed">{share.compatibility.summary}</p>
+
+                              {share.compatibility.alignmentHighlights.length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Where you're in sync</h4>
+                                  <ul className="space-y-2 list-disc list-inside text-gray-600">
+                                    {share.compatibility.alignmentHighlights.slice(0, 2).map((item, idx) => (
+                                      <li key={idx}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {share.compatibility.potentialFriction.length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Watch-outs</h4>
+                                  <ul className="space-y-2 list-disc list-inside text-gray-600">
+                                    {share.compatibility.potentialFriction.slice(0, 2).map((item, idx) => (
+                                      <li key={idx}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {share.compatibility.conversationStarters.length > 0 && (
+                                <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+                                  <p className="text-sm font-semibold text-blue-700 mb-2">Suggested conversation starters</p>
+                                  <ul className="space-y-2 text-blue-800 list-disc list-inside">
+                                    {share.compatibility.conversationStarters.slice(0, 3).map((item, idx) => (
+                                      <li key={idx}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Chapter Content */}
           <div className="modern-card mb-8">

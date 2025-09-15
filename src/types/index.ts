@@ -53,6 +53,35 @@ export interface AdvisorAssessment {
   results?: Profile;
 }
 
+export interface CompatibilityInsights {
+  compatibilityScore: number;
+  compatibilityLabel: 'High Alignment' | 'Balanced Blend' | 'Growth Opportunity';
+  summary: string;
+  sharedTraits: string[];
+  complementaryDynamics: string[];
+  alignmentHighlights: string[];
+  potentialFriction: string[];
+  conversationStarters: string[];
+}
+
+export interface FriendAssessmentShare {
+  id: string;
+  sharerId: string;
+  sharerName: string;
+  sharerEmail: string;
+  relationship: string;
+  recipientEmail: string;
+  recipientName?: string;
+  personalNote?: string;
+  status: 'sent' | 'completed';
+  sentAt: Date;
+  completedAt?: Date;
+  assessmentLink: string;
+  sharerProfile: Profile;
+  recipientProfile?: Profile;
+  compatibility?: CompatibilityInsights;
+}
+
 export interface EmailNotification {
   to: string;
   subject: string;

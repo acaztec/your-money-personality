@@ -1,4 +1,4 @@
-import { EmailNotification } from '../types';
+import { CompatibilityInsights, EmailNotification } from '../types';
 
 export class EmailService {
   static async sendAssessmentInvitation(
@@ -140,6 +140,141 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Error sending completion notification:', error);
+      return false;
+    }
+  }
+
+  static async sendFriendAssessmentInvitation(
+    sharerName: string,
+    sharerEmail: string,
+    recipientEmail: string,
+    assessmentLink: string,
+    relationship: string,
+    personalNote?: string
+  ): Promise<boolean> {
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Money Personality <onboarding@resend.dev>',
+          to: [recipientEmail],
+          subject: `${sharerName} invited you to discover your Money Personality`,
+          html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 40px;">
+            </div>
+
+            <h2 style="color: #2563eb; text-align: center;">${sharerName} wants to compare Money Personalities!</h2>
+
+            <p>Hello there,</p>
+
+            <p><strong>${sharerName}</strong> would love for you to take the Money Personality assessment so you can explore how your perspectives on money work together as ${relationship.toLowerCase()}.</p>
+
+            ${personalNote ? `<p style="background-color: #eff6ff; padding: 16px; border-radius: 8px;">${personalNote}</p>` : ''}
+
+            <p>The assessment only takes about 10 minutes. Once you are finished, you'll both receive a compatibility breakdown that highlights strengths, watch-outs, and conversation starters tailored to your results.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${assessmentLink}" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                Take Assessment Now
+              </a>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">Questions? You can reply directly to ${sharerEmail}.</p>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+
+            <p style="font-size: 12px; color: #999; text-align: center;">
+              This email was sent by iGrad Enrich Money Personality Assessment
+            </p>
+          </div>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Email API error:', response.status, errorText);
+        return false;
+      }
+
+      await response.json();
+      return true;
+    } catch (error) {
+      console.error('Error sending friend assessment invitation:', error);
+      return false;
+    }
+  }
+
+  static async sendFriendCompletionNotification(
+    sharerEmail: string,
+    sharerName: string,
+    participantEmail: string,
+    compatibility: CompatibilityInsights
+  ): Promise<boolean> {
+    try {
+      const highlightsList = compatibility.alignmentHighlights.slice(0, 2).map(item => `<li>${item}</li>`).join('');
+      const watchoutsList = compatibility.potentialFriction.slice(0, 2).map(item => `<li>${item}</li>`).join('');
+
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Money Personality <onboarding@resend.dev>',
+          to: [sharerEmail],
+          subject: `${participantEmail} finished the Money Personality assessment!`,
+          html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 40px;">
+            </div>
+
+            <h2 style="color: #16a34a; text-align: center;">Compatibility insights are ready</h2>
+
+            <p>Hi ${sharerName},</p>
+
+            <p><strong>${participantEmail}</strong> just completed the Money Personality assessment. Here's a preview of your compatibility results:</p>
+
+            <p style="font-weight: bold;">Score: ${compatibility.compatibilityScore} (${compatibility.compatibilityLabel})</p>
+            <p>${compatibility.summary}</p>
+
+            ${highlightsList ? `<h3>Shared strengths</h3><ul>${highlightsList}</ul>` : ''}
+            ${watchoutsList ? `<h3>Conversation opportunities</h3><ul>${watchoutsList}</ul>` : ''}
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${window.location.origin}/dashboard" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                View Full Compatibility Insights
+              </a>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">Keep the momentum going by scheduling a quick money check-in together.</p>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+
+            <p style="font-size: 12px; color: #999; text-align: center;">
+              This email was sent by iGrad Enrich Money Personality Assessment
+            </p>
+          </div>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Email API error:', response.status, errorText);
+        return false;
+      }
+
+      await response.json();
+      return true;
+    } catch (error) {
+      console.error('Error sending friend completion notification:', error);
       return false;
     }
   }
