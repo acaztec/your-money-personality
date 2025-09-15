@@ -8,7 +8,6 @@ export class EmailService {
     advisorEmail: string,
     clientEmail: string,
     clientName?: string,
-    clientName?: string,
   ): Promise<boolean> {
     try {
       const clientDisplayName = clientName || 'there';

@@ -140,7 +140,6 @@ export class AssessmentService {
         clientName,
         status: 'sent',
         assessmentLink,
-        clientName
       };
 
       this.saveAssessment(localAssessment);
