@@ -315,11 +315,11 @@ function computeAssessmentSignals(
 
     let intensityMethod: IntensityMethod = 'midpoint_distance';
     let baseIntensity = distanceFromMidpoint;
-    let zScore: number | undefined;
+    let zScoreValue: number | undefined;
 
     if (typeof metadata.norm_mean === 'number' && typeof metadata.norm_sd === 'number' && metadata.norm_sd > 0) {
-      zScore = (adjustedScore - metadata.norm_mean) / metadata.norm_sd;
-      baseIntensity = Math.abs(zScore);
+      zScoreValue = (adjustedScore - metadata.norm_mean) / metadata.norm_sd;
+      baseIntensity = Math.abs(zScoreValue);
       intensityMethod = 'z_score';
     }
 
@@ -339,7 +339,7 @@ function computeAssessmentSignals(
       intensity_score: Number.isFinite(intensityScore) ? intensityScore : 0,
       intensity_label: 'Low' as IntensityLabel,
       intensity_weight: weight,
-      z_score,
+      z_score: zScoreValue,
       norm_mean: metadata.norm_mean,
       norm_sd: metadata.norm_sd,
       distance_from_midpoint: distanceFromMidpoint,
