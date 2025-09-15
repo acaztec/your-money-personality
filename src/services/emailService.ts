@@ -1,5 +1,7 @@
 import { CompatibilityInsights, EmailNotification } from '../types';
 
+const DEFAULT_FROM_ADDRESS = 'Money Personality <notifications@yourmoneypersonality.com>';
+
 export class EmailService {
   static async sendAssessmentInvitation(
     advisorName: string,
@@ -17,7 +19,7 @@ export class EmailService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Money Personality <onboarding@resend.dev>',
+          from: DEFAULT_FROM_ADDRESS,
           to: [clientEmail],
           subject: `${advisorName} is asking you to discover your Money Personality!`,
           html: `
@@ -64,7 +66,6 @@ export class EmailService {
         return false;
       }
 
-      const data = await response.json();
       return true;
     } catch (error) {
       console.error('Error sending assessment invitation:', error);
@@ -87,7 +88,7 @@ export class EmailService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Money Personality <onboarding@resend.dev>',
+          from: DEFAULT_FROM_ADDRESS,
           to: [advisorEmail],
           subject: `Money Personality Assessment Completed${clientName ? ` - ${clientName}` : ''}`,
           html: `
@@ -136,7 +137,6 @@ export class EmailService {
         return false;
       }
 
-      const data = await response.json();
       return true;
     } catch (error) {
       console.error('Error sending completion notification:', error);
@@ -159,7 +159,7 @@ export class EmailService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Money Personality <onboarding@resend.dev>',
+          from: DEFAULT_FROM_ADDRESS,
           to: [recipientEmail],
           subject: `${sharerName} invited you to discover your Money Personality`,
           html: `
@@ -202,7 +202,6 @@ export class EmailService {
         return false;
       }
 
-      await response.json();
       return true;
     } catch (error) {
       console.error('Error sending friend assessment invitation:', error);
@@ -226,7 +225,7 @@ export class EmailService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Money Personality <onboarding@resend.dev>',
+          from: DEFAULT_FROM_ADDRESS,
           to: [sharerEmail],
           subject: `${participantEmail} finished the Money Personality assessment!`,
           html: `
@@ -271,7 +270,6 @@ export class EmailService {
         return false;
       }
 
-      await response.json();
       return true;
     } catch (error) {
       console.error('Error sending friend completion notification:', error);
