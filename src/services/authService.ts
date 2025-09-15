@@ -238,14 +238,13 @@ export class AuthService {
   }
 
   static async getCurrentUser(): Promise<User | null> {
-    // Use getSession instead of getUser to avoid network call and
-    // restore the user directly from the persisted session. This
-    // prevents issues where an expired or invalid session in
-    // localStorage causes getUser to throw and leave the app stuck
-    // in a loading state after refresh or opening a new tab.
     const { data: { session }, error } = await supabase.auth.getSession()
     if (error || !session) return null
     return session.user ?? null
+  }
+
+  static async getSession() {
+    return await supabase.auth.getSession()
   }
 
   static async getCurrentAdvisor(): Promise<Advisor | null> {
@@ -260,9 +259,14 @@ export class AuthService {
 
       const advisor = await this.getAdvisorProfile(user.id)
       if (advisor) {
-        this.storeAdvisorProfile(advisor)
+        const completeAdvisor = {
+          ...advisor,
+          email: user.email!
+        }
+        this.storeAdvisorProfile(completeAdvisor)
+        return completeAdvisor
       }
-      return advisor
+      return null
     } catch (error) {
       console.error('Error getting current advisor:', error)
       return null
@@ -288,7 +292,6 @@ export class AuthService {
 
       if (error || !data) {
         if (error?.code === 'PGRST116') {
-          // No rows returned - this is expected for new users
           console.log('No advisor profile found (expected for new users)')
           return null
         }
@@ -296,22 +299,15 @@ export class AuthService {
         return null
       }
 
-      // Get user email
-      const user = await this.getCurrentUser()
-      console.log('Current user for profile:', user?.email)
-      if (!user) return null
-
-      const advisor = {
+      // Return profile without email - email will be added by caller
+      return {
         id: data.id,
         user_id: data.user_id,
-        email: user.email!,
+        email: '', // Will be populated by caller
         name: data.name,
         company: data.company,
         created_at: data.created_at
       }
-      
-      console.log('Returning advisor profile:', advisor)
-      return advisor
     } catch (error) {
       console.error('Error getting advisor profile:', error)
       return null

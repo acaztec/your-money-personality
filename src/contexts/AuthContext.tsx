@@ -22,31 +22,85 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     let mounted = true
+    let initialLoadComplete = false
 
     const restoreSession = async () => {
       try {
-        const currentAdvisor = await AuthService.getCurrentAdvisor()
+        // Get the session directly first
+        const { data: { session } } = await AuthService.getSession()
+        
+        if (!session?.user) {
+          if (mounted) {
+            setAdvisor(null)
+            setIsLoading(false)
+            initialLoadComplete = true
+          }
+          return
+        }
+
+        // Try to get cached advisor profile first
+        const cached = AuthService.getStoredAdvisorProfile()
+        if (cached && cached.user_id === session.user.id) {
+          if (mounted) {
+            setAdvisor(cached)
+            setIsLoading(false)
+            initialLoadComplete = true
+          }
+          return
+        }
+
+        // Get advisor profile from database
+        const advisor = await AuthService.getAdvisorProfile(session.user.id)
         if (mounted) {
-          setAdvisor(currentAdvisor)
+          if (advisor) {
+            // Build complete advisor object with email from session
+            const completeAdvisor = {
+              ...advisor,
+              email: session.user.email!
+            }
+            AuthService.storeAdvisorProfile(completeAdvisor)
+            setAdvisor(completeAdvisor)
+          } else {
+            setAdvisor(null)
+          }
+          setIsLoading(false)
+          initialLoadComplete = true
         }
       } catch (error) {
+        console.error('Error in restoreSession:', error)
         if (mounted) {
           setAdvisor(null)
-        }
-      } finally {
-        if (mounted) {
           setIsLoading(false)
+          initialLoadComplete = true
         }
       }
     }
 
-    restoreSession()
-
-    // Listen for auth state changes
+    // Set up auth state listener first
     const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, !!session)
+      
+      if (!mounted) return
+
       if (session?.user) {
         try {
-          const advisor = await AuthService.getAdvisorProfile(session.user.id)
+          // Check if we already have a cached profile for this user
+          const cached = AuthService.getStoredAdvisorProfile()
+          if (cached && cached.user_id === session.user.id) {
+            setAdvisor(cached)
+            if (initialLoadComplete) {
+              setIsLoading(false)
+            }
+            return
+          }
+
+          // Get fresh advisor profile
+          const advisorProfile = await AuthService.getAdvisorProfile(session.user.id)
+          const advisor = advisorProfile ? {
+            ...advisorProfile,
+            email: session.user.email!
+          } : null
+
           if (advisor) {
             AuthService.storeAdvisorProfile(advisor)
           } else {
@@ -54,6 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
           setAdvisor(advisor)
         } catch (error) {
+          console.error('Error in auth state change:', error)
           AuthService.clearStoredAdvisorProfile()
           setAdvisor(null)
         }
@@ -62,8 +117,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAdvisor(null)
       }
 
-      setIsLoading(false)
+      // Only set loading to false if initial load is complete
+      // This prevents the auth state listener from interfering with initial load
+      if (initialLoadComplete) {
+        setIsLoading(false)
+      }
     })
+
+    // Start the session restoration after listener is set up
+    restoreSession()
 
     return () => {
       mounted = false
