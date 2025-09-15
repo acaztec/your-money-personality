@@ -70,35 +70,6 @@ export default function Assessment() {
     loadAssessmentInfo();
   }, [searchParams]);
 
-  // Remove the old useEffect and replace with the above
-  /* 
-  useEffect(() => {
-    const advisorId = searchParams.get('advisor');
-    const friendId = searchParams.get('share');
-
-    if (advisorId) {
-      const assessment = AssessmentService.getAssessment(advisorId);
-      if (assessment) {
-        setAdvisorAssessmentId(advisorId);
-        setAdvisorInfo({
-          name: assessment.advisorName,
-          email: assessment.advisorEmail
-        });
-      }
-    } else if (friendId) {
-      const share = AssessmentService.getFriendAssessment(friendId);
-      if (share) {
-        setFriendAssessmentId(friendId);
-        setFriendInfo({
-          sharerName: share.sharerName,
-          relationship: share.relationship,
-          personalNote: share.personalNote
-        });
-      }
-    }
-  }, [searchParams]);
-  */
-
   const handleAnswerChange = (value: number) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = value;
@@ -250,6 +221,7 @@ export default function Assessment() {
               </p>
               {friendInfo.personalNote && (
                 <p className="text-emerald-700 text-sm italic">{friendInfo.personalNote}</p>
+              </p>
               )}
             </div>
           </div>
