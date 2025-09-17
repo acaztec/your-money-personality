@@ -13,7 +13,7 @@ import {
   Award,
   Target,
   Lightbulb,
-  Heart,
+  Users,
   Share2,
   Link2,
   Sparkles,
@@ -578,13 +578,13 @@ export default function Dashboard() {
             <div className="modern-card mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
-                    <Heart className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Couples Compatibility Center</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Money Personality Compatibility Quiz</h2>
                     <p className="text-sm text-gray-600 mt-1">
-                      Invite a partner, spouse, or close friend to compare Money Personalities and unlock AI-powered compatibility insights.
+                      Invite a spouse, partner, family member, or close friend to compare Money Personalities and unlock AI-powered compatibility insights.
                     </p>
                   </div>
                 </div>
@@ -713,7 +713,7 @@ export default function Dashboard() {
                       onChange={handleFriendShareChange}
                       rows={3}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="I thought it would be fun to compare our money personalities before our next planning night!"
+                      placeholder="I thought it would be helpful to compare our money personalities before our next planning session!"
                     />
                   </div>
 
@@ -745,7 +745,7 @@ export default function Dashboard() {
 
                 <div className="space-y-6">
                   <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-5">
-                    <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wide">How the couple report works</h3>
+                    <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wide">How the compatibility quiz works</h3>
                     <ul className="mt-3 space-y-2 text-sm text-indigo-900 list-disc list-inside">
                       <li>Your invitee receives a secure link to the Money Personality assessment.</li>
                       <li>Once both assessments are complete, compatibility insights unlock automatically.</li>
@@ -819,7 +819,7 @@ export default function Dashboard() {
                                     <span className="text-sm font-medium text-emerald-600 ml-2">{share.compatibility.compatibilityLabel}</span>
                                   </p>
                                 </div>
-                                <Heart className="w-7 h-7 text-emerald-500" />
+                                <Sparkles className="w-7 h-7 text-emerald-500" />
                               </div>
 
                               {share.compatibility.sharedTraits.length > 0 && (
