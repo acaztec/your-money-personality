@@ -249,6 +249,32 @@ export default function AdvisorDashboard() {
     }
   }, [banner]);
 
+  const completedAssessments = useMemo(
+    () => assessments.filter(assessment => assessment.status === 'completed'),
+    [assessments],
+  );
+
+  const pendingAssessments = useMemo(
+    () => assessments.filter(assessment => assessment.status !== 'completed'),
+    [assessments],
+  );
+
+  // Create a lookup map for unlocked results
+  const unlockedResultsMap = useMemo(() => {
+    const map: Record<string, DatabaseAssessmentResult> = {};
+    unlockedResults.forEach(result => {
+      map[result.assessment_id] = result;
+    });
+    return map;
+  }, [unlockedResults]);
+
+  const unlockedCount = useMemo(() => {
+    return completedAssessments.filter(assessment => {
+      const result = unlockedResultsMap[assessment.id];
+      return result && result.is_unlocked;
+    }).length;
+  }, [completedAssessments, unlockedResultsMap]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen professional-bg flex items-center justify-center">
@@ -261,32 +287,6 @@ export default function AdvisorDashboard() {
       </div>
     );
   }
-
-  const completedAssessments = useMemo(
-    () => assessments.filter(assessment => assessment.status === 'completed'),
-    [assessments],
-  );
-  
-  const pendingAssessments = useMemo(
-    () => assessments.filter(assessment => assessment.status !== 'completed'),
-    [assessments],
-  );
-  
-  // Create a lookup map for unlocked results
-  const unlockedResultsMap = useMemo(() => {
-    const map: Record<string, DatabaseAssessmentResult> = {};
-    unlockedResults.forEach(result => {
-      map[result.assessment_id] = result;
-    });
-    return map;
-  }, [unlockedResults]);
-  
-  const unlockedCount = useMemo(() => {
-    return completedAssessments.filter(assessment => {
-      const result = unlockedResultsMap[assessment.id];
-      return result && result.is_unlocked;
-    }).length;
-  }, [completedAssessments, unlockedResultsMap]);
   
   const totalAssessments = assessments.length;
 
