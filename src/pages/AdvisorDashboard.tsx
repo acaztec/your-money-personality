@@ -100,11 +100,30 @@ export default function AdvisorDashboard() {
           }
         }
 
-        const resultsMap: Record<string, DatabaseAssessmentResult> = {};
-        dbResults.forEach(result => {
-          resultsMap[result.assessment_id] = result;
+        // Create a stable object reference to prevent infinite re-renders
+        setUnlockedResults(prevResults => {
+          const newResults: Record<string, DatabaseAssessmentResult> = {};
+          dbResults.forEach(result => {
+            newResults[result.assessment_id] = result;
+          });
+          
+          // Check if the results have actually changed
+          const currentKeys = Object.keys(prevResults);
+          const newKeys = Object.keys(newResults);
+          
+          if (currentKeys.length !== newKeys.length) {
+            return newResults;
+          }
+          
+          for (const key of newKeys) {
+            if (!prevResults[key] || prevResults[key].id !== newResults[key].id) {
+              return newResults;
+            }
+          }
+          
+          // No changes, return previous state to maintain reference stability
+          return prevResults;
         });
-        setUnlockedResults(resultsMap);
       } catch (error) {
         console.error('Failed to load advisor dashboard data:', error);
       } finally {
@@ -266,14 +285,20 @@ export default function AdvisorDashboard() {
     () => assessments.filter(assessment => assessment.status === 'completed'),
     [assessments],
   );
+  
   const pendingAssessments = useMemo(
     () => assessments.filter(assessment => assessment.status !== 'completed'),
     [assessments],
   );
-  const unlockedCount = useMemo(
-    () => completedAssessments.filter(assessment => unlockedResults[assessment.id]).length,
-    [completedAssessments, unlockedResults],
-  );
+  
+  // Memoize the unlocked count with stable dependencies
+  const unlockedCount = useMemo(() => {
+    return completedAssessments.filter(assessment => {
+      const result = unlockedResults[assessment.id];
+      return result && result.is_unlocked;
+    }).length;
+  }, [completedAssessments, unlockedResults]);
+  
   const totalAssessments = assessments.length;
 
   return (

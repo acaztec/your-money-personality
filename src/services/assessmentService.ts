@@ -496,11 +496,22 @@ export class AssessmentService {
     cancelUrl: string
   ): Promise<{ success: boolean; url?: string; sessionId?: string; error?: string }> {
     try {
+      // Get the current user's session token for authentication
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
       const { data, error } = await supabase.functions.invoke('stripe-checkout', {
         body: {
           assessment_id: assessmentId,
           success_url: successUrl,
           cancel_url: cancelUrl,
+          price_id: import.meta.env.VITE_STRIPE_REPORT_PRICE_ID || 'price_1S8R4kLG78umdkDnPPtdrLhQ'
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         },
       });
 
