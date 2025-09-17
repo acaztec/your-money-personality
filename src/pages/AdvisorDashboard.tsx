@@ -29,7 +29,7 @@ export default function AdvisorDashboard() {
   const { advisor, logout } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [assessments, setAssessments] = useState<DatabaseAdvisorAssessment[]>([]);
-  const [unlockedResults, setUnlockedResults] = useState<Record<string, DatabaseAssessmentResult>>({});
+  const [unlockedResults, setUnlockedResults] = useState<DatabaseAssessmentResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; assessmentId: string; clientName?: string }>({
     isOpen: false,
@@ -46,7 +46,10 @@ export default function AdvisorDashboard() {
 
   const refreshData = useCallback(
     async (showSpinner = true) => {
-      if (!advisorEmail) {
+      const currentAdvisorEmail = advisor?.email;
+      const currentAdvisorName = advisor?.name || '';
+      
+      if (!currentAdvisorEmail) {
         if (showSpinner) {
           setIsLoading(false);
         }
@@ -59,20 +62,20 @@ export default function AdvisorDashboard() {
 
       try {
         const [dbAssessments, dbResults] = await Promise.all([
-          AssessmentService.getAssessmentsForAdvisorFromDatabase(advisorEmail),
-          AssessmentService.getUnlockedAssessmentResultsForAdvisor(advisorEmail),
+          AssessmentService.getAssessmentsForAdvisorFromDatabase(currentAdvisorEmail),
+          AssessmentService.getUnlockedAssessmentResultsForAdvisor(currentAdvisorEmail),
         ]);
 
         if (dbAssessments.length > 0) {
           setAssessments(dbAssessments);
         } else {
-          const fallback = AssessmentService.getAssessmentsForAdvisor(advisorEmail);
+          const fallback = AssessmentService.getAssessmentsForAdvisor(currentAdvisorEmail);
 
           if (fallback.length > 0) {
             const normalized: DatabaseAdvisorAssessment[] = fallback.map((item: AdvisorAssessment) => ({
               id: item.id,
-              advisor_email: advisorEmail,
-              advisor_name: advisorName || item.advisorName,
+              advisor_email: currentAdvisorEmail,
+              advisor_name: currentAdvisorName || item.advisorName,
               client_email: item.clientEmail,
               client_name: item.clientName,
               status: item.status === 'sent' ? 'sent' : 'completed',
@@ -100,30 +103,8 @@ export default function AdvisorDashboard() {
           }
         }
 
-        // Create a stable object reference to prevent infinite re-renders
-        setUnlockedResults(prevResults => {
-          const newResults: Record<string, DatabaseAssessmentResult> = {};
-          dbResults.forEach(result => {
-            newResults[result.assessment_id] = result;
-          });
-          
-          // Check if the results have actually changed
-          const currentKeys = Object.keys(prevResults);
-          const newKeys = Object.keys(newResults);
-          
-          if (currentKeys.length !== newKeys.length) {
-            return newResults;
-          }
-          
-          for (const key of newKeys) {
-            if (!prevResults[key] || prevResults[key].id !== newResults[key].id) {
-              return newResults;
-            }
-          }
-          
-          // No changes, return previous state to maintain reference stability
-          return prevResults;
-        });
+        // Set unlocked results directly - React will handle shallow comparison
+        setUnlockedResults(dbResults);
       } catch (error) {
         console.error('Failed to load advisor dashboard data:', error);
       } finally {
@@ -132,7 +113,7 @@ export default function AdvisorDashboard() {
         }
       }
     },
-    [advisorEmail, advisorName],
+    [advisor?.email, advisor?.name], // Use advisor object properties directly
   );
 
   useEffect(() => {
@@ -291,13 +272,21 @@ export default function AdvisorDashboard() {
     [assessments],
   );
   
-  // Memoize the unlocked count with stable dependencies
+  // Create a lookup map for unlocked results
+  const unlockedResultsMap = useMemo(() => {
+    const map: Record<string, DatabaseAssessmentResult> = {};
+    unlockedResults.forEach(result => {
+      map[result.assessment_id] = result;
+    });
+    return map;
+  }, [unlockedResults]);
+  
   const unlockedCount = useMemo(() => {
     return completedAssessments.filter(assessment => {
-      const result = unlockedResults[assessment.id];
+      const result = unlockedResultsMap[assessment.id];
       return result && result.is_unlocked;
     }).length;
-  }, [completedAssessments, unlockedResults]);
+  }, [completedAssessments, unlockedResultsMap]);
   
   const totalAssessments = assessments.length;
 
@@ -448,7 +437,7 @@ export default function AdvisorDashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {completedAssessments.map(assessment => {
-                    const unlockedResult = unlockedResults[assessment.id];
+                    const unlockedResult = unlockedResultsMap[assessment.id];
                     const isUnlocked = Boolean(unlockedResult);
                     const isPaid = assessment.is_paid;
                     const isUnlocking = isPaid && !isUnlocked;
