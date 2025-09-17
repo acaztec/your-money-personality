@@ -1,5 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import Layout from '../components/Layout';
 import { Profile, FriendAssessmentShare } from '../types';
 import {
@@ -21,23 +23,23 @@ import {
 } from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
-// Markdown to HTML converter
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: false,
+  mangle: false
+});
+
+// Markdown to HTML converter with sanitization
 const convertMarkdownToHTML = (markdown: string): string => {
-  return markdown
-    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/^- (.*$)/gm, '<li>$1</li>')
-    .split('\n\n')
-    .map(paragraph => {
-      if (paragraph.startsWith('<h') || paragraph.startsWith('<li')) {
-        return paragraph;
-      }
-      return paragraph.trim() ? `<p>${paragraph}</p>` : '';
-    })
-    .join('\n');
+  const parsed = marked.parse(markdown ?? '', { async: false });
+  const rawHtml = typeof parsed === 'string' ? parsed : '';
+
+  if (typeof window !== 'undefined') {
+    return DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
+  }
+
+  return rawHtml;
 };
 
 export default function Dashboard() {
