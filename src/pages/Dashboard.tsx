@@ -19,9 +19,12 @@ import {
   Sparkles,
   CheckCircle2,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Lock,
+  CreditCard,
+  Loader2
 } from 'lucide-react';
-import { AssessmentService } from '../services/assessmentService';
+import { AssessmentService, DatabaseAdvisorAssessment } from '../services/assessmentService';
 
 marked.setOptions({
   gfm: true,
@@ -44,13 +47,18 @@ const convertMarkdownToHTML = (markdown: string): string => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [advisorSummary, setAdvisorSummary] = useState<string>('');
   const [currentChapter, setCurrentChapter] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isAdvisorAssessment, setIsAdvisorAssessment] = useState(false);
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
+  const [advisorAssessment, setAdvisorAssessment] = useState<DatabaseAdvisorAssessment | null>(null);
+  const [unlockStatus, setUnlockStatus] = useState<'locked' | 'unlocking' | 'unlocked' | 'pending'>('pending');
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [friendShares, setFriendShares] = useState<FriendAssessmentShare[]>([]);
   const [shareForm, setShareForm] = useState(() => ({
     sharerName: typeof window !== 'undefined' ? localStorage.getItem('friendShareName') || '' : '',
@@ -110,33 +118,74 @@ export default function Dashboard() {
 
   const loadAssessmentResultFromDatabase = async (assessmentId: string) => {
     try {
-      const result = await AssessmentService.getAssessmentResult(assessmentId);
-      if (result) {
-        setProfile(result.profile);
-        // Set advisor summary from database result for advisor assessments
-        if (result.advisor_summary) {
-          setAdvisorSummary(result.advisor_summary);
-        }
-        setIsAdvisorAssessment(true);
-        
-        // Get advisor info from the local assessment data
-        const assessment = AssessmentService.getAssessment(assessmentId);
-        if (assessment) {
-          setAdvisorInfo({
-            name: assessment.advisorName,
-            email: assessment.advisorEmail
-          });
-        }
-      } else {
+      setLoading(true);
+      setUnlockError(null);
+      setProfile(null);
+      setAdvisorSummary('');
+      setAdvisorAssessment(null);
+      setAdvisorInfo(null);
+
+      const checkoutSuccess = searchParams.get('checkoutSuccess');
+      const checkoutCancelled = searchParams.get('checkoutCancelled');
+
+      if (checkoutSuccess === '1') {
+        setStatusMessage('Payment received! Unlocking your report now.');
+      } else if (checkoutCancelled === '1') {
+        setUnlockError('Checkout was cancelled. No payment was taken.');
+      }
+
+      const assessment = await AssessmentService.getAssessmentFromDatabase(assessmentId);
+
+      if (!assessment) {
         navigate('/');
         return;
       }
+
+      setIsAdvisorAssessment(true);
+      setAdvisorAssessment(assessment);
+      setAdvisorInfo({ name: assessment.advisor_name, email: assessment.advisor_email });
+      setUnlockError(null);
+
+      if (assessment.status !== 'completed') {
+        setUnlockStatus('pending');
+        setStatusMessage('This assessment has not been completed yet. We will notify you when the client finishes.');
+        return;
+      }
+
+      if (!assessment.is_paid) {
+        setUnlockStatus('locked');
+        setStatusMessage('Purchase this report to unlock the full assessment results.');
+        return;
+      }
+
+      const result = await AssessmentService.getAssessmentResult(assessmentId);
+
+      if (result) {
+        setProfile(result.profile);
+        if (result.advisor_summary) {
+          setAdvisorSummary(result.advisor_summary);
+        }
+        setUnlockError(null);
+        setUnlockStatus('unlocked');
+        setStatusMessage(null);
+      } else {
+        setUnlockStatus('unlocking');
+        setStatusMessage('Payment received! We are finalizing the report now.');
+      }
     } catch (error) {
       console.error('Error loading assessment result:', error);
-      navigate('/');
-      return;
+      setUnlockError(error instanceof Error ? error.message : 'Unable to load assessment results.');
+    } finally {
+      if (searchParams.get('checkoutSuccess') || searchParams.get('checkoutCancelled')) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('checkoutSuccess');
+        next.delete('checkoutCancelled');
+        next.delete('session_id');
+        setSearchParams(next, { replace: true });
+      }
+
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const loadUserProfileFromStorage = () => {
@@ -148,13 +197,18 @@ export default function Dashboard() {
       return;
     }
 
-    try {
-      const parsedProfile = JSON.parse(savedProfile);
-      setProfile(parsedProfile);
-      setAdvisorSummary(savedSummary || '');
-      loadFriendShares();
-      setLoading(false);
-    } catch (error) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        setIsAdvisorAssessment(false);
+        setUnlockStatus('unlocked');
+        setAdvisorAssessment(null);
+        setUnlockError(null);
+        setStatusMessage(null);
+        setProfile(parsedProfile);
+        setAdvisorSummary(savedSummary || '');
+        loadFriendShares();
+        setLoading(false);
+      } catch (error) {
       console.error('Error parsing saved profile:', error);
       navigate('/');
       return;
@@ -227,8 +281,63 @@ export default function Dashboard() {
     }
   };
 
+  const handleUnlockReport = async () => {
+    if (!advisorAssessment) {
+      return;
+    }
+
+    setCheckoutLoading(true);
+    setUnlockError(null);
+    setStatusMessage('Redirecting to secure checkout...');
+
+    const successUrl = `${window.location.origin}/dashboard?advisor=${advisorAssessment.id}&checkoutSuccess=1`;
+    const cancelUrl = `${window.location.origin}/dashboard?advisor=${advisorAssessment.id}&checkoutCancelled=1`;
+
+    const result = await AssessmentService.startCheckout(advisorAssessment.id, successUrl, cancelUrl);
+
+    setCheckoutLoading(false);
+
+    if (!result.success || !result.url) {
+      setUnlockError(result.error || 'Failed to start checkout. Please try again.');
+      setStatusMessage('Purchase this report to unlock the full assessment results.');
+      return;
+    }
+
+    window.location.href = result.url;
+  };
+
   const pendingFriendShares = friendShares.filter(share => share.status === 'sent');
   const completedFriendShares = friendShares.filter(share => share.status === 'completed');
+
+  useEffect(() => {
+    if (!advisorAssessment || unlockStatus !== 'unlocking') {
+      return;
+    }
+
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts += 1;
+      const result = await AssessmentService.getAssessmentResult(advisorAssessment.id);
+
+      if (result) {
+        setProfile(result.profile);
+        if (result.advisor_summary) {
+          setAdvisorSummary(result.advisor_summary);
+        }
+        setUnlockError(null);
+        setUnlockStatus('unlocked');
+        setStatusMessage(null);
+        clearInterval(interval);
+      } else if (attempts >= 10) {
+        clearInterval(interval);
+        setStatusMessage('Payment confirmed. The report will unlock shortly—please refresh if it takes longer than expected.');
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [advisorAssessment, unlockStatus]);
 
   if (loading) {
     return (
@@ -240,6 +349,73 @@ export default function Dashboard() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Analyzing Your Results</h2>
             <p className="text-gray-600">Creating your personalized money personality profile...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isAdvisorAssessment && unlockStatus !== 'unlocked') {
+    const clientName = advisorAssessment?.client_name || 'your client';
+    const possessiveName = clientName.endsWith('s') ? `${clientName}'` : `${clientName}'s`;
+    const headline =
+      unlockStatus === 'locked'
+        ? `Unlock ${possessiveName} report`
+        : unlockStatus === 'pending'
+          ? 'Assessment not completed yet'
+          : 'Finalizing your report';
+
+    return (
+      <Layout>
+        <div className="min-h-screen professional-bg flex items-center justify-center px-4 py-16">
+          <div className="max-w-xl w-full">
+            <div className="modern-card text-center space-y-6">
+              <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                {unlockStatus === 'locked' ? (
+                  <Lock className="w-10 h-10 text-white" />
+                ) : (
+                  <Loader2 className="w-10 h-10 text-white animate-spin" />
+                )}
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900">{headline}</h1>
+              {statusMessage && <p className="text-gray-600 text-sm">{statusMessage}</p>}
+              {unlockError && <p className="text-sm text-red-600">{unlockError}</p>}
+              {advisorAssessment?.client_email && (
+                <p className="text-xs text-gray-500">Client email: {advisorAssessment.client_email}</p>
+              )}
+              {unlockStatus === 'locked' && (
+                <button
+                  onClick={handleUnlockReport}
+                  disabled={checkoutLoading}
+                  className="btn-primary inline-flex items-center justify-center px-6 py-3 text-base font-semibold"
+                >
+                  {checkoutLoading ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-5 h-5 mr-2" />
+                  )}
+                  {checkoutLoading ? 'Redirecting to checkout...' : 'Unlock report ($1)'}
+                </button>
+              )}
+              {unlockStatus === 'pending' && (
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Awaiting client completion
+                </div>
+              )}
+              {unlockStatus === 'unlocking' && (
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-sm font-medium">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Finalizing your report...
+                </div>
+              )}
+              <button
+                onClick={() => navigate('/advisor/dashboard')}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+              >
+                Return to advisor dashboard
+              </button>
+            </div>
           </div>
         </div>
       </Layout>

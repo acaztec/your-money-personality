@@ -5,9 +5,8 @@ import { supabase } from '../lib/supabase';
 import { getOrCreateUserId } from '../utils/userIdentity';
 import { generateCompatibilityInsights } from '../utils/compatibilityInsights';
 import { generateAdvisorSummary } from './aiService';
-import { generateAdvisorSummary } from './aiService';
 
-interface DatabaseAdvisorAssessment {
+export interface DatabaseAdvisorAssessment {
   id: string;
   advisor_email: string;
   advisor_name: string;
@@ -17,6 +16,26 @@ interface DatabaseAdvisorAssessment {
   assessment_link: string;
   sent_at: string;
   completed_at?: string;
+  is_paid: boolean;
+  paid_at?: string | null;
+  last_checkout_session_id?: string | null;
+}
+
+export interface DatabaseAssessmentResult {
+  id: string;
+  assessment_id: string;
+  advisor_email: string;
+  client_email: string;
+  client_name?: string | null;
+  answers: any;
+  profile: any;
+  advisor_summary?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  is_unlocked: boolean;
+  unlocked_at?: string | null;
+  stripe_order_id?: number | null;
+  checkout_session_id?: string | null;
 }
 
 export class AssessmentService {
@@ -220,7 +239,8 @@ export class AssessmentService {
           client_name: assessment.client_name,
           answers: assessmentAnswers,
           profile: results,
-          advisor_summary: advisorSummary
+          advisor_summary: advisorSummary,
+          is_unlocked: false
         });
 
       if (dbError) {
@@ -337,7 +357,7 @@ export class AssessmentService {
     }
   }
 
-  static async getAssessmentResultsForAdvisor(advisorEmail: string): Promise<any[]> {
+  static async getUnlockedAssessmentResultsForAdvisor(advisorEmail: string): Promise<DatabaseAssessmentResult[]> {
     try {
       const { data, error } = await supabase
         .from('assessment_results')
@@ -350,7 +370,7 @@ export class AssessmentService {
         return [];
       }
 
-      return data || [];
+      return (data as DatabaseAssessmentResult[]) || [];
     } catch (error) {
       console.error('Error getting assessment results for advisor:', error);
       return [];
@@ -358,16 +378,13 @@ export class AssessmentService {
   }
 
   // New method to get assessment from database
-  static async getAssessmentFromDatabase(assessmentId: string): Promise<{
-    advisor_email: string;
-    advisor_name: string;
-    client_email: string;
-    client_name?: string;
-  } | null> {
+  static async getAssessmentFromDatabase(assessmentId: string): Promise<DatabaseAdvisorAssessment | null> {
     try {
       const { data, error } = await supabase
         .from('advisor_assessments')
-        .select('advisor_email, advisor_name, client_email, client_name')
+        .select(
+          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id',
+        )
         .eq('id', assessmentId)
         .single();
 
@@ -376,7 +393,7 @@ export class AssessmentService {
         return null;
       }
 
-      return data;
+      return data as DatabaseAdvisorAssessment;
     } catch (error) {
       console.error('Error getting assessment from database:', error);
       return null;
@@ -435,7 +452,9 @@ export class AssessmentService {
     try {
       const { data, error } = await supabase
         .from('advisor_assessments')
-        .select('*')
+        .select(
+          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id',
+        )
         .eq('advisor_email', advisorEmail)
         .order('sent_at', { ascending: false });
 
@@ -444,14 +463,14 @@ export class AssessmentService {
         return [];
       }
 
-      return data || [];
+      return (data as DatabaseAdvisorAssessment[]) || [];
     } catch (error) {
       console.error('Error getting advisor assessments from database:', error);
       return [];
     }
   }
 
-  static async getAssessmentResult(assessmentId: string): Promise<any | null> {
+  static async getAssessmentResult(assessmentId: string): Promise<DatabaseAssessmentResult | null> {
     try {
       const { data, error } = await supabase
         .from('assessment_results')
@@ -464,10 +483,49 @@ export class AssessmentService {
         return null;
       }
 
-      return data;
+      return data as DatabaseAssessmentResult;
     } catch (error) {
       console.error('Error getting assessment result:', error);
       return null;
+    }
+  }
+
+  static async startCheckout(
+    assessmentId: string,
+    successUrl: string,
+    cancelUrl: string
+  ): Promise<{ success: boolean; url?: string; sessionId?: string; error?: string }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+        body: {
+          assessment_id: assessmentId,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+        },
+      });
+
+      if (error) {
+        console.error('Error creating checkout session:', error);
+        return { success: false, error: error.message || 'Failed to start checkout session' };
+      }
+
+      if (!data || typeof data !== 'object') {
+        return { success: false, error: 'Unexpected response from checkout service' };
+      }
+
+      const { url, sessionId } = data as { url?: string; sessionId?: string };
+
+      if (!url) {
+        return { success: false, error: 'Checkout session did not return a URL' };
+      }
+
+      return { success: true, url, sessionId };
+    } catch (error) {
+      console.error('Error starting checkout:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to start checkout session'
+      };
     }
   }
   static getAssessment(assessmentId: string): AdvisorAssessment | null {

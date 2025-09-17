@@ -4,6 +4,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')!;
+const reportPriceId = Deno.env.get('STRIPE_REPORT_PRICE_ID') ?? 'price_placeholder';
 const stripe = new Stripe(stripeSecret, {
   appInfo: {
     name: 'Bolt Integration',
@@ -43,20 +44,36 @@ Deno.serve(async (req) => {
       return corsResponse({ error: 'Method not allowed' }, 405);
     }
 
-    const { price_id, success_url, cancel_url, mode } = await req.json();
+    const {
+      price_id,
+      success_url,
+      cancel_url,
+      mode = 'payment',
+      assessment_id,
+    } = await req.json();
 
     const error = validateParameters(
-      { price_id, success_url, cancel_url, mode },
+      { success_url, cancel_url, mode, assessment_id },
       {
         cancel_url: 'string',
-        price_id: 'string',
         success_url: 'string',
-        mode: { values: ['payment', 'subscription'] },
+        assessment_id: 'string',
+        mode: { values: ['payment'] },
       },
     );
 
     if (error) {
       return corsResponse({ error }, 400);
+    }
+
+    if (price_id != null && typeof price_id !== 'string') {
+      return corsResponse({ error: 'Expected parameter price_id to be a string' }, 400);
+    }
+
+    const priceIdToUse = price_id ?? reportPriceId;
+
+    if (!priceIdToUse) {
+      return corsResponse({ error: 'Missing Stripe price id' }, 400);
     }
 
     const authHeader = req.headers.get('Authorization')!;
@@ -177,22 +194,69 @@ Deno.serve(async (req) => {
       }
     }
 
+    const { data: assessment, error: getAssessmentError } = await supabase
+      .from('advisor_assessments')
+      .select('id, advisor_email, status, is_paid, last_checkout_session_id')
+      .eq('id', assessment_id)
+      .maybeSingle();
+
+    if (getAssessmentError) {
+      console.error('Failed to fetch assessment before checkout', getAssessmentError);
+      return corsResponse({ error: 'Failed to validate assessment' }, 500);
+    }
+
+    if (!assessment) {
+      return corsResponse({ error: 'Assessment not found' }, 404);
+    }
+
+    if (assessment.advisor_email !== user.email) {
+      return corsResponse({ error: 'You do not have access to this assessment' }, 403);
+    }
+
+    if (assessment.status !== 'completed') {
+      return corsResponse({ error: 'Assessment is not completed yet' }, 400);
+    }
+
+    if (assessment.is_paid) {
+      return corsResponse({ error: 'Assessment is already unlocked' }, 400);
+    }
+
     // create Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
         {
-          price: price_id,
+          price: priceIdToUse,
           quantity: 1,
         },
       ],
       mode,
+      client_reference_id: assessment_id,
+      metadata: {
+        assessment_id,
+        advisor_email: user.email ?? '',
+      },
+      payment_intent_data: {
+        metadata: {
+          assessment_id,
+          advisor_email: user.email ?? '',
+        },
+      },
       success_url,
       cancel_url,
     });
 
     console.log(`Created checkout session ${session.id} for customer ${customerId}`);
+
+    const { error: updateAssessmentError } = await supabase
+      .from('advisor_assessments')
+      .update({ last_checkout_session_id: session.id })
+      .eq('id', assessment_id);
+
+    if (updateAssessmentError) {
+      console.error('Failed to store checkout session on assessment', updateAssessmentError);
+    }
 
     return corsResponse({ sessionId: session.id, url: session.url });
   } catch (error: any) {

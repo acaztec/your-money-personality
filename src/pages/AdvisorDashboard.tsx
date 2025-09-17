@@ -1,26 +1,35 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { AssessmentService } from '../services/assessmentService';
+import {
+  AssessmentService,
+  DatabaseAdvisorAssessment,
+  DatabaseAssessmentResult,
+} from '../services/assessmentService';
 import { AdvisorAssessment } from '../types';
-import { 
-  Users, 
-  Mail, 
-  Clock, 
-  CheckCircle, 
-  Eye, 
-  Plus, 
-  BarChart3, 
+import {
+  Users,
+  Clock,
+  CheckCircle,
+  Eye,
+  Plus,
   Calendar,
   ExternalLink,
   LogOut,
-  Trash2
+  Trash2,
+  Lock,
+  CreditCard,
+  Loader2,
+  AlertTriangle,
+  Unlock,
+  X
 } from 'lucide-react';
 
 export default function AdvisorDashboard() {
   const { advisor, logout } = useAuth();
-  const [assessments, setAssessments] = useState<AdvisorAssessment[]>([]);
-  const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [assessments, setAssessments] = useState<DatabaseAdvisorAssessment[]>([]);
+  const [unlockedResults, setUnlockedResults] = useState<Record<string, DatabaseAssessmentResult>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; assessmentId: string; clientName?: string }>({
     isOpen: false,
@@ -29,52 +38,128 @@ export default function AdvisorDashboard() {
   });
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [checkoutLoadingId, setCheckoutLoadingId] = useState<string | null>(null);
+  const [banner, setBanner] = useState<{ type: 'success' | 'info' | 'error'; message: string } | null>(null);
 
-  const loadAssessments = () => {
-    // Keep the localStorage version for now, but we could switch to database version
-    if (advisor) {
-      const advisorAssessments = AssessmentService.getAssessmentsForAdvisor(advisor.email);
-      setAssessments(advisorAssessments);
-    }
-  };
+  const advisorEmail = advisor?.email ?? null;
+  const advisorName = advisor?.name ?? '';
 
-  const loadAssessmentResults = async () => {
-    if (advisor) {
-      const results = await AssessmentService.getAssessmentResultsForAdvisor(advisor.email);
-      setAssessmentResults(results);
-    }
-  };
+  const refreshData = useCallback(
+    async (showSpinner = true) => {
+      if (!advisorEmail) {
+        if (showSpinner) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      if (showSpinner) {
+        setIsLoading(true);
+      }
+
+      try {
+        const [dbAssessments, dbResults] = await Promise.all([
+          AssessmentService.getAssessmentsForAdvisorFromDatabase(advisorEmail),
+          AssessmentService.getUnlockedAssessmentResultsForAdvisor(advisorEmail),
+        ]);
+
+        if (dbAssessments.length > 0) {
+          setAssessments(dbAssessments);
+        } else {
+          const fallback = AssessmentService.getAssessmentsForAdvisor(advisorEmail);
+
+          if (fallback.length > 0) {
+            const normalized: DatabaseAdvisorAssessment[] = fallback.map((item: AdvisorAssessment) => ({
+              id: item.id,
+              advisor_email: advisorEmail,
+              advisor_name: advisorName || item.advisorName,
+              client_email: item.clientEmail,
+              client_name: item.clientName,
+              status: item.status === 'sent' ? 'sent' : 'completed',
+              assessment_link: item.assessmentLink,
+              sent_at:
+                item.sentAt instanceof Date
+                  ? item.sentAt.toISOString()
+                  : item.sentAt
+                    ? new Date(item.sentAt).toISOString()
+                    : new Date().toISOString(),
+              completed_at:
+                item.completedAt instanceof Date
+                  ? item.completedAt.toISOString()
+                  : item.completedAt
+                    ? new Date(item.completedAt).toISOString()
+                    : undefined,
+              is_paid: false,
+              paid_at: null,
+              last_checkout_session_id: null,
+            }));
+
+            setAssessments(normalized);
+          } else {
+            setAssessments([]);
+          }
+        }
+
+        const resultsMap: Record<string, DatabaseAssessmentResult> = {};
+        dbResults.forEach(result => {
+          resultsMap[result.assessment_id] = result;
+        });
+        setUnlockedResults(resultsMap);
+      } catch (error) {
+        console.error('Failed to load advisor dashboard data:', error);
+      } finally {
+        if (showSpinner) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [advisorEmail, advisorName],
+  );
+
   useEffect(() => {
-    loadAssessments();
-    loadAssessmentResults();
-    setIsLoading(false);
-  }, [advisor]);
+    refreshData(true);
+  }, [refreshData]);
 
   useEffect(() => {
-    // Listen for storage changes to refresh assessments
     const handleStorageChange = (e: StorageEvent) => {
-      console.log('📡 Storage event detected:', e.key);
       if (e.key === 'advisor_assessments') {
-        console.log('🔄 Refreshing assessments due to storage change');
-        loadAssessments();
-        loadAssessmentResults();
+        refreshData(false);
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom storage events (for same-window updates)
     const handleCustomStorageChange = () => {
-      console.log('🔄 Custom storage event - refreshing assessments');
-      loadAssessments();
-      loadAssessmentResults();
+      refreshData(false);
     };
-    
+
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('localStorageUpdate', handleCustomStorageChange);
-    
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('localStorageUpdate', handleCustomStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [advisor]);
+    };
+  }, [refreshData]);
+
+  useEffect(() => {
+    const success = searchParams.get('checkoutSuccess');
+    const cancelled = searchParams.get('checkoutCancelled');
+
+    if (success === '1') {
+      setBanner({ type: 'success', message: 'Payment received! Unlocking your report now.' });
+      refreshData(false);
+    } else if (cancelled === '1') {
+      setBanner({ type: 'info', message: 'Checkout was cancelled. No payment was taken.' });
+    }
+
+    if (success || cancelled) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('checkoutSuccess');
+      next.delete('checkoutCancelled');
+      next.delete('session_id');
+      next.delete('assessment');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refreshData]);
 
   const handleLogout = () => {
     logout();
@@ -100,13 +185,11 @@ export default function AdvisorDashboard() {
     setDeleteError('');
 
     const result = await AssessmentService.deleteAssessment(deleteConfirm.assessmentId);
-    
+
     setIsDeleting(false);
-    
+
     if (result.success) {
-      // Reload data after successful deletion
-      loadAssessments();
-      loadAssessmentResults();
+      await refreshData(false);
       setDeleteConfirm({ isOpen: false, assessmentId: '', clientName: '' });
     } else {
       setDeleteError(result.error || 'Failed to delete assessment');
@@ -117,6 +200,55 @@ export default function AdvisorDashboard() {
     setDeleteConfirm({ isOpen: false, assessmentId: '', clientName: '' });
     setDeleteError('');
   };
+
+  const handleUnlock = async (assessmentId: string) => {
+    if (!advisorEmail) {
+      setBanner({ type: 'error', message: 'You must be logged in to unlock a report.' });
+      return;
+    }
+
+    setCheckoutLoadingId(assessmentId);
+    setBanner(null);
+
+    const successUrl = `${window.location.origin}/advisor/dashboard?checkoutSuccess=1&assessment=${assessmentId}&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${window.location.origin}/advisor/dashboard?checkoutCancelled=1&assessment=${assessmentId}`;
+
+    const result = await AssessmentService.startCheckout(assessmentId, successUrl, cancelUrl);
+
+    setCheckoutLoadingId(null);
+
+    if (!result.success || !result.url) {
+      setBanner({ type: 'error', message: result.error || 'Failed to start checkout. Please try again.' });
+      return;
+    }
+
+    window.location.href = result.url;
+  };
+
+  const bannerTheme = useMemo(() => {
+    if (!banner) {
+      return null;
+    }
+
+    switch (banner.type) {
+      case 'success':
+        return {
+          className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+          icon: <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />,
+        };
+      case 'error':
+        return {
+          className: 'border-red-200 bg-red-50 text-red-700',
+          icon: <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />,
+        };
+      default:
+        return {
+          className: 'border-blue-200 bg-blue-50 text-blue-700',
+          icon: <AlertTriangle className="w-5 h-5 text-blue-500 mt-0.5" />,
+        };
+    }
+  }, [banner]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen professional-bg flex items-center justify-center">
@@ -130,8 +262,18 @@ export default function AdvisorDashboard() {
     );
   }
 
-  const completedAssessments = assessmentResults;
-  const pendingAssessments = assessments.filter(a => a.status === 'sent');
+  const completedAssessments = useMemo(
+    () => assessments.filter(assessment => assessment.status === 'completed'),
+    [assessments],
+  );
+  const pendingAssessments = useMemo(
+    () => assessments.filter(assessment => assessment.status !== 'completed'),
+    [assessments],
+  );
+  const unlockedCount = useMemo(
+    () => completedAssessments.filter(assessment => unlockedResults[assessment.id]).length,
+    [completedAssessments, unlockedResults],
+  );
   const totalAssessments = assessments.length;
 
   return (
@@ -183,6 +325,22 @@ export default function AdvisorDashboard() {
           </div>
         </div>
 
+        {banner && bannerTheme && (
+          <div className={`mb-6 rounded-xl border p-4 flex items-start justify-between ${bannerTheme.className}`}>
+            <div className="flex items-start space-x-3">
+              {bannerTheme.icon}
+              <p className="text-sm leading-6">{banner.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBanner(null)}
+              className="ml-4 text-sm opacity-60 hover:opacity-100 transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -218,12 +376,10 @@ export default function AdvisorDashboard() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completion Rate</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {totalAssessments > 0 ? Math.round((completedAssessments.length / totalAssessments) * 100) : 0}%
-                </p>
+                <p className="text-sm font-medium text-gray-600">Unlocked Reports</p>
+                <p className="text-2xl font-bold text-emerald-600">{unlockedCount}</p>
               </div>
-              <BarChart3 className="w-8 h-8 text-purple-600" />
+              <Unlock className="w-8 h-8 text-emerald-600" />
             </div>
           </div>
         </div>
@@ -266,56 +422,103 @@ export default function AdvisorDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {completedAssessments.map((result) => (
-                    <tr key={result.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {result.client_name || 'Anonymous Client'}
+                  {completedAssessments.map(assessment => {
+                    const unlockedResult = unlockedResults[assessment.id];
+                    const isUnlocked = Boolean(unlockedResult);
+                    const isPaid = assessment.is_paid;
+                    const isUnlocking = isPaid && !isUnlocked;
+
+                    return (
+                      <tr key={assessment.id} className="hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <div>
+                            <div className="font-medium text-gray-900">
+                              {assessment.client_name || 'Anonymous Client'}
+                            </div>
+                            <div className="text-sm text-gray-600">{assessment.client_email}</div>
                           </div>
-                          <div className="text-sm text-gray-600">{result.client_email}</div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex flex-wrap gap-1">
-                          {result.profile?.personalities?.slice(0, 2).map((personality: string, idx: number) => (
-                            <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {personality}
-                            </span>
-                          ))}
-                          {result.profile?.personalities?.length > 2 && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              +{result.profile.personalities.length - 2} more
-                            </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          {isUnlocked ? (
+                            <div className="flex flex-wrap gap-1">
+                              {(() => {
+                                const personalities = Array.isArray(unlockedResult?.profile?.personalities)
+                                  ? (unlockedResult?.profile?.personalities as string[])
+                                  : [];
+
+                                return (
+                                  <>
+                                    {personalities.slice(0, 2).map((personality: string, idx: number) => (
+                                      <span
+                                        key={idx}
+                                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                      >
+                                        {personality}
+                                      </span>
+                                    ))}
+                                    {personalities.length > 2 && (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                        +{personalities.length - 2} more
+                                      </span>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Lock className="w-4 h-4 mr-2 text-gray-400" />
+                              {isUnlocking ? 'Processing payment...' : 'Unlock to view the full report'}
+                            </div>
                           )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {new Date(result.completed_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleViewResults(result.assessment_id)}
-                            className="text-blue-600 hover:text-blue-700 p-1"
-                            title="View Results"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(result.assessment_id, result.client_name)}
-                            className="text-red-600 hover:text-red-700 p-1"
-                            title="Delete Assessment"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            {assessment.completed_at ? new Date(assessment.completed_at).toLocaleDateString() : '—'}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {isUnlocked ? (
+                              <button
+                                onClick={() => handleViewResults(assessment.id)}
+                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Results
+                              </button>
+                            ) : !isPaid ? (
+                              <button
+                                onClick={() => handleUnlock(assessment.id)}
+                                disabled={checkoutLoadingId === assessment.id}
+                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {checkoutLoadingId === assessment.id ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <CreditCard className="w-4 h-4 mr-2" />
+                                )}
+                                {checkoutLoadingId === assessment.id ? 'Redirecting…' : 'Unlock report ($1)'}
+                              </button>
+                            ) : (
+                              <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-amber-700 bg-amber-100 rounded-lg">
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Unlocking...
+                              </span>
+                            )}
+                            <button
+                              onClick={() => handleDeleteClick(assessment.id, assessment.client_name)}
+                              className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -341,14 +544,14 @@ export default function AdvisorDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {pendingAssessments.map((assessment) => (
+                  {pendingAssessments.map(assessment => (
                     <tr key={assessment.id} className="hover:bg-gray-50">
                       <td className="py-4 px-4">
                         <div>
                           <div className="font-medium text-gray-900">
-                            {assessment.clientName || 'Anonymous Client'}
+                            {assessment.client_name || 'Anonymous Client'}
                           </div>
-                          <div className="text-sm text-gray-600">{assessment.clientEmail}</div>
+                          <div className="text-sm text-gray-600">{assessment.client_email}</div>
                         </div>
                       </td>
                       <td className="py-4 px-4">
@@ -360,14 +563,14 @@ export default function AdvisorDashboard() {
                       <td className="py-4 px-4 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-2" />
-                          {new Date(assessment.sentAt).toLocaleDateString()}
+                          {assessment.sent_at ? new Date(assessment.sent_at).toLocaleDateString() : '—'}
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText(assessment.assessmentLink);
+                              navigator.clipboard.writeText(assessment.assessment_link);
                               alert('Assessment link copied to clipboard!');
                             }}
                             className="text-gray-600 hover:text-gray-700 p-1"
@@ -376,7 +579,7 @@ export default function AdvisorDashboard() {
                             <ExternalLink className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteClick(assessment.id, assessment.clientName)}
+                            onClick={() => handleDeleteClick(assessment.id, assessment.client_name)}
                             className="text-red-600 hover:text-red-700 p-1"
                             title="Delete Assessment"
                           >
