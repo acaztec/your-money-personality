@@ -98,23 +98,89 @@ async function handleEvent(event: Stripe.Event) {
           amount_subtotal,
           amount_total,
           currency,
+          metadata,
+          client_reference_id,
         } = stripeData as Stripe.Checkout.Session;
 
+        const paymentIntentId =
+          typeof payment_intent === 'string'
+            ? payment_intent
+            : payment_intent && typeof payment_intent === 'object' && 'id' in payment_intent
+              ? (payment_intent as { id: string }).id
+              : null;
+        const metadataJson = metadata
+          ? Object.fromEntries(Object.entries(metadata))
+          : {};
+        const assessmentId = (metadataJson as Record<string, string | undefined>)?.assessment_id ?? client_reference_id ?? null;
+        const advisorEmail = (metadataJson as Record<string, string | undefined>)?.advisor_email ?? null;
+
+        if (!paymentIntentId) {
+          console.error('Checkout session missing payment intent id', checkout_session_id);
+          return;
+        }
+
         // Insert the order into the stripe_orders table
-        const { error: orderError } = await supabase.from('stripe_orders').insert({
-          checkout_session_id,
-          payment_intent_id: payment_intent,
-          customer_id: customerId,
-          amount_subtotal,
-          amount_total,
-          currency,
-          payment_status,
-          status: 'completed', // assuming we want to mark it as completed since payment is successful
-        });
+        const { data: orderData, error: orderError } = await supabase
+          .from('stripe_orders')
+          .upsert(
+            {
+              checkout_session_id,
+              payment_intent_id: paymentIntentId,
+              customer_id: customerId,
+              amount_subtotal,
+              amount_total,
+              currency,
+              payment_status,
+              status: 'completed',
+              assessment_id: assessmentId,
+              advisor_email: advisorEmail,
+              metadata: metadataJson,
+            },
+            { onConflict: 'checkout_session_id' },
+          )
+          .select()
+          .maybeSingle();
 
         if (orderError) {
-          console.error('Error inserting order:', orderError);
+          console.error('Error upserting order:', orderError);
           return;
+        }
+
+        const stripeOrderId = orderData?.id ?? null;
+
+        if (!assessmentId) {
+          console.warn('Checkout session completed without assessment metadata', {
+            checkout_session_id,
+          });
+        } else {
+          const now = new Date().toISOString();
+
+          const { error: updateAssessmentError } = await supabase
+            .from('advisor_assessments')
+            .update({
+              is_paid: true,
+              paid_at: now,
+              last_checkout_session_id: checkout_session_id,
+            })
+            .eq('id', assessmentId);
+
+          if (updateAssessmentError) {
+            console.error('Failed to mark assessment as paid:', updateAssessmentError);
+          }
+
+          const { error: updateResultError } = await supabase
+            .from('assessment_results')
+            .update({
+              is_unlocked: true,
+              unlocked_at: now,
+              checkout_session_id,
+              ...(stripeOrderId ? { stripe_order_id: stripeOrderId } : {}),
+            })
+            .eq('assessment_id', assessmentId);
+
+          if (updateResultError) {
+            console.error('Failed to unlock assessment result:', updateResultError);
+          }
         }
         console.info(`Successfully processed one-time payment for session: ${checkout_session_id}`);
       } catch (error) {
