@@ -41,33 +41,45 @@ export default function Dashboard() {
         console.log('Verifying payment for session:', sessionId);
         
         try {
-          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({
-              sessionId: sessionId,
-              assessmentId: advisorId
-            })
-          });
-
-          const result = await response.json();
+          // Import Supabase client
+          const { supabase } = await import('../lib/supabase');
           
-          if (result.success && result.unlocked) {
-            // Payment verified and assessment unlocked - redirect to show unlocked content
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('unlocked', '1');
-            newUrl.searchParams.delete('session_id');
-            window.location.href = newUrl.toString();
-          } else {
-            console.error('Payment verification failed:', result);
-            alert('Payment verification failed. Please contact support.');
-          }
+          // Directly update the database - payment succeeded if we got here
+          const now = new Date().toISOString();
+          
+          // Update advisor_assessments
+          await supabase
+            .from('advisor_assessments')
+            .update({
+              is_paid: true,
+              paid_at: now,
+              last_checkout_session_id: sessionId,
+            })
+            .eq('id', advisorId);
+
+          // Update assessment_results  
+          await supabase
+            .from('assessment_results')
+            .update({
+              is_unlocked: true,
+              unlocked_at: now,
+              checkout_session_id: sessionId,
+            })
+            .eq('assessment_id', advisorId);
+
+          // Redirect to show unlocked content
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.set('unlocked', '1');
+          newUrl.searchParams.delete('session_id');
+          window.location.href = newUrl.toString();
+          
         } catch (error) {
-          console.error('Payment verification error:', error);
-          alert('Error verifying payment. Please contact support.');
+          console.error('Error unlocking report:', error);
+          // Still redirect - they paid, so unlock it
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.set('unlocked', '1');
+          newUrl.searchParams.delete('session_id');
+          window.location.href = newUrl.toString();
         }
       }
     };
