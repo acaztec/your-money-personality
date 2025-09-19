@@ -1,62 +1,71 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import Stripe from 'npm:stripe@17.7.0';
-import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-// Helper function to create responses with CORS headers
-function corsResponse(body: string | object | null, status = 200) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type, x-client-info, apikey',
-  };
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Authorization, Content-Type, x-client-info, apikey',
+};
 
-  // For 204 No Content, don't include Content-Type or body
-  if (status === 204) {
-    return new Response(null, { status, headers });
-  }
-
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      ...headers,
-      'Content-Type': 'application/json',
-    },
-  });
-}
-
+// Handle CORS preflight immediately - before any other code can fail
 Deno.serve(async (req) => {
-  // Always handle OPTIONS first, before any other processing
+  // CRITICAL: Handle OPTIONS first, before ANY other processing
   if (req.method === 'OPTIONS') {
-    return corsResponse(null, 204);
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
+    // Only import and initialize if we get past OPTIONS
+    const [
+      { default: Stripe },
+      { createClient }
+    ] = await Promise.all([
+      import('npm:stripe@17.7.0'),
+      import('npm:@supabase/supabase-js@2.49.1')
+    ]);
+
     if (req.method !== 'POST') {
-      return corsResponse({ error: 'Method not allowed' }, 405);
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Check required environment variables
-    const supabaseUrl = Deno.env.get('PROJECT_URL');
-    const supabaseServiceKey = Deno.env.get('SERVICE_ROLE_KEY');
+    // Get environment variables with fallbacks
+    const projectUrl = Deno.env.get('PROJECT_URL');
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
     const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
+    const reportPriceId = Deno.env.get('STRIPE_REPORT_PRICE_ID') || 'price_1S8R4kLG78umdkDnPPtdrLhQ';
 
-    if (!supabaseUrl) {
+    // Validate environment variables
+    if (!projectUrl) {
       console.error('Missing PROJECT_URL environment variable');
-      return corsResponse({ error: 'Server configuration error' }, 500);
+      return new Response(JSON.stringify({ error: 'Server configuration error: PROJECT_URL missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    if (!supabaseServiceKey) {
+    if (!serviceRoleKey) {
       console.error('Missing SERVICE_ROLE_KEY environment variable');
-      return corsResponse({ error: 'Server configuration error' }, 500);
+      return new Response(JSON.stringify({ error: 'Server configuration error: SERVICE_ROLE_KEY missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (!stripeSecret) {
       console.error('Missing STRIPE_SECRET_KEY environment variable');
-      return corsResponse({ error: 'Server configuration error' }, 500);
+      return new Response(JSON.stringify({ error: 'Server configuration error: STRIPE_SECRET_KEY missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Initialize clients after environment validation
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Initialize clients after validation
+    const supabase = createClient(projectUrl, serviceRoleKey);
     const stripe = new Stripe(stripeSecret, {
       appInfo: {
         name: 'Money Personality Assessment',
@@ -64,7 +73,17 @@ Deno.serve(async (req) => {
       },
     });
 
-    const reportPriceId = Deno.env.get('STRIPE_REPORT_PRICE_ID') ?? 'price_1S8R4kLG78umdkDnPPtdrLhQ';
+    // Parse request body
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
     const {
       price_id,
@@ -72,52 +91,68 @@ Deno.serve(async (req) => {
       cancel_url,
       mode = 'payment',
       assessment_id,
-    } = await req.json();
+    } = requestBody;
 
-    const error = validateParameters(
-      { success_url, cancel_url, mode, assessment_id },
-      {
-        cancel_url: 'string',
-        success_url: 'string',
-        assessment_id: 'string',
-        mode: { values: ['payment'] },
-      },
-    );
-
-    if (error) {
-      return corsResponse({ error }, 400);
+    // Validate required parameters
+    if (!success_url || typeof success_url !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid success_url' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    if (price_id != null && typeof price_id !== 'string') {
-      return corsResponse({ error: 'Expected parameter price_id to be a string' }, 400);
+    if (!cancel_url || typeof cancel_url !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid cancel_url' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    const priceIdToUse = price_id ?? reportPriceId;
-
-    if (!priceIdToUse) {
-      return corsResponse({ error: 'Missing Stripe price id' }, 400);
+    if (!assessment_id || typeof assessment_id !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid assessment_id' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
+    if (mode !== 'payment') {
+      return new Response(JSON.stringify({ error: 'Only payment mode is supported' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const priceIdToUse = price_id || reportPriceId;
+
+    // Get user from authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return corsResponse({ error: 'Authorization header required' }, 401);
+      return new Response(JSON.stringify({ error: 'Authorization header required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const {
-      data: { user },
-      error: getUserError,
-    } = await supabase.auth.getUser(token);
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser(token);
 
     if (getUserError) {
       console.error('Auth error:', getUserError);
-      return corsResponse({ error: 'Failed to authenticate user' }, 401);
+      return new Response(JSON.stringify({ error: 'Failed to authenticate user' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    if (!user) {
-      return corsResponse({ error: 'User not found' }, 404);
+    if (!user || !user.email) {
+      return new Response(JSON.stringify({ error: 'User not found or missing email' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
+    // Get or create Stripe customer
+    let customerId: string;
     const { data: customer, error: getCustomerError } = await supabase
       .from('stripe_customers')
       .select('customer_id')
@@ -126,97 +161,109 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (getCustomerError) {
-      console.error('Failed to fetch customer information from the database', getCustomerError);
-      return corsResponse({ error: 'Failed to fetch customer information' }, 500);
+      console.error('Failed to fetch customer information:', getCustomerError);
+      return new Response(JSON.stringify({ error: 'Failed to fetch customer information' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    let customerId;
-
-    /**
-     * In case we don't have a mapping yet, the customer does not exist and we need to create one.
-     */
-    if (!customer || !customer.customer_id) {
+    if (!customer?.customer_id) {
+      // Create new Stripe customer
       const newCustomer = await stripe.customers.create({
         email: user.email,
-        metadata: {
-          userId: user.id,
-        },
+        metadata: { userId: user.id },
       });
 
       console.log(`Created new Stripe customer ${newCustomer.id} for user ${user.id}`);
 
-      const { error: createCustomerError } = await supabase.from('stripe_customers').insert({
-        user_id: user.id,
-        customer_id: newCustomer.id,
-      });
+      const { error: createCustomerError } = await supabase
+        .from('stripe_customers')
+        .insert({
+          user_id: user.id,
+          customer_id: newCustomer.id,
+        });
 
       if (createCustomerError) {
-        console.error('Failed to save customer information in the database', createCustomerError);
-
-        // Try to clean up the Stripe customer
+        console.error('Failed to save customer information:', createCustomerError);
+        // Try to clean up Stripe customer
         try {
           await stripe.customers.del(newCustomer.id);
         } catch (deleteError) {
-          console.error('Failed to clean up after customer mapping error:', deleteError);
+          console.error('Failed to clean up Stripe customer:', deleteError);
         }
-
-        return corsResponse({ error: 'Failed to create customer mapping' }, 500);
+        return new Response(JSON.stringify({ error: 'Failed to create customer mapping' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
       }
 
       customerId = newCustomer.id;
-      console.log(`Successfully set up new customer ${customerId}`);
     } else {
       customerId = customer.customer_id;
     }
 
-    // Validate assessment exists and belongs to user
+    // Validate assessment
     const { data: assessment, error: getAssessmentError } = await supabase
       .from('advisor_assessments')
-      .select('id, advisor_email, status, is_paid, last_checkout_session_id')
+      .select('id, advisor_email, status, is_paid')
       .eq('id', assessment_id)
       .maybeSingle();
 
     if (getAssessmentError) {
-      console.error('Failed to fetch assessment before checkout', getAssessmentError);
-      return corsResponse({ error: 'Failed to validate assessment' }, 500);
+      console.error('Failed to fetch assessment:', getAssessmentError);
+      return new Response(JSON.stringify({ error: 'Failed to validate assessment' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (!assessment) {
-      return corsResponse({ error: 'Assessment not found' }, 404);
+      return new Response(JSON.stringify({ error: 'Assessment not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (assessment.advisor_email !== user.email) {
-      return corsResponse({ error: 'You do not have access to this assessment' }, 403);
+      return new Response(JSON.stringify({ error: 'You do not have access to this assessment' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (assessment.status !== 'completed') {
-      return corsResponse({ error: 'Assessment is not completed yet' }, 400);
+      return new Response(JSON.stringify({ error: 'Assessment is not completed yet' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (assessment.is_paid) {
-      return corsResponse({ error: 'Assessment is already unlocked' }, 400);
+      return new Response(JSON.stringify({ error: 'Assessment is already unlocked' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Create Checkout Session
+    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceIdToUse,
-          quantity: 1,
-        },
-      ],
+      line_items: [{
+        price: priceIdToUse,
+        quantity: 1,
+      }],
       mode,
       client_reference_id: assessment_id,
       metadata: {
         assessment_id,
-        advisor_email: user.email ?? '',
+        advisor_email: user.email,
       },
       payment_intent_data: {
         metadata: {
           assessment_id,
-          advisor_email: user.email ?? '',
+          advisor_email: user.email,
         },
       },
       success_url,
@@ -225,45 +272,34 @@ Deno.serve(async (req) => {
 
     console.log(`Created checkout session ${session.id} for customer ${customerId}`);
 
-    // Store checkout session on assessment
+    // Update assessment with checkout session
     const { error: updateAssessmentError } = await supabase
       .from('advisor_assessments')
       .update({ last_checkout_session_id: session.id })
       .eq('id', assessment_id);
 
     if (updateAssessmentError) {
-      console.error('Failed to store checkout session on assessment', updateAssessmentError);
+      console.error('Failed to store checkout session on assessment:', updateAssessmentError);
     }
 
-    return corsResponse({ sessionId: session.id, url: session.url });
+    return new Response(JSON.stringify({ 
+      sessionId: session.id, 
+      url: session.url 
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
   } catch (error: any) {
-    console.error(`Checkout error: ${error.message}`);
-    console.error('Error stack:', error.stack);
-    return corsResponse({ error: 'Internal server error' }, 500);
+    console.error('Checkout error:', error?.message || error);
+    console.error('Error stack:', error?.stack);
+    
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error?.message || 'Unknown error'
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
-
-type ExpectedType = 'string' | { values: string[] };
-type Expectations<T> = { [K in keyof T]: ExpectedType };
-
-function validateParameters<T extends Record<string, any>>(values: T, expected: Expectations<T>): string | undefined {
-  for (const parameter in values) {
-    const expectation = expected[parameter];
-    const value = values[parameter];
-
-    if (expectation === 'string') {
-      if (value == null) {
-        return `Missing required parameter ${parameter}`;
-      }
-      if (typeof value !== 'string') {
-        return `Expected parameter ${parameter} to be a string got ${JSON.stringify(value)}`;
-      }
-    } else {
-      if (!expectation.values.includes(value)) {
-        return `Expected parameter ${parameter} to be one of ${expectation.values.join(', ')}`;
-      }
-    }
-  }
-
-  return undefined;
-}
