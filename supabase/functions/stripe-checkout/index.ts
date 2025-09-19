@@ -36,17 +36,17 @@ Deno.serve(async (req) => {
     }
 
     // Check required environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseUrl = Deno.env.get('PROJECT_URL');
+    const supabaseServiceKey = Deno.env.get('SERVICE_ROLE_KEY');
     const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
 
     if (!supabaseUrl) {
-      console.error('Missing SUPABASE_URL environment variable');
+      console.error('Missing PROJECT_URL environment variable');
       return corsResponse({ error: 'Server configuration error' }, 500);
     }
 
     if (!supabaseServiceKey) {
-      console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+      console.error('Missing SERVICE_ROLE_KEY environment variable');
       return corsResponse({ error: 'Server configuration error' }, 500);
     }
 
