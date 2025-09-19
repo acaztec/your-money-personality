@@ -31,6 +31,50 @@ export default function Dashboard() {
   const [isLocked, setIsLocked] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
 
+  // Handle payment verification after Stripe redirect
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const sessionId = searchParams.get('session_id');
+      const success = searchParams.get('unlocked');
+      
+      if (sessionId && advisorId && success !== '1') {
+        console.log('Verifying payment for session:', sessionId);
+        
+        try {
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              sessionId: sessionId,
+              assessmentId: advisorId
+            })
+          });
+
+          const result = await response.json();
+          
+          if (result.success && result.unlocked) {
+            // Payment verified and assessment unlocked - redirect to show unlocked content
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('unlocked', '1');
+            newUrl.searchParams.delete('session_id');
+            window.location.href = newUrl.toString();
+          } else {
+            console.error('Payment verification failed:', result);
+            alert('Payment verification failed. Please contact support.');
+          }
+        } catch (error) {
+          console.error('Payment verification error:', error);
+          alert('Error verifying payment. Please contact support.');
+        }
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams, advisorId]);
+
   useEffect(() => {
     const loadData = async () => {
       if (advisorId) {
