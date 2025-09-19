@@ -14,82 +14,102 @@ const stripe = new Stripe(stripeSecret, {
 const supabase = createClient(Deno.env.get('PROJECT_URL')!, Deno.env.get('SERVICE_ROLE_KEY')!);
 
 Deno.serve(async (req) => {
+  console.log('🚀 Webhook received request:', req.method, req.url);
+  
   try {
     // Handle OPTIONS request for CORS preflight
     if (req.method === 'OPTIONS') {
+      console.log('✅ Handling CORS preflight');
       return new Response(null, { status: 204 });
     }
 
     if (req.method !== 'POST') {
+      console.log('❌ Invalid method:', req.method);
       return new Response('Method not allowed', { status: 405 });
     }
 
     // get the signature from the header
     const signature = req.headers.get('stripe-signature');
+    console.log('🔑 Stripe signature present:', !!signature);
 
     if (!signature) {
+      console.log('❌ No signature found in headers');
       return new Response('No signature found', { status: 400 });
     }
 
     // get the raw body
     const body = await req.text();
+    console.log('📝 Request body length:', body.length);
 
     // verify the webhook signature
     let event: Stripe.Event;
 
     try {
+      console.log('🔐 Verifying webhook signature...');
       event = await stripe.webhooks.constructEventAsync(body, signature, stripeWebhookSecret);
+      console.log('✅ Webhook signature verified, event type:', event.type);
     } catch (error: any) {
       console.error(`Webhook signature verification failed: ${error.message}`);
       return new Response(`Webhook signature verification failed: ${error.message}`, { status: 400 });
     }
 
+    console.log('🎯 Processing event:', event.type, 'with ID:', event.id);
     EdgeRuntime.waitUntil(handleEvent(event));
 
+    console.log('✅ Webhook processed successfully');
     return Response.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error);
+    console.error('💥 Error processing webhook:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
 
 async function handleEvent(event: Stripe.Event) {
+  console.log('🔄 Starting handleEvent for:', event.type);
+  
   const stripeData = event?.data?.object ?? {};
+  console.log('📊 Event data keys:', Object.keys(stripeData));
 
   if (!stripeData) {
+    console.log('❌ No stripe data in event');
     return;
   }
 
   if (!('customer' in stripeData)) {
+    console.log('❌ No customer field in stripe data');
     return;
   }
 
   // for one time payments, we only listen for the checkout.session.completed event
   if (event.type === 'payment_intent.succeeded' && event.data.object.invoice === null) {
+    console.log('⚠️ Ignoring payment_intent.succeeded for one-time payment');
     return;
   }
 
   const { customer: customerId } = stripeData;
+  console.log('👤 Customer ID:', customerId);
 
   if (!customerId || typeof customerId !== 'string') {
-    console.error(`No customer received on event: ${JSON.stringify(event)}`);
+    console.error(`❌ Invalid customer ID: ${customerId}`);
   } else {
     let isSubscription = true;
 
     if (event.type === 'checkout.session.completed') {
       const { mode } = stripeData as Stripe.Checkout.Session;
+      console.log('🛒 Checkout mode:', mode);
 
       isSubscription = mode === 'subscription';
-
-      console.info(`Processing ${isSubscription ? 'subscription' : 'one-time payment'} checkout session`);
+      console.log(`🎯 Processing ${isSubscription ? 'subscription' : 'one-time payment'} checkout session`);
     }
 
     const { mode, payment_status } = stripeData as Stripe.Checkout.Session;
+    console.log('💰 Payment status:', payment_status);
 
     if (isSubscription) {
-      console.info(`Starting subscription sync for customer: ${customerId}`);
+      console.log(`🔄 Starting subscription sync for customer: ${customerId}`);
       await syncCustomerFromStripe(customerId);
     } else if (mode === 'payment' && payment_status === 'paid') {
+      console.log('💳 Processing paid one-time payment...');
       try {
         // Extract the necessary information from the session
         const {
@@ -114,6 +134,10 @@ async function handleEvent(event: Stripe.Event) {
         const assessmentId = (metadataJson as Record<string, string | undefined>)?.assessment_id ?? client_reference_id ?? null;
         const advisorEmail = (metadataJson as Record<string, string | undefined>)?.advisor_email ?? null;
 
+        console.log('🔍 Payment details:', {
+          checkout_session_id, assessmentId, advisorEmail, amount_total, currency
+        });
+
         if (!paymentIntentId) {
           console.error('Checkout session missing payment intent id', checkout_session_id);
           return;
@@ -121,6 +145,7 @@ async function handleEvent(event: Stripe.Event) {
 
         // Insert the order into the stripe_orders table
         const { data: orderData, error: orderError } = await supabase
+        console.log('💾 Inserting order into stripe_orders...');
           .from('stripe_orders')
           .upsert(
             {
@@ -142,18 +167,20 @@ async function handleEvent(event: Stripe.Event) {
           .maybeSingle();
 
         if (orderError) {
-          console.error('Error upserting order:', orderError);
+          console.error('❌ Error upserting order:', orderError);
           return;
         }
+        console.log('✅ Order inserted successfully:', orderData?.id);
 
         const stripeOrderId = orderData?.id ?? null;
 
         if (!assessmentId) {
-          console.warn('Checkout session completed without assessment metadata', {
+          console.warn('⚠️ Checkout session completed without assessment metadata', {
             checkout_session_id,
           });
         } else {
           const now = new Date().toISOString();
+          console.log('🔓 Unlocking assessment:', assessmentId);
 
           const { error: updateAssessmentError } = await supabase
             .from('advisor_assessments')
@@ -165,7 +192,9 @@ async function handleEvent(event: Stripe.Event) {
             .eq('id', assessmentId);
 
           if (updateAssessmentError) {
-            console.error('Failed to mark assessment as paid:', updateAssessmentError);
+            console.error('❌ Failed to mark assessment as paid:', updateAssessmentError);
+          } else {
+            console.log('✅ Assessment marked as paid');
           }
 
           const { error: updateResultError } = await supabase
@@ -179,12 +208,14 @@ async function handleEvent(event: Stripe.Event) {
             .eq('assessment_id', assessmentId);
 
           if (updateResultError) {
-            console.error('Failed to unlock assessment result:', updateResultError);
+            console.error('❌ Failed to unlock assessment result:', updateResultError);
+          } else {
+            console.log('✅ Assessment result unlocked');
           }
         }
-        console.info(`Successfully processed one-time payment for session: ${checkout_session_id}`);
+        console.log(`🎉 Successfully processed one-time payment for session: ${checkout_session_id}`);
       } catch (error) {
-        console.error('Error processing one-time payment:', error);
+        console.error('💥 Error processing one-time payment:', error);
       }
     }
   }
