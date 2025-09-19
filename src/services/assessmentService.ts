@@ -539,6 +539,52 @@ export class AssessmentService {
       };
     }
   }
+
+  static async forceUnlockAssessment(assessmentId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const now = new Date().toISOString();
+
+      // Update advisor_assessments table
+      const { error: assessmentError } = await supabase
+        .from('advisor_assessments')
+        .update({
+          is_paid: true,
+          paid_at: now,
+          last_checkout_session_id: null
+        })
+        .eq('id', assessmentId);
+
+      if (assessmentError) {
+        console.error('Failed to update advisor_assessments:', assessmentError);
+        return { success: false, error: `Failed to update assessment: ${assessmentError.message}` };
+      }
+
+      // Update assessment_results table
+      const { error: resultError } = await supabase
+        .from('assessment_results')
+        .update({
+          is_unlocked: true,
+          unlocked_at: now,
+          checkout_session_id: null
+        })
+        .eq('assessment_id', assessmentId);
+
+      if (resultError) {
+        console.error('Failed to update assessment_results:', resultError);
+        return { success: false, error: `Failed to update results: ${resultError.message}` };
+      }
+
+      console.log('✅ Assessment unlocked successfully:', assessmentId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error unlocking assessment:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to unlock assessment'
+      };
+    }
+  }
+
   static getAssessment(assessmentId: string): AdvisorAssessment | null {
     try {
       const assessments = this.getAllAssessments();

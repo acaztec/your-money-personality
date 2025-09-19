@@ -168,18 +168,21 @@ export default function Dashboard() {
     }
   };
 
-  // Check for unlock success/cancellation
+  // Check for payment status after redirect
   useEffect(() => {
-    const unlocked = searchParams.get('unlocked');
-    const cancelled = searchParams.get('cancelled');
+    const payment = searchParams.get('payment');
 
-    if (unlocked === '1') {
-      // Refresh the page to load the unlocked content
+    if (payment === 'success') {
+      // Payment successful, refresh to show unlocked content
       window.location.href = `/dashboard?advisor=${advisorId}`;
     }
 
-    if (cancelled === '1') {
-      alert('Checkout was cancelled. The report remains locked.');
+    if (payment === 'cancelled') {
+      alert('Payment was cancelled. The report has been unlocked for you to review, but please complete payment when convenient.');
+      // Clean up URL
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.delete('payment');
+      window.history.replaceState({}, '', newUrl.toString());
     }
   }, [searchParams, advisorId]);
 
