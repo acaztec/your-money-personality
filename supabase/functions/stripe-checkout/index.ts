@@ -1,4 +1,4 @@
-// Minimal, bulletproof Edge Function that prioritizes CORS handling
+// Complete Stripe Checkout Edge Function
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -8,7 +8,7 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   console.log(`${req.method} ${req.url}`);
   
-  // CRITICAL: Handle OPTIONS first - no exceptions, no imports, no logic
+  // Handle CORS preflight - this must be first
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
     return new Response(null, { 
@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Only proceed if method is POST
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -26,15 +26,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting checkout session creation...');
+    console.log('Starting Stripe checkout process...');
 
-    // Dynamic imports to prevent startup crashes
+    // Dynamic imports to prevent startup issues
     const [{ default: Stripe }, { createClient }] = await Promise.all([
       import('npm:stripe@17.7.0'),
       import('npm:@supabase/supabase-js@2.49.1')
     ]);
 
-    console.log('Imported dependencies successfully');
+    console.log('Dependencies imported successfully');
 
     // Get environment variables
     const projectUrl = Deno.env.get('PROJECT_URL');
@@ -49,16 +49,17 @@ Deno.serve(async (req) => {
       hasReportPrice: !!reportPriceId
     });
 
-    // Check critical env vars
-    if (!projectUrl || !serviceRoleKey || !stripeSecret) {
+    // Validate required environment variables
+    if (!projectUrl || !serviceRoleKey || !stripeSecret || !reportPriceId) {
       const missing = [];
       if (!projectUrl) missing.push('PROJECT_URL');
       if (!serviceRoleKey) missing.push('SERVICE_ROLE_KEY');
       if (!stripeSecret) missing.push('STRIPE_SECRET_KEY');
+      if (!reportPriceId) missing.push('STRIPE_REPORT_PRICE_ID');
       
       console.error('Missing environment variables:', missing);
       return new Response(JSON.stringify({ 
-        error: 'Missing required environment variables', 
+        error: 'Server configuration error - missing environment variables', 
         missing 
       }), {
         status: 500,
@@ -70,20 +71,20 @@ Deno.serve(async (req) => {
     let body;
     try {
       body = await req.json();
+      console.log('Request body parsed:', body);
     } catch (e) {
       console.error('JSON parse error:', e);
-      return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('Request body:', body);
-
     const { assessment_id, success_url, cancel_url, price_id } = body;
 
     // Validate required parameters
     if (!assessment_id || !success_url || !cancel_url) {
+      console.error('Missing required parameters:', { assessment_id: !!assessment_id, success_url: !!success_url, cancel_url: !!cancel_url });
       return new Response(JSON.stringify({ 
         error: 'Missing required parameters',
         required: ['assessment_id', 'success_url', 'cancel_url']
@@ -93,18 +94,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Initialize clients
+    // Initialize Supabase client
     const supabase = createClient(projectUrl, serviceRoleKey);
-    const stripe = new Stripe(stripeSecret, {
-      apiVersion: '2023-10-16'
-    });
-
-    console.log('Initialized Stripe and Supabase clients');
+    console.log('Supabase client initialized');
 
     // Get user from authorization header
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+      console.error('No authorization header found');
+      return new Response(JSON.stringify({ error: 'Authorization header required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -114,31 +112,85 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user?.email) {
-      console.error('User auth error:', userError);
-      return new Response(JSON.stringify({ error: 'Authentication failed' }), {
+      console.error('User authentication failed:', userError);
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('Authenticated user:', user.email);
+    console.log('User authenticated:', user.email);
 
-    // For now, return a test response to verify the function works
+    // Verify assessment exists and belongs to this advisor
+    const { data: assessment, error: assessmentError } = await supabase
+      .from('advisor_assessments')
+      .select('*')
+      .eq('id', assessment_id)
+      .eq('advisor_email', user.email)
+      .single();
+
+    if (assessmentError || !assessment) {
+      console.error('Assessment not found or unauthorized:', assessmentError);
+      return new Response(JSON.stringify({ error: 'Assessment not found or access denied' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Assessment verified:', assessment.id);
+
+    // Initialize Stripe
+    const stripe = new Stripe(stripeSecret, {
+      apiVersion: '2023-10-16'
+    });
+    console.log('Stripe client initialized');
+
+    // Use the price_id from the request or fall back to environment variable
+    const finalPriceId = price_id || reportPriceId;
+    console.log('Using price ID:', finalPriceId);
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price: finalPriceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: success_url,
+      cancel_url: cancel_url,
+      client_reference_id: assessment_id,
+      metadata: {
+        assessment_id: assessment_id,
+        advisor_email: user.email,
+      },
+    });
+
+    console.log('Stripe checkout session created:', session.id);
+
+    if (!session.url) {
+      console.error('Stripe session created but no URL returned');
+      return new Response(JSON.stringify({ error: 'Checkout session created but no URL available' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Return the checkout URL
     return new Response(JSON.stringify({
-      message: 'Edge Function is working!',
-      user: user.email,
-      assessment_id,
-      timestamp: new Date().toISOString()
+      url: session.url,
+      sessionId: session.id
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Stripe checkout error:', error);
     return new Response(JSON.stringify({ 
-      error: 'Internal server error',
-      message: error.message || 'Unknown error'
+      error: 'Failed to create checkout session',
+      message: error.message || 'Unknown error occurred'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
