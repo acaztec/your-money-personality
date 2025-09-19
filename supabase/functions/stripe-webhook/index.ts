@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       event = await stripe.webhooks.constructEventAsync(body, signature, stripeWebhookSecret);
       console.log('✅ Webhook signature verified, event type:', event.type);
     } catch (error: any) {
-      console.error(`Webhook signature verification failed: ${error.message}`);
+      console.error(`❌ Webhook signature verification failed: ${error.message}`);
       return new Response(`Webhook signature verification failed: ${error.message}`, { status: 400 });
     }
 
@@ -139,13 +139,13 @@ async function handleEvent(event: Stripe.Event) {
         });
 
         if (!paymentIntentId) {
-          console.error('Checkout session missing payment intent id', checkout_session_id);
+          console.error('❌ Checkout session missing payment intent id', checkout_session_id);
           return;
         }
 
         // Insert the order into the stripe_orders table
-        const { data: orderData, error: orderError } = await supabase
         console.log('💾 Inserting order into stripe_orders...');
+        const { data: orderData, error: orderError } = await supabase
           .from('stripe_orders')
           .upsert(
             {
@@ -182,6 +182,8 @@ async function handleEvent(event: Stripe.Event) {
           const now = new Date().toISOString();
           console.log('🔓 Unlocking assessment:', assessmentId);
 
+          // Update advisor_assessments table
+          console.log('📝 Updating advisor_assessments table...');
           const { error: updateAssessmentError } = await supabase
             .from('advisor_assessments')
             .update({
@@ -197,6 +199,8 @@ async function handleEvent(event: Stripe.Event) {
             console.log('✅ Assessment marked as paid');
           }
 
+          // Update assessment_results table
+          console.log('📝 Updating assessment_results table...');
           const { error: updateResultError } = await supabase
             .from('assessment_results')
             .update({
@@ -238,7 +242,7 @@ async function syncCustomerFromStripe(customerId: string) {
       const { error: noSubError } = await supabase.from('stripe_subscriptions').upsert(
         {
           customer_id: customerId,
-          subscription_status: 'not_started',
+          status: 'not_started',
         },
         {
           onConflict: 'customer_id',
