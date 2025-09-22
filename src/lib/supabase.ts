@@ -56,8 +56,6 @@ export type Database = {
           created_at: string
           is_unlocked: boolean
           unlocked_at: string | null
-          stripe_order_id: number | null
-          checkout_session_id: string | null
         }
         Insert: {
           id?: string
@@ -72,8 +70,6 @@ export type Database = {
           created_at?: string
           is_unlocked?: boolean
           unlocked_at?: string | null
-          stripe_order_id?: number | null
-          checkout_session_id?: string | null
         }
         Update: {
           id?: string
@@ -88,8 +84,6 @@ export type Database = {
           created_at?: string
           is_unlocked?: boolean
           unlocked_at?: string | null
-          stripe_order_id?: number | null
-          checkout_session_id?: string | null
         }
       }
       advisor_assessments: {
@@ -106,7 +100,6 @@ export type Database = {
           created_at: string
           is_paid: boolean
           paid_at: string | null
-          last_checkout_session_id: string | null
         }
         Insert: {
           id: string
@@ -121,7 +114,6 @@ export type Database = {
           created_at?: string
           is_paid?: boolean
           paid_at?: string | null
-          last_checkout_session_id?: string | null
         }
         Update: {
           id?: string
@@ -136,7 +128,6 @@ export type Database = {
           created_at?: string
           is_paid?: boolean
           paid_at?: string | null
-          last_checkout_session_id?: string | null
         }
       }
     }

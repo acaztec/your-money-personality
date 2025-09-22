@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   AssessmentService,
@@ -27,7 +27,6 @@ import {
 
 export default function AdvisorDashboard() {
   const { advisor, logout } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [assessments, setAssessments] = useState<DatabaseAdvisorAssessment[]>([]);
   const [unlockedResults, setUnlockedResults] = useState<DatabaseAssessmentResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +93,6 @@ export default function AdvisorDashboard() {
                     : undefined,
               is_paid: false,
               paid_at: null,
-              last_checkout_session_id: null,
             }));
 
             setAssessments(normalized);
@@ -139,27 +137,6 @@ export default function AdvisorDashboard() {
       window.removeEventListener('localStorageUpdate', handleCustomStorageChange);
     };
   }, [refreshData]);
-
-  useEffect(() => {
-    const success = searchParams.get('checkoutSuccess');
-    const cancelled = searchParams.get('checkoutCancelled');
-
-    if (success === '1') {
-      setBanner({ type: 'success', message: 'Payment received! Unlocking your report now.' });
-      refreshData(false);
-    } else if (cancelled === '1') {
-      setBanner({ type: 'info', message: 'Checkout was cancelled. No payment was taken.' });
-    }
-
-    if (success || cancelled) {
-      const next = new URLSearchParams(searchParams);
-      next.delete('checkoutSuccess');
-      next.delete('checkoutCancelled');
-      next.delete('session_id');
-      next.delete('assessment');
-      setSearchParams(next, { replace: true });
-    }
-  }, [searchParams, setSearchParams, refreshData]);
 
   const handleLogout = () => {
     logout();
@@ -210,19 +187,17 @@ export default function AdvisorDashboard() {
     setCheckoutLoadingId(assessmentId);
     setBanner(null);
 
-    const successUrl = `${window.location.origin}/advisor/dashboard?checkoutSuccess=1&assessment=${assessmentId}&session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${window.location.origin}/advisor/dashboard?checkoutCancelled=1&assessment=${assessmentId}`;
-
-    const result = await AssessmentService.startCheckout(assessmentId, successUrl, cancelUrl);
+    const result = await AssessmentService.unlockAssessment(assessmentId);
 
     setCheckoutLoadingId(null);
 
-    if (!result.success || !result.url) {
-      setBanner({ type: 'error', message: result.error || 'Failed to start checkout. Please try again.' });
+    if (!result.success) {
+      setBanner({ type: 'error', message: result.error || 'Failed to unlock report. Please try again.' });
       return;
     }
 
-    window.location.href = result.url;
+    setBanner({ type: 'success', message: 'Report unlocked successfully for demo purposes.' });
+    await refreshData(false);
   };
 
   const bannerTheme = useMemo(() => {
@@ -503,18 +478,18 @@ export default function AdvisorDashboard() {
                                 View Results
                               </button>
                             ) : !isPaid ? (
-                              <button
-                                onClick={() => handleUnlock(assessment.id)}
-                                disabled={checkoutLoadingId === assessment.id}
-                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {checkoutLoadingId === assessment.id ? (
+                            <button
+                              onClick={() => handleUnlock(assessment.id)}
+                              disabled={checkoutLoadingId === assessment.id}
+                              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                              {checkoutLoadingId === assessment.id ? (
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 ) : (
                                   <CreditCard className="w-4 h-4 mr-2" />
                                 )}
-                                {checkoutLoadingId === assessment.id ? 'Redirecting…' : 'Unlock report ($1)'}
-                              </button>
+                                {checkoutLoadingId === assessment.id ? 'Unlocking…' : 'Unlock report (demo)'}
+                            </button>
                             ) : (
                               <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-amber-700 bg-amber-100 rounded-lg">
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
