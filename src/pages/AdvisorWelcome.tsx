@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3 } from 'lucide-react';
+import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3, LogOut } from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
 export default function AdvisorWelcome() {
-  const { advisor } = useAuth();
+  const { advisor, logout } = useAuth();
+  const navigate = useNavigate();
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [shareError, setShareError] = useState('');
@@ -37,6 +38,11 @@ export default function AdvisorWelcome() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/advisor/login');
   };
 
   const handleShareAssessment = async (e: React.FormEvent) => {
@@ -76,9 +82,9 @@ export default function AdvisorWelcome() {
       <div className="bg-primary-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <img 
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-              alt="iGrad Enrich" 
+            <img
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              alt="iGrad Enrich"
               className="h-8 w-auto"
             />
             <div className="flex items-center space-x-4">
@@ -94,6 +100,14 @@ export default function AdvisorWelcome() {
               >
                 For Individuals
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-2 text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>

@@ -63,7 +63,7 @@ export class AssessmentService {
     sharerProfile: Profile,
     personalNote?: string,
     recipientName?: string
-  ): Promise<{ success: boolean; shareId?: string; error?: string }> {
+  ): Promise<{ success: boolean; shareId?: string; assessmentLink?: string; error?: string }> {
     try {
       if (!sharerProfile) {
         return { success: false, error: 'Your profile is required before sharing the assessment.' };
@@ -103,7 +103,7 @@ export class AssessmentService {
         throw new Error('Failed to send invitation email');
       }
 
-      return { success: true, shareId };
+      return { success: true, shareId, assessmentLink };
     } catch (error) {
       console.error('Error sharing assessment with friend:', error);
       return {

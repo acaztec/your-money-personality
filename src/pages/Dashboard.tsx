@@ -24,6 +24,8 @@ export default function Dashboard() {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [shareError, setShareError] = useState('');
+  const [shareLink, setShareLink] = useState('');
+  const [shareCopyFeedback, setShareCopyFeedback] = useState('');
   const [friendShares, setFriendShares] = useState<FriendAssessmentShare[]>([]);
   const [compatibility, setCompatibility] = useState<CompatibilityInsights | null>(null);
   const [advisorResult, setAdvisorResult] = useState<DatabaseAssessmentResult | null>(null);
@@ -124,6 +126,8 @@ export default function Dashboard() {
     setIsSharing(true);
     setShareError('');
     setShareSuccess(false);
+    setShareLink('');
+    setShareCopyFeedback('');
 
     const userName = localStorage.getItem('userName') || 'Someone';
     const userEmail = localStorage.getItem('userEmail') || '';
@@ -142,6 +146,7 @@ export default function Dashboard() {
 
     if (result.success) {
       setShareSuccess(true);
+      setShareLink(result.assessmentLink || '');
       setShareEmail('');
       setShareName('');
       setPersonalNote('');
@@ -151,6 +156,21 @@ export default function Dashboard() {
       setFriendShares(shares);
     } else {
       setShareError(result.error || 'Failed to share assessment');
+      setShareLink('');
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareLink) return;
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setShareCopyFeedback('Link copied to clipboard!');
+      setTimeout(() => setShareCopyFeedback(''), 3000);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      setShareCopyFeedback('Unable to copy automatically. Please copy the link manually.');
+      setTimeout(() => setShareCopyFeedback(''), 4000);
     }
   };
 
@@ -542,11 +562,11 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                 <Share2 className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Share with Partner</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Share the Compatibility Quiz</h2>
             </div>
 
             <p className="text-gray-600 mb-6">
-              Invite your partner to take the assessment and discover how your money personalities work together.
+              Invite someone important in your life to explore how your money personalities complement each other.
             </p>
 
             {shareSuccess && (
@@ -555,7 +575,32 @@ export default function Dashboard() {
                   <Star className="w-5 h-5 text-green-600" />
                   <p className="text-green-800 font-medium">Assessment invitation sent successfully!</p>
                 </div>
-                <p className="text-green-700 text-sm mt-1">They'll receive an email with the assessment link.</p>
+                <p className="text-green-700 text-sm mt-1">They'll receive an email with the quiz link.</p>
+                {shareLink && (
+                  <div className="mt-4 text-left">
+                    <p className="text-sm text-green-700 mb-2">
+                      Want to share it directly? Use this link:
+                    </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={shareLink}
+                        className="flex-1 px-3 py-2 border border-green-200 rounded-lg bg-white text-sm text-gray-800"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCopyShareLink}
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors"
+                      >
+                        Copy link
+                      </button>
+                    </div>
+                    {shareCopyFeedback && (
+                      <p className="text-xs text-green-700 mt-2">{shareCopyFeedback}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
