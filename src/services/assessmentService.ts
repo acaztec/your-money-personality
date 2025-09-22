@@ -125,9 +125,19 @@ export class AssessmentService {
     try {
       // Verify advisor is authenticated
       const currentAdvisor = await AuthService.getCurrentAdvisor();
-      if (!currentAdvisor || currentAdvisor.email !== advisorEmail) {
+      const normalizedCurrentEmail = currentAdvisor?.email?.trim().toLowerCase() || '';
+      const normalizedProvidedEmail = advisorEmail?.trim().toLowerCase() || '';
+
+      if (!currentAdvisor || !normalizedCurrentEmail) {
         return { success: false, error: 'Unauthorized: Please log in again' };
       }
+
+      if (normalizedProvidedEmail && normalizedCurrentEmail !== normalizedProvidedEmail) {
+        return { success: false, error: 'Advisor email mismatch. Please refresh and try again.' };
+      }
+
+      const canonicalAdvisorEmail = normalizedCurrentEmail;
+      const canonicalAdvisorName = currentAdvisor.name?.trim() || advisorName;
 
       const assessmentId = this.generateAssessmentId();
       const assessmentLink = this.generateAssessmentLink(assessmentId);
@@ -137,8 +147,8 @@ export class AssessmentService {
         .from('advisor_assessments')
         .insert({
           id: assessmentId,
-          advisor_email: advisorEmail,
-          advisor_name: advisorName,
+          advisor_email: canonicalAdvisorEmail,
+          advisor_name: canonicalAdvisorName,
           client_email: clientEmail,
           client_name: clientName,
           status: 'sent',
@@ -153,8 +163,8 @@ export class AssessmentService {
       // Also save to localStorage for backward compatibility
       const localAssessment: AdvisorAssessment = {
         id: assessmentId,
-        advisorName,
-        advisorEmail,
+        advisorName: canonicalAdvisorName,
+        advisorEmail: canonicalAdvisorEmail,
         clientEmail,
         clientName,
         status: 'sent',
@@ -448,22 +458,114 @@ export class AssessmentService {
   }
 
   // Update method to get assessments for advisor dashboard
-  static async getAssessmentsForAdvisorFromDatabase(advisorEmail: string): Promise<DatabaseAdvisorAssessment[]> {
+  static async getAssessmentsForAdvisorFromDatabase(
+    advisorEmail: string,
+    advisorName?: string,
+  ): Promise<DatabaseAdvisorAssessment[]> {
     try {
-      const { data, error } = await supabase
-        .from('advisor_assessments')
-        .select(
-          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id',
-        )
-        .eq('advisor_email', advisorEmail)
-        .order('sent_at', { ascending: false });
+      const normalizedEmail = advisorEmail?.trim().toLowerCase();
 
-      if (error) {
-        console.error('Error fetching advisor assessments:', error);
+      if (!normalizedEmail && !advisorName) {
         return [];
       }
 
-      return (data as DatabaseAdvisorAssessment[]) || [];
+      const columns =
+        'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id';
+
+      let typedData: DatabaseAdvisorAssessment[] = [];
+
+      if (normalizedEmail) {
+        const { data, error } = await supabase
+          .from('advisor_assessments')
+          .select(columns)
+          .eq('advisor_email', normalizedEmail)
+          .order('sent_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching advisor assessments:', error);
+          return [];
+        }
+
+        typedData = (data as DatabaseAdvisorAssessment[]) || [];
+        if (typedData.length > 0 || !advisorName) {
+          return typedData;
+        }
+      }
+
+      if (!advisorName) {
+        return typedData;
+      }
+
+      // Handle legacy records that were created before advisor emails were stored correctly
+      const legacyRecords: DatabaseAdvisorAssessment[] = [];
+
+      const [{ data: nullEmailData, error: nullEmailError }, { data: blankEmailData, error: blankEmailError }] = await Promise.all([
+        supabase
+          .from('advisor_assessments')
+          .select(columns)
+          .is('advisor_email', null)
+          .eq('advisor_name', advisorName)
+          .order('sent_at', { ascending: false }),
+        supabase
+          .from('advisor_assessments')
+          .select(columns)
+          .eq('advisor_email', '')
+          .eq('advisor_name', advisorName)
+          .order('sent_at', { ascending: false }),
+      ]);
+
+      if (nullEmailError) {
+        console.error('Error fetching advisor assessments with null email:', nullEmailError);
+      }
+      if (blankEmailError) {
+        console.error('Error fetching advisor assessments with blank email:', blankEmailError);
+      }
+
+      if (nullEmailData) {
+        legacyRecords.push(...(nullEmailData as DatabaseAdvisorAssessment[]));
+      }
+      if (blankEmailData) {
+        legacyRecords.push(...(blankEmailData as DatabaseAdvisorAssessment[]));
+      }
+
+      if (legacyRecords.length === 0) {
+        return [];
+      }
+
+      legacyRecords.sort((a, b) => {
+        const sentA = a.sent_at ? new Date(a.sent_at).getTime() : 0;
+        const sentB = b.sent_at ? new Date(b.sent_at).getTime() : 0;
+        return sentB - sentA;
+      });
+
+      const legacyIds = legacyRecords.map(record => record.id);
+
+      if (!normalizedEmail) {
+        return legacyRecords;
+      }
+
+      const { error: updateError } = await supabase
+        .from('advisor_assessments')
+        .update({ advisor_email: normalizedEmail })
+        .in('id', legacyIds);
+
+      if (updateError) {
+        console.error('Failed to backfill advisor emails on assessments:', updateError);
+        return legacyRecords.map(record => ({ ...record, advisor_email: normalizedEmail }));
+      }
+
+      const { data: refetchedData, error: refetchError } = await supabase
+        .from('advisor_assessments')
+        .select(columns)
+        .eq('advisor_email', normalizedEmail)
+        .order('sent_at', { ascending: false });
+
+      if (refetchError) {
+        console.error('Error refetching advisor assessments after email backfill:', refetchError);
+        return legacyRecords.map(record => ({ ...record, advisor_email: normalizedEmail }));
+      }
+
+      return (refetchedData as DatabaseAdvisorAssessment[]) || [];
     } catch (error) {
       console.error('Error getting advisor assessments from database:', error);
       return [];

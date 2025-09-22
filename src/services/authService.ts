@@ -27,7 +27,11 @@ export interface SignupData {
 export class AuthService {
   static storeAdvisorProfile(advisor: Advisor) {
     try {
-      localStorage.setItem(ADVISOR_STORAGE_KEY, JSON.stringify(advisor))
+      const sanitizedAdvisor: Advisor = {
+        ...advisor,
+        email: advisor.email?.trim().toLowerCase() || advisor.email,
+      }
+      localStorage.setItem(ADVISOR_STORAGE_KEY, JSON.stringify(sanitizedAdvisor))
     } catch (err) {
       console.error('Failed to store advisor profile:', err)
     }
@@ -36,7 +40,23 @@ export class AuthService {
   static getStoredAdvisorProfile(): Advisor | null {
     try {
       const data = localStorage.getItem(ADVISOR_STORAGE_KEY)
-      return data ? JSON.parse(data) : null
+      if (!data) {
+        return null
+      }
+
+      const parsed = JSON.parse(data) as Advisor
+      if (!parsed.email) {
+        return parsed
+      }
+
+      const normalizedEmail = parsed.email.trim().toLowerCase()
+      if (normalizedEmail === parsed.email) {
+        return parsed
+      }
+
+      const normalizedAdvisor = { ...parsed, email: normalizedEmail }
+      this.storeAdvisorProfile(normalizedAdvisor)
+      return normalizedAdvisor
     } catch {
       return null
     }
@@ -77,11 +97,11 @@ export class AuthService {
 
       // Get advisor profile
       let advisor = await this.getAdvisorProfile(data.user.id)
-      
+
       // If no advisor profile exists but user is confirmed, create it from user metadata
       if (!advisor && data.user.email_confirmed_at) {
         console.log('Creating missing advisor profile for confirmed user:', data.user.id)
-        
+
         const name = data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Advisor'
         const company = data.user.user_metadata?.company || null
         
@@ -110,13 +130,21 @@ export class AuthService {
           return { success: false, error: 'Failed to create advisor profile' }
         }
       }
-      
+
       if (!advisor) {
         return { success: false, error: 'Advisor profile not found and could not be created' }
       }
 
-      this.storeAdvisorProfile(advisor)
-      return { success: true, advisor }
+      // Ensure the advisor object always carries the authenticated email address
+      const normalizedEmail = data.user.email ? data.user.email.trim().toLowerCase() : advisor.email
+
+      const advisorWithEmail: Advisor = {
+        ...advisor,
+        email: normalizedEmail || advisor.email,
+      }
+
+      this.storeAdvisorProfile(advisorWithEmail)
+      return { success: true, advisor: advisorWithEmail }
     } catch (error) {
       console.error('Login error:', error)
       return { 
@@ -253,15 +281,24 @@ export class AuthService {
       if (!user) return null
 
       const cached = this.getStoredAdvisorProfile()
-      if (cached && cached.user_id === user.id) {
+      const cachedEmail = cached?.email?.trim()
+      if (cached && cached.user_id === user.id && cachedEmail) {
+        const normalizedEmail = cachedEmail.toLowerCase()
+        if (normalizedEmail !== cached.email) {
+          const normalizedAdvisor = { ...cached, email: normalizedEmail }
+          this.storeAdvisorProfile(normalizedAdvisor)
+          return normalizedAdvisor
+        }
+
         return cached
       }
 
       const advisor = await this.getAdvisorProfile(user.id)
       if (advisor) {
+        const normalizedEmail = user.email ? user.email.trim().toLowerCase() : advisor.email
         const completeAdvisor = {
           ...advisor,
-          email: user.email!
+          email: normalizedEmail || advisor.email
         }
         this.storeAdvisorProfile(completeAdvisor)
         return completeAdvisor
