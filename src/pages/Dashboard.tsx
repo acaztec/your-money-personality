@@ -150,13 +150,13 @@ export default function Dashboard() {
       setShareEmail('');
       setShareName('');
       setPersonalNote('');
-      
+
       // Refresh friend assessments
       const shares = AssessmentService.getFriendAssessmentsForUser();
       setFriendShares(shares);
     } else {
       setShareError(result.error || 'Failed to share assessment');
-      setShareLink('');
+      setShareLink(result.assessmentLink || '');
     }
   };
 
@@ -607,6 +607,31 @@ export default function Dashboard() {
             {shareError && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-800 font-medium">Error: {shareError}</p>
+                {shareLink && (
+                  <div className="mt-4 text-left">
+                    <p className="text-sm text-red-700 mb-2">
+                      The quiz link is still ready—share it directly while email delivery is unavailable:
+                    </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={shareLink}
+                        className="flex-1 px-3 py-2 border border-red-200 rounded-lg bg-white text-sm text-gray-800"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCopyShareLink}
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+                      >
+                        Copy link
+                      </button>
+                    </div>
+                    {shareCopyFeedback && (
+                      <p className="text-xs text-red-700 mt-2">{shareCopyFeedback}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

@@ -50,6 +50,8 @@ export default function AdvisorWelcome() {
     setIsSharing(true);
     setShareError('');
     setShareSuccess(false);
+    setGeneratedLink('');
+    setCopyFeedback('');
 
     const result = await AssessmentService.shareAssessment(
       formData.advisorName,
@@ -72,7 +74,9 @@ export default function AdvisorWelcome() {
       });
     } else {
       setShareError(result.error || 'Failed to share assessment');
-      setGeneratedLink('');
+      if (result.assessmentLink) {
+        setGeneratedLink(result.assessmentLink);
+      }
     }
   };
 
@@ -190,6 +194,31 @@ export default function AdvisorWelcome() {
           {shareError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-800 font-medium">Error: {shareError}</p>
+              {generatedLink && (
+                <div className="mt-4 text-left">
+                  <p className="text-sm text-red-700 mb-2">
+                    The assessment link was still created—share it manually while email delivery is unavailable:
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedLink}
+                      className="flex-1 px-3 py-2 border border-red-200 rounded-lg bg-white text-sm text-gray-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+                    >
+                      Copy link
+                    </button>
+                  </div>
+                  {copyFeedback && (
+                    <p className="text-xs text-red-700 mt-2">{copyFeedback}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
