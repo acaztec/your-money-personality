@@ -62,7 +62,7 @@ export default function AdvisorDashboard() {
 
       try {
         const [dbAssessments, dbResults] = await Promise.all([
-          AssessmentService.getAssessmentsForAdvisorFromDatabase(currentAdvisorEmail),
+          AssessmentService.getAssessmentsForAdvisorFromDatabase(currentAdvisorEmail, currentAdvisorName),
           AssessmentService.getUnlockedAssessmentResultsForAdvisor(currentAdvisorEmail),
         ]);
 
