@@ -9,12 +9,28 @@ export default function AdvisorWelcome() {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [shareError, setShareError] = useState('');
+  const [generatedLink, setGeneratedLink] = useState('');
+  const [copyFeedback, setCopyFeedback] = useState('');
   const [formData, setFormData] = useState({
     advisorName: advisor?.name || '',
     advisorEmail: advisor?.email || '',
     clientEmail: '',
     clientName: ''
   });
+
+  const handleCopyLink = async () => {
+    if (!generatedLink) return;
+
+    try {
+      await navigator.clipboard.writeText(generatedLink);
+      setCopyFeedback('Link copied to clipboard!');
+      setTimeout(() => setCopyFeedback(''), 3000);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      setCopyFeedback('Unable to copy automatically. Please copy the link manually.');
+      setTimeout(() => setCopyFeedback(''), 4000);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -40,6 +56,8 @@ export default function AdvisorWelcome() {
 
     if (result.success) {
       setShareSuccess(true);
+      setGeneratedLink(result.assessmentLink || '');
+      setCopyFeedback('');
       setFormData({
         advisorName: advisor?.name || '',
         advisorEmail: advisor?.email || '',
@@ -48,6 +66,7 @@ export default function AdvisorWelcome() {
       });
     } else {
       setShareError(result.error || 'Failed to share assessment');
+      setGeneratedLink('');
     }
   };
 
@@ -126,6 +145,31 @@ export default function AdvisorWelcome() {
                 <p className="text-green-800 font-medium">Assessment invitation sent successfully!</p>
               </div>
               <p className="text-green-700 text-sm mt-1">Your client will receive an email with the assessment link.</p>
+              {generatedLink && (
+                <div className="mt-4 text-left">
+                  <p className="text-sm text-green-700 mb-2">
+                    For the demo, you can also share the link directly:
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedLink}
+                      className="flex-1 px-3 py-2 border border-green-200 rounded-lg bg-white text-sm text-gray-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors"
+                    >
+                      Copy link
+                    </button>
+                  </div>
+                  {copyFeedback && (
+                    <p className="text-xs text-green-700 mt-2">{copyFeedback}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

@@ -18,7 +18,6 @@ export interface DatabaseAdvisorAssessment {
   completed_at?: string;
   is_paid: boolean;
   paid_at?: string | null;
-  last_checkout_session_id?: string | null;
 }
 
 export interface DatabaseAssessmentResult {
@@ -34,8 +33,6 @@ export interface DatabaseAssessmentResult {
   created_at: string;
   is_unlocked: boolean;
   unlocked_at?: string | null;
-  stripe_order_id?: number | null;
-  checkout_session_id?: string | null;
 }
 
 export class AssessmentService {
@@ -121,7 +118,7 @@ export class AssessmentService {
     advisorEmail: string,
     clientEmail: string,
     clientName?: string
-  ): Promise<{ success: boolean; assessmentId?: string; error?: string }> {
+  ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string }> {
     try {
       // Verify advisor is authenticated
       const currentAdvisor = await AuthService.getCurrentAdvisor();
@@ -187,12 +184,12 @@ export class AssessmentService {
         throw new Error('Failed to send email invitation');
       }
 
-      return { success: true, assessmentId };
+      return { success: true, assessmentId, assessmentLink };
     } catch (error) {
       console.error('Error sharing assessment:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
   }
@@ -393,7 +390,7 @@ export class AssessmentService {
       const { data, error } = await supabase
         .from('advisor_assessments')
         .select(
-          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id',
+          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at',
         )
         .eq('id', assessmentId)
         .single();
@@ -470,7 +467,7 @@ export class AssessmentService {
       }
 
       const columns =
-        'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, last_checkout_session_id';
+        'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at';
 
       let typedData: DatabaseAdvisorAssessment[] = [];
 
@@ -592,52 +589,20 @@ export class AssessmentService {
     }
   }
 
-  static async startCheckout(
-    assessmentId: string,
-    successUrl: string,
-    cancelUrl: string
-  ): Promise<{ success: boolean; url?: string; sessionId?: string; error?: string }> {
+  static async unlockAssessment(assessmentId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Get the current user's session token for authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError || !session) {
         return { success: false, error: 'Authentication required' };
       }
 
-      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-        body: {
-          assessment_id: assessmentId,
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-          price_id: import.meta.env.VITE_STRIPE_REPORT_PRICE_ID || 'price_1S8R4kLG78umdkDnPPtdrLhQ'
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        },
-      });
-
-      if (error) {
-        console.error('Error creating checkout session:', error);
-        return { success: false, error: error.message || 'Failed to start checkout session' };
-      }
-
-      if (!data || typeof data !== 'object') {
-        return { success: false, error: 'Unexpected response from checkout service' };
-      }
-
-      const { url, sessionId } = data as { url?: string; sessionId?: string };
-
-      if (!url) {
-        return { success: false, error: 'Checkout session did not return a URL' };
-      }
-
-      return { success: true, url, sessionId };
+      return await this.forceUnlockAssessment(assessmentId);
     } catch (error) {
-      console.error('Error starting checkout:', error);
+      console.error('Error unlocking assessment:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to start checkout session'
+        error: error instanceof Error ? error.message : 'Failed to unlock assessment'
       };
     }
   }
@@ -651,8 +616,7 @@ export class AssessmentService {
         .from('advisor_assessments')
         .update({
           is_paid: true,
-          paid_at: now,
-          last_checkout_session_id: null
+          paid_at: now
         })
         .eq('id', assessmentId);
 
@@ -666,8 +630,7 @@ export class AssessmentService {
         .from('assessment_results')
         .update({
           is_unlocked: true,
-          unlocked_at: now,
-          checkout_session_id: null
+          unlocked_at: now
         })
         .eq('assessment_id', assessmentId);
 

@@ -31,62 +31,6 @@ export default function Dashboard() {
   const [isLocked, setIsLocked] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
 
-  // Handle payment verification after Stripe redirect
-  useEffect(() => {
-    const verifyPayment = async () => {
-      const sessionId = searchParams.get('session_id');
-      const success = searchParams.get('unlocked');
-      
-      if (sessionId && advisorId && success !== '1') {
-        console.log('Verifying payment for session:', sessionId);
-        
-        try {
-          // Import Supabase client
-          const { supabase } = await import('../lib/supabase');
-          
-          // Directly update the database - payment succeeded if we got here
-          const now = new Date().toISOString();
-          
-          // Update advisor_assessments
-          await supabase
-            .from('advisor_assessments')
-            .update({
-              is_paid: true,
-              paid_at: now,
-              last_checkout_session_id: sessionId,
-            })
-            .eq('id', advisorId);
-
-          // Update assessment_results  
-          await supabase
-            .from('assessment_results')
-            .update({
-              is_unlocked: true,
-              unlocked_at: now,
-              checkout_session_id: sessionId,
-            })
-            .eq('assessment_id', advisorId);
-
-          // Redirect to show unlocked content
-          const newUrl = new URL(window.location);
-          newUrl.searchParams.set('unlocked', '1');
-          newUrl.searchParams.delete('session_id');
-          window.location.href = newUrl.toString();
-          
-        } catch (error) {
-          console.error('Error unlocking report:', error);
-          // Still redirect - they paid, so unlock it
-          const newUrl = new URL(window.location);
-          newUrl.searchParams.set('unlocked', '1');
-          newUrl.searchParams.delete('session_id');
-          window.location.href = newUrl.toString();
-        }
-      }
-    };
-
-    verifyPayment();
-  }, [searchParams, advisorId]);
-
   useEffect(() => {
     const loadData = async () => {
       if (advisorId) {
@@ -147,43 +91,31 @@ export default function Dashboard() {
 
     setIsUnlocking(true);
 
-    const successUrl = `${window.location.origin}/dashboard?advisor=${advisorId}&unlocked=1`;
-    const cancelUrl = `${window.location.origin}/dashboard?advisor=${advisorId}&cancelled=1`;
-
     try {
-      const result = await AssessmentService.startCheckout(advisorId, successUrl, cancelUrl);
+      const result = await AssessmentService.unlockAssessment(advisorId);
 
-      if (result.success && result.url) {
-        window.location.href = result.url;
+      if (result.success) {
+        const updated = await AssessmentService.getAssessmentResult(advisorId);
+        if (updated) {
+          setAdvisorResult(updated);
+          setProfile(updated.profile);
+          setAssessmentAnswers(updated.answers || []);
+          setAdvisorSummary(updated.advisor_summary || '');
+          setIsLocked(!updated.is_unlocked);
+        } else {
+          setIsLocked(false);
+        }
       } else {
-        console.error('Failed to start checkout:', result.error);
-        alert('Failed to start checkout. Please try again.');
+        console.error('Failed to unlock report:', result.error);
+        alert('Failed to unlock the report. Please try again.');
       }
     } catch (error) {
-      console.error('Error starting checkout:', error);
+      console.error('Error unlocking report:', error);
       alert('An error occurred. Please try again.');
     } finally {
       setIsUnlocking(false);
     }
   };
-
-  // Check for payment status after redirect
-  useEffect(() => {
-    const payment = searchParams.get('payment');
-
-    if (payment === 'success') {
-      // Payment successful, refresh to show unlocked content
-      window.location.href = `/dashboard?advisor=${advisorId}`;
-    }
-
-    if (payment === 'cancelled') {
-      alert('Payment was cancelled. The report has been unlocked for you to review, but please complete payment when convenient.');
-      // Clean up URL
-      const newUrl = new URL(window.location);
-      newUrl.searchParams.delete('payment');
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-  }, [searchParams, advisorId]);
 
   const handleShareAssessment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,12 +230,12 @@ export default function Dashboard() {
               {isUnlocking ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Processing...</span>
+                  <span>Unlocking…</span>
                 </>
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  <span>Unlock Report for $1</span>
+                  <span>Unlock Report (demo)</span>
                 </>
               )}
             </button>
