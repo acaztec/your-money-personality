@@ -63,18 +63,24 @@ export class AssessmentService {
     sharerProfile: Profile,
     personalNote?: string,
     recipientName?: string
-  ): Promise<{ success: boolean; shareId?: string; error?: string }> {
+  ): Promise<{ success: boolean; shareId?: string; assessmentLink?: string; error?: string }> {
+    let shareId: string | undefined;
+    let assessmentLink: string | undefined;
+
     try {
       if (!sharerProfile) {
         return { success: false, error: 'Your profile is required before sharing the assessment.' };
       }
 
       const sharerId = getOrCreateUserId();
-      const shareId = this.generateFriendAssessmentId();
-      const assessmentLink = this.generateFriendAssessmentLink(shareId);
+      const generatedShareId = this.generateFriendAssessmentId();
+      const generatedAssessmentLink = this.generateFriendAssessmentLink(generatedShareId);
+
+      shareId = generatedShareId;
+      assessmentLink = generatedAssessmentLink;
 
       const share: FriendAssessmentShare = {
-        id: shareId,
+        id: generatedShareId,
         sharerId,
         sharerName,
         sharerEmail,
@@ -84,7 +90,7 @@ export class AssessmentService {
         personalNote,
         status: 'sent',
         sentAt: new Date(),
-        assessmentLink,
+        assessmentLink: generatedAssessmentLink,
         sharerProfile
       };
 
@@ -94,20 +100,27 @@ export class AssessmentService {
         sharerName,
         sharerEmail,
         recipientEmail,
-        assessmentLink,
+        generatedAssessmentLink,
         relationship,
         personalNote
       );
 
       if (!emailSent) {
-        throw new Error('Failed to send invitation email');
+        return {
+          success: false,
+          shareId,
+          assessmentLink,
+          error: 'Failed to send invitation email'
+        };
       }
 
-      return { success: true, shareId };
+      return { success: true, shareId, assessmentLink };
     } catch (error) {
       console.error('Error sharing assessment with friend:', error);
       return {
         success: false,
+        shareId,
+        assessmentLink,
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
@@ -119,6 +132,9 @@ export class AssessmentService {
     clientEmail: string,
     clientName?: string
   ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string }> {
+    let assessmentId: string | undefined;
+    let assessmentLink: string | undefined;
+
     try {
       // Verify advisor is authenticated
       const currentAdvisor = await AuthService.getCurrentAdvisor();
@@ -136,20 +152,23 @@ export class AssessmentService {
       const canonicalAdvisorEmail = normalizedCurrentEmail;
       const canonicalAdvisorName = currentAdvisor.name?.trim() || advisorName;
 
-      const assessmentId = this.generateAssessmentId();
-      const assessmentLink = this.generateAssessmentLink(assessmentId);
+      const generatedAssessmentId = this.generateAssessmentId();
+      const generatedAssessmentLink = this.generateAssessmentLink(generatedAssessmentId);
+
+      assessmentId = generatedAssessmentId;
+      assessmentLink = generatedAssessmentLink;
 
       // Save to database first
       const { error: dbError } = await supabase
         .from('advisor_assessments')
         .insert({
-          id: assessmentId,
+          id: generatedAssessmentId,
           advisor_email: canonicalAdvisorEmail,
           advisor_name: canonicalAdvisorName,
           client_email: clientEmail,
           client_name: clientName,
           status: 'sent',
-          assessment_link: assessmentLink
+          assessment_link: generatedAssessmentLink
         });
 
       if (dbError) {
@@ -159,13 +178,13 @@ export class AssessmentService {
 
       // Also save to localStorage for backward compatibility
       const localAssessment: AdvisorAssessment = {
-        id: assessmentId,
+        id: generatedAssessmentId,
         advisorName: canonicalAdvisorName,
         advisorEmail: canonicalAdvisorEmail,
         clientEmail,
         clientName,
         status: 'sent',
-        assessmentLink,
+        assessmentLink: generatedAssessmentLink,
       };
 
       this.saveAssessment(localAssessment);
@@ -175,13 +194,18 @@ export class AssessmentService {
         advisorName,
         advisorEmail,
         clientEmail,
-        assessmentLink,
-        assessmentLink,
+        generatedAssessmentLink,
+        generatedAssessmentLink,
         clientName
       );
 
       if (!emailSent) {
-        throw new Error('Failed to send email invitation');
+        return {
+          success: false,
+          assessmentId,
+          assessmentLink,
+          error: 'Failed to send email invitation'
+        };
       }
 
       return { success: true, assessmentId, assessmentLink };
@@ -189,6 +213,8 @@ export class AssessmentService {
       console.error('Error sharing assessment:', error);
       return {
         success: false,
+        assessmentId,
+        assessmentLink,
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }

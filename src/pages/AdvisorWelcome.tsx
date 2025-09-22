@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3 } from 'lucide-react';
+import { Brain, TrendingUp, MessageCircle, ArrowRight, Users, Mail, CheckCircle, BarChart3, LogOut } from 'lucide-react';
 import { AssessmentService } from '../services/assessmentService';
 
 export default function AdvisorWelcome() {
-  const { advisor } = useAuth();
+  const { advisor, logout } = useAuth();
+  const navigate = useNavigate();
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [shareError, setShareError] = useState('');
@@ -39,11 +40,18 @@ export default function AdvisorWelcome() {
     });
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/advisor/login');
+  };
+
   const handleShareAssessment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSharing(true);
     setShareError('');
     setShareSuccess(false);
+    setGeneratedLink('');
+    setCopyFeedback('');
 
     const result = await AssessmentService.shareAssessment(
       formData.advisorName,
@@ -66,7 +74,9 @@ export default function AdvisorWelcome() {
       });
     } else {
       setShareError(result.error || 'Failed to share assessment');
-      setGeneratedLink('');
+      if (result.assessmentLink) {
+        setGeneratedLink(result.assessmentLink);
+      }
     }
   };
 
@@ -76,9 +86,9 @@ export default function AdvisorWelcome() {
       <div className="bg-primary-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <img 
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-              alt="iGrad Enrich" 
+            <img
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              alt="iGrad Enrich"
               className="h-8 w-auto"
             />
             <div className="flex items-center space-x-4">
@@ -94,6 +104,14 @@ export default function AdvisorWelcome() {
               >
                 For Individuals
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-2 text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -176,6 +194,31 @@ export default function AdvisorWelcome() {
           {shareError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-800 font-medium">Error: {shareError}</p>
+              {generatedLink && (
+                <div className="mt-4 text-left">
+                  <p className="text-sm text-red-700 mb-2">
+                    The assessment link was still created—share it manually while email delivery is unavailable:
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedLink}
+                      className="flex-1 px-3 py-2 border border-red-200 rounded-lg bg-white text-sm text-gray-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+                    >
+                      Copy link
+                    </button>
+                  </div>
+                  {copyFeedback && (
+                    <p className="text-xs text-red-700 mt-2">{copyFeedback}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
