@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
-import { generateAdvisorSummary } from '../services/aiService';
 import { AssessmentService } from '../services/assessmentService';
 import { Brain, Sparkles } from 'lucide-react';
 import questionsData from '../data/questions.json';
@@ -108,14 +107,9 @@ export default function Assessment() {
           console.log('No advisor or share ID - individual assessment');
         }
 
-        // Generate advisor summary for non-advisor assessments
-        let advisorSummary = '';
+        // Clear any previously stored advisor summary - clients shouldn't keep AI summaries locally
         if (!advisorAssessmentId && !friendAssessmentId) {
-          console.log('Generating AI advisor summary...');
-          advisorSummary = await generateAdvisorSummary(profile, answers);
-          if (advisorSummary) {
-            localStorage.setItem('advisorSummary', advisorSummary);
-          }
+          localStorage.removeItem('advisorSummary');
         }
         
         // Small delay to ensure storage events fire

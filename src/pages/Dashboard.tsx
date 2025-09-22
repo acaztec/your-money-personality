@@ -114,19 +114,18 @@ export default function Dashboard() {
         // Load user's own profile
         const storedProfile = localStorage.getItem('userProfile');
         const storedAnswers = localStorage.getItem('assessmentAnswers');
-        const storedSummary = localStorage.getItem('advisorSummary');
-        
+
         if (storedProfile) {
           setProfile(JSON.parse(storedProfile));
         }
-        
+
         if (storedAnswers) {
           setAssessmentAnswers(JSON.parse(storedAnswers));
         }
-        
-        if (storedSummary) {
-          setAdvisorSummary(storedSummary);
-        }
+
+        // Ensure any locally stored advisor summaries are cleared for client views
+        localStorage.removeItem('advisorSummary');
+        setAdvisorSummary('');
 
         // Load friend assessments
         const shares = AssessmentService.getFriendAssessmentsForUser();
@@ -416,15 +415,13 @@ export default function Dashboard() {
         </div>
 
         {/* AI Advisor Summary - Only show for advisor view or individual assessments */}
-        {advisorSummary && (
+        {isAdvisorView && advisorSummary && (
           <div className="modern-card">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {isAdvisorView ? 'Advisor Insights' : 'AI Advisor Summary'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Advisor Insights</h2>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
               {renderAdvisorSummary(advisorSummary)}
