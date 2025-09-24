@@ -1,10 +1,9 @@
 import { CompatibilityInsights, EmailNotification } from '../types';
+import { buildAdvisorForwardingCopy, SAMPLE_REPORT_PLACEHOLDER_URL } from '../utils/advisorForwardingCopy';
 
 const DEFAULT_FROM_ADDRESS = 'Money Personality <notifications@yourmoneypersonality.com>';
 // TODO: Update this placeholder address with the real internal lead notification recipient before launch.
 const INTERNAL_NOTIFICATION_RECIPIENT = 'leads-placeholder@yourdomain.com';
-// TODO: Replace this placeholder URL with the finalized sample report destination before launch.
-const SAMPLE_REPORT_PLACEHOLDER_URL = 'https://yourmoneypersonality.com/sample-report-placeholder.pdf';
 
 export class EmailService {
   static async sendAssessmentInvitation(
@@ -144,19 +143,33 @@ export class EmailService {
       const clientDisplayName = options?.clientName || clientEmail;
       const sampleReportUrl = options?.sampleReportUrl || SAMPLE_REPORT_PLACEHOLDER_URL;
       const qualifiesForTrial = Boolean(options?.qualifiesForTrial);
+      const dashboardUrl = `${window.location.origin}/advisor/dashboard`;
+      const copy = buildAdvisorForwardingCopy({
+        clientDisplayName,
+        advisorName,
+      });
+      const bulletItemsHtml = copy.bullets
+        .map(
+          item => `
+            <li style="margin-bottom: 8px;">
+              ${item}
+            </li>
+          `,
+        )
+        .join('');
 
       const trialHighlight = qualifiesForTrial
         ? `
           <div style="background-color: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 16px; margin: 24px 0;">
             <h3 style="margin: 0 0 8px; color: #047857;">Complimentary preview unlocked</h3>
             <p style="margin: 0; color: #065f46;">
-              This invitation qualifies for your introductory preview. When ${clientDisplayName} completes the assessment, you'll be able to review their full results without entering payment details.
+              Because this is your first Money Personality invitation, you'll be able to review ${clientDisplayName}'s full results at no cost once they finish the assessment.
             </p>
           </div>
         `
         : `
           <p style="margin: 0 0 16px; color: #4b5563;">
-            When your client completes the assessment you'll receive another email with direct access to unlock their full report.
+            We'll follow up as soon as your client completes the assessment so you can unlock their full Money Personality report.
           </p>
         `;
 
@@ -168,48 +181,55 @@ export class EmailService {
         body: JSON.stringify({
           from: DEFAULT_FROM_ADDRESS,
           to: [advisorEmail],
-          subject: `Confirmation: Money Personality invite sent to ${clientDisplayName}`,
+          subject: copy.subjectLine,
           html: `
           <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
             <div style="text-align: center; margin-bottom: 24px;">
               <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 36px;">
             </div>
 
-            <h2 style="color: #2563eb; text-align: center; margin-bottom: 16px;">We've sent your assessment invite</h2>
+            <h2 style="color: #2563eb; text-align: center; margin-bottom: 16px;">${copy.headline}</h2>
 
             <p style="margin: 0 0 16px; color: #111827;">
               Hi ${advisorName || 'there'},
             </p>
 
             <p style="margin: 0 0 16px; color: #4b5563;">
-              Your invitation asking <strong>${clientDisplayName}</strong> to discover their Money Personality is on its way. Here's what happens next:
+              ${copy.intro}
             </p>
 
-            <ol style="margin: 0 0 24px 20px; padding: 0; color: #111827;">
-              <li style="margin-bottom: 8px;">Your client receives a personalized email with their assessment link.</li>
-              <li style="margin-bottom: 8px;">You'll get an alert as soon as they complete the assessment.</li>
-              <li style="margin-bottom: 8px;">From your advisor dashboard you can unlock the full results and AI-powered insights.</li>
-            </ol>
+            <ul style="margin: 0 0 24px 20px; padding: 0; color: #111827;">
+              ${bulletItemsHtml}
+            </ul>
 
             ${trialHighlight}
 
             <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-              <h3 style="margin: 0 0 8px; color: #1f2937;">Need the link again?</h3>
-              <p style="margin: 0 0 8px; color: #4b5563;">You can resend or copy the assessment link anytime:</p>
-              <a href="${assessmentLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Open invite link</a>
-            </div>
-
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
-              <h3 style="margin: 0 0 8px; color: #1f2937;">Preview the Money Personality report</h3>
+              <h3 style="margin: 0 0 8px; color: #1f2937;">${copy.sample.heading}</h3>
               <p style="margin: 0 0 12px; color: #4b5563;">
-                Show clients exactly what they'll receive. Download the sample summary and AI insights overview we're including during the introductory period.
+                ${copy.sample.description}
               </p>
-              <a href="${sampleReportUrl}" style="display: inline-block; border: 1px solid #2563eb; color: #2563eb; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">View sample report</a>
+              <a href="${sampleReportUrl}" style="display: inline-block; border: 1px solid #2563eb; color: #2563eb; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">${copy.sample.ctaLabel}</a>
             </div>
 
-            <p style="margin: 24px 0 0; font-size: 12px; color: #9ca3af; text-align: center;">
-              Update the sample report URL once final assets are approved.
-            </p>
+            <div style="background: #eef2ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+              <h3 style="margin: 0 0 8px; color: #3730a3;">Need the link again?</h3>
+              <p style="margin: 0 0 8px; color: #4338ca;">You can copy or resend the assessment link anytime:</p>
+              <a href="${assessmentLink}" style="display: inline-block; background-color: #4338ca; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Open invite link</a>
+            </div>
+
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; margin-bottom: 24px;">
+              <p style="margin: 0 0 12px; color: #4b5563;">
+                ${copy.dashboard.description}
+              </p>
+              <a href="${dashboardUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">${copy.dashboard.ctaLabel}</a>
+            </div>
+
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; color: #4b5563;">
+              <p style="margin: 0 0 12px;">${copy.support}</p>
+              <p style="margin: 0 0 12px;">${copy.closing}</p>
+              <p style="margin: 0; font-weight: 600;">${copy.signature}</p>
+            </div>
           </div>
           `,
         }),

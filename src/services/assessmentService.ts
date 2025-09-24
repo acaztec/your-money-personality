@@ -158,7 +158,7 @@ export class AssessmentService {
     advisorEmail: string,
     clientEmail: string,
     clientName?: string
-  ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string }> {
+  ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string; qualifiesForTrial?: boolean }> {
     let assessmentId: string | undefined;
     let assessmentLink: string | undefined;
 
@@ -287,7 +287,7 @@ export class AssessmentService {
         console.error('Failed to send advisor confirmation email:', confirmationError);
       }
 
-      return { success: true, assessmentId, assessmentLink };
+      return { success: true, assessmentId, assessmentLink, qualifiesForTrial };
     } catch (error) {
       console.error('Error sharing assessment:', error);
       return {
