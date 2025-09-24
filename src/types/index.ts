@@ -47,10 +47,12 @@ export interface AdvisorAssessment {
   clientEmail: string;
   clientName?: string;
   status: 'sent' | 'completed' | 'viewed';
-  sentAt: Date;
-  completedAt?: Date;
+  sentAt: Date | string;
+  completedAt?: Date | string;
   assessmentLink: string;
   results?: Profile;
+  isTrial?: boolean;
+  confirmationSentAt?: Date | string;
 }
 
 export interface CompatibilityInsights {
@@ -86,5 +88,9 @@ export interface EmailNotification {
   to: string;
   subject: string;
   content: string;
-  type: 'assessment_invitation' | 'completion_notification';
+  type:
+    | 'assessment_invitation'
+    | 'completion_notification'
+    | 'internal_lead_alert'
+    | 'advisor_share_confirmation';
 }

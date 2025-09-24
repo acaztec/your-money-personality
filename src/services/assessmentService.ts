@@ -18,6 +18,8 @@ export interface DatabaseAdvisorAssessment {
   completed_at?: string;
   is_paid: boolean;
   paid_at?: string | null;
+  is_trial?: boolean;
+  confirmation_sent_at?: string | null;
 }
 
 export interface DatabaseAssessmentResult {
@@ -45,6 +47,31 @@ export class AssessmentService {
 
   static generateAssessmentLink(assessmentId: string): string {
     return `${window.location.origin}/assessment?advisor=${assessmentId}`;
+  }
+
+  private static async shouldFlagTrialInvite(advisorEmail: string): Promise<boolean> {
+    try {
+      const normalizedEmail = advisorEmail?.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        return false;
+      }
+
+      const { count, error } = await supabase
+        .from('advisor_assessments')
+        .select('*', { count: 'exact', head: true })
+        .eq('advisor_email', normalizedEmail);
+
+      if (error) {
+        console.error('Failed to evaluate trial eligibility:', error);
+        return false;
+      }
+
+      return (count ?? 0) === 0;
+    } catch (error) {
+      console.error('Unexpected error while evaluating trial eligibility:', error);
+      return false;
+    }
   }
 
   static generateFriendAssessmentId(): string {
@@ -131,7 +158,7 @@ export class AssessmentService {
     advisorEmail: string,
     clientEmail: string,
     clientName?: string
-  ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string }> {
+  ): Promise<{ success: boolean; assessmentId?: string; assessmentLink?: string; error?: string; qualifiesForTrial?: boolean }> {
     let assessmentId: string | undefined;
     let assessmentLink: string | undefined;
 
@@ -152,6 +179,8 @@ export class AssessmentService {
       const canonicalAdvisorEmail = normalizedCurrentEmail;
       const canonicalAdvisorName = currentAdvisor.name?.trim() || advisorName;
 
+      const qualifiesForTrial = await this.shouldFlagTrialInvite(canonicalAdvisorEmail);
+
       const generatedAssessmentId = this.generateAssessmentId();
       const generatedAssessmentLink = this.generateAssessmentLink(generatedAssessmentId);
 
@@ -168,7 +197,8 @@ export class AssessmentService {
           client_email: clientEmail,
           client_name: clientName,
           status: 'sent',
-          assessment_link: generatedAssessmentLink
+          assessment_link: generatedAssessmentLink,
+          is_trial: qualifiesForTrial
         });
 
       if (dbError) {
@@ -177,7 +207,8 @@ export class AssessmentService {
       }
 
       // Also save to localStorage for backward compatibility
-      const localAssessment: AdvisorAssessment = {
+      const now = new Date();
+      let localAssessment: AdvisorAssessment = {
         id: generatedAssessmentId,
         advisorName: canonicalAdvisorName,
         advisorEmail: canonicalAdvisorEmail,
@@ -185,16 +216,17 @@ export class AssessmentService {
         clientName,
         status: 'sent',
         assessmentLink: generatedAssessmentLink,
+        sentAt: now,
+        isTrial: qualifiesForTrial,
       };
 
       this.saveAssessment(localAssessment);
 
       // Send email invitation
       const emailSent = await EmailService.sendAssessmentInvitation(
-        advisorName,
-        advisorEmail,
+        canonicalAdvisorName,
+        canonicalAdvisorEmail,
         clientEmail,
-        generatedAssessmentLink,
         generatedAssessmentLink,
         clientName
       );
@@ -208,7 +240,54 @@ export class AssessmentService {
         };
       }
 
-      return { success: true, assessmentId, assessmentLink };
+      try {
+        await EmailService.sendInternalLeadNotification(
+          canonicalAdvisorName,
+          canonicalAdvisorEmail,
+          clientEmail,
+          generatedAssessmentLink,
+          clientName
+        );
+      } catch (internalNotificationError) {
+        console.error('Failed to send internal lead notification:', internalNotificationError);
+      }
+
+      try {
+        const confirmationSent = await EmailService.sendAdvisorShareConfirmation(
+          canonicalAdvisorEmail,
+          canonicalAdvisorName,
+          clientEmail,
+          generatedAssessmentLink,
+          {
+            clientName,
+            qualifiesForTrial,
+          }
+        );
+
+        if (confirmationSent) {
+          const confirmationTimestamp = new Date().toISOString();
+
+          const { error: confirmationUpdateError } = await supabase
+            .from('advisor_assessments')
+            .update({ confirmation_sent_at: confirmationTimestamp })
+            .eq('id', generatedAssessmentId);
+
+          if (confirmationUpdateError) {
+            console.error('Failed to record confirmation timestamp:', confirmationUpdateError);
+          }
+
+          localAssessment = {
+            ...localAssessment,
+            confirmationSentAt: confirmationTimestamp,
+          };
+
+          this.saveAssessment(localAssessment);
+        }
+      } catch (confirmationError) {
+        console.error('Failed to send advisor confirmation email:', confirmationError);
+      }
+
+      return { success: true, assessmentId, assessmentLink, qualifiesForTrial };
     } catch (error) {
       console.error('Error sharing assessment:', error);
       return {
@@ -416,7 +495,7 @@ export class AssessmentService {
       const { data, error } = await supabase
         .from('advisor_assessments')
         .select(
-          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at',
+          'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, is_trial, confirmation_sent_at',
         )
         .eq('id', assessmentId)
         .single();
@@ -493,7 +572,7 @@ export class AssessmentService {
       }
 
       const columns =
-        'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at';
+        'id, advisor_email, advisor_name, client_email, client_name, status, assessment_link, sent_at, completed_at, is_paid, paid_at, is_trial, confirmation_sent_at';
 
       let typedData: DatabaseAdvisorAssessment[] = [];
 

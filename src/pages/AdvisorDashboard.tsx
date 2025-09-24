@@ -93,6 +93,11 @@ export default function AdvisorDashboard() {
                     : undefined,
               is_paid: false,
               paid_at: null,
+              is_trial: item.isTrial ?? false,
+              confirmation_sent_at:
+                item.confirmationSentAt instanceof Date
+                  ? item.confirmationSentAt.toISOString()
+                  : item.confirmationSentAt ?? null,
             }));
 
             setAssessments(normalized);
