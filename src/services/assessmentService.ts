@@ -191,10 +191,9 @@ export class AssessmentService {
 
       // Send email invitation
       const emailSent = await EmailService.sendAssessmentInvitation(
-        advisorName,
-        advisorEmail,
+        canonicalAdvisorName,
+        canonicalAdvisorEmail,
         clientEmail,
-        generatedAssessmentLink,
         generatedAssessmentLink,
         clientName
       );
@@ -206,6 +205,18 @@ export class AssessmentService {
           assessmentLink,
           error: 'Failed to send email invitation'
         };
+      }
+
+      try {
+        await EmailService.sendInternalLeadNotification(
+          canonicalAdvisorName,
+          canonicalAdvisorEmail,
+          clientEmail,
+          generatedAssessmentLink,
+          clientName
+        );
+      } catch (internalNotificationError) {
+        console.error('Failed to send internal lead notification:', internalNotificationError);
       }
 
       return { success: true, assessmentId, assessmentLink };

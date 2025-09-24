@@ -1,6 +1,8 @@
 import { CompatibilityInsights, EmailNotification } from '../types';
 
 const DEFAULT_FROM_ADDRESS = 'Money Personality <notifications@yourmoneypersonality.com>';
+// TODO: Update this placeholder address with the real internal lead notification recipient before launch.
+const INTERNAL_NOTIFICATION_RECIPIENT = 'leads-placeholder@yourdomain.com';
 
 export class EmailService {
   static async sendAssessmentInvitation(
@@ -69,6 +71,62 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Error sending assessment invitation:', error);
+      return false;
+    }
+  }
+
+  static async sendInternalLeadNotification(
+    advisorName: string,
+    advisorEmail: string,
+    clientEmail: string,
+    assessmentLink: string,
+    clientName?: string,
+  ): Promise<boolean> {
+    try {
+      const clientDisplayName = clientName || 'Prospective client';
+
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: DEFAULT_FROM_ADDRESS,
+          to: [INTERNAL_NOTIFICATION_RECIPIENT],
+          subject: `New Money Personality referral from ${advisorName}`,
+          html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <img src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png" alt="iGrad Enrich" style="height: 36px;">
+            </div>
+
+            <h2 style="color: #2563eb; text-align: center; margin-bottom: 16px;">New Advisor Referral Submitted</h2>
+
+            <p style="margin-bottom: 12px;">An advisor has just shared the Money Personality assessment:</p>
+            <ul style="margin: 0 0 16px 20px; padding: 0; color: #111827;">
+              <li><strong>Advisor:</strong> ${advisorName} (${advisorEmail})</li>
+              <li><strong>Client:</strong> ${clientDisplayName} (${clientEmail})</li>
+              <li><strong>Assessment Link:</strong> <a href="${assessmentLink}">${assessmentLink}</a></li>
+            </ul>
+
+            <p style="font-size: 14px; color: #4b5563; margin-bottom: 0;">Log this lead in CRM and follow up as needed.</p>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 12px; color: #9ca3af; text-align: center;">This alert was generated automatically by the Your Money Personality platform.</p>
+          </div>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Internal lead notification error:', response.status, errorText);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error sending internal lead notification:', error);
       return false;
     }
   }
