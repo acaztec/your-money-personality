@@ -5,71 +5,43 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-interface NavLinkItem {
+interface NavItem {
   label: string;
-  href: string;
+  to: string;
 }
 
-interface NavSection {
+interface FooterLink {
   label: string;
+  to?: string;
   href?: string;
-  links?: NavLinkItem[];
 }
 
-const navSections: NavSection[] = [
-  {
-    label: 'Services',
-    links: [
-      { label: 'Financial Wellness Programs', href: '#programs' },
-      { label: 'Personalized Coaching', href: '#personalized-support' },
-      { label: 'Engagement Campaigns', href: '#engagement' },
-    ],
-  },
-  {
-    label: 'Financial Wellness Resources',
-    links: [
-      { label: 'Resource Library', href: '#resources' },
-      { label: 'Money Personality Chapters', href: '#chapters' },
-      { label: 'Success Stories', href: '#success' },
-    ],
-  },
-  {
-    label: 'About Us',
-    links: [
-      { label: 'Our Story', href: '#about-enrich' },
-      { label: 'Research & Outcomes', href: '#outcomes' },
-      { label: 'Partners', href: '#partners' },
-    ],
-  },
-  {
-    label: 'Blog & Press',
-    href: '#insights',
-  },
+interface FooterColumn {
+  heading: string;
+  links: FooterLink[];
+}
+
+const navItems: NavItem[] = [
+  { label: 'Assessment', to: '/assessment' },
+  { label: 'Dashboard', to: '/dashboard' },
+  { label: 'Advisor', to: '/advisor' },
 ];
 
-const footerColumns = [
+const footerColumns: FooterColumn[] = [
   {
-    heading: 'Company',
+    heading: 'Your Money Personality',
     links: [
-      { label: 'About Enrich', href: '#about-enrich' },
-      { label: 'Careers', href: '#careers' },
-      { label: 'Contact', href: '#contact' },
+      { label: 'Start Assessment', to: '/assessment' },
+      { label: 'View Dashboard', to: '/dashboard' },
+      { label: 'Share with an Advisor', to: '/advisor' },
     ],
   },
   {
-    heading: 'Resources',
+    heading: 'Help',
     links: [
-      { label: 'Money Personality Assessment', href: '#programs' },
-      { label: 'Financial Wellness Checkup', href: '#resources' },
-      { label: 'Blog & Press', href: '#insights' },
-    ],
-  },
-  {
-    heading: 'Compliance',
-    links: [
-      { label: 'Accessibility', href: '#accessibility' },
-      { label: 'Privacy Policy', href: '#privacy' },
-      { label: 'Terms of Use', href: '#terms' },
+      { label: 'Contact Support', href: 'mailto:support@enrich.org' },
+      { label: 'Privacy Policy', href: 'https://www.enrich.org/privacy-policy' },
+      { label: 'Terms of Use', href: 'https://www.enrich.org/terms' },
     ],
   },
 ];
@@ -77,33 +49,12 @@ const footerColumns = [
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openSection, setOpenSection] = useState<string | null>(null);
-
-  const toggleSection = (label: string) => {
-    setOpenSection((current) => (current === label ? null : label));
-  };
+  const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
     <div className="min-h-screen bg-canvas text-ink flex flex-col">
       <a href="#main-content" className="skip-link">Skip to content</a>
       <header className="shadow-sm">
-        <div className="bg-primary-900 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between text-sm">
-            <div className="flex items-center gap-6">
-              <span className="font-semibold tracking-wide">Contact Sales (888) 844-1525</span>
-              <Link to="/advisor/login" className="text-primary-300 hover:text-white transition-colors">
-                Client Login
-              </Link>
-            </div>
-            <Link
-              to="/advisor"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full bg-accent-600 px-4 py-2 font-semibold text-white transition hover:bg-accent-700"
-            >
-              Schedule a Call
-            </Link>
-          </div>
-        </div>
-
         <div className="bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -117,68 +68,27 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
 
               <nav className="hidden lg:flex items-center gap-8" aria-label="Primary">
-                {navSections.map((section) => (
-                  <div key={section.label} className="relative">
-                    {section.links ? (
-                      <div className="group inline-flex flex-col">
-                        <button
-                          type="button"
-                          onClick={() => toggleSection(section.label)}
-                          onMouseEnter={() => setOpenSection(section.label)}
-                          onMouseLeave={() => setOpenSection(null)}
-                          className="text-sm font-semibold text-neutral-700 hover:text-primary-700 flex items-center gap-2"
-                          aria-expanded={openSection === section.label}
-                        >
-                          {section.label}
-                          <span aria-hidden="true">▾</span>
-                        </button>
-                        <div
-                          onMouseEnter={() => setOpenSection(section.label)}
-                          onMouseLeave={() => setOpenSection(null)}
-                          className={`absolute left-1/2 top-10 z-40 hidden min-w-[240px] -translate-x-1/2 rounded-xl border border-neutral-200 bg-white p-4 shadow-subtle group-hover:block ${
-                            openSection === section.label ? 'block' : ''
-                          }`}
-                        >
-                          <ul className="space-y-2">
-                            {section.links.map((item) => (
-                              <li key={item.label}>
-                                <a
-                                  href={item.href}
-                                  className="block rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-canvas hover:text-primary-700"
-                                >
-                                  {item.label}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    ) : (
-                      <a
-                        href={section.href}
-                        className={`text-sm font-semibold transition hover:text-primary-700 ${
-                          location.hash === section.href ? 'text-primary-700' : 'text-neutral-700'
-                        }`}
-                      >
-                        {section.label}
-                      </a>
-                    )}
-                  </div>
+                {navItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`text-sm font-semibold transition ${
+                      isActive(item.to)
+                        ? 'text-primary-700'
+                        : 'text-neutral-700 hover:text-primary-700'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
                 ))}
               </nav>
 
               <div className="flex items-center gap-4 lg:gap-6">
                 <Link
                   to="/assessment"
-                  className="hidden lg:inline-flex items-center rounded-full border border-primary-300 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:border-primary-500 hover:text-primary-900"
-                >
-                  Start Assessment
-                </Link>
-                <Link
-                  to="/advisor"
                   className="hidden lg:inline-flex items-center rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
                 >
-                  Schedule a Call
+                  Start Assessment
                 </Link>
                 <button
                   type="button"
@@ -203,50 +113,29 @@ export default function Layout({ children }: LayoutProps) {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-neutral-200 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-              {navSections.map((section) => (
-                <div key={section.label} className="border-b border-neutral-200 pb-4 last:border-b-0 last:pb-0">
-                  {section.links ? (
-                    <details>
-                      <summary className="cursor-pointer text-base font-semibold text-neutral-800">
-                        {section.label}
-                      </summary>
-                      <ul className="mt-3 space-y-3 pl-4">
-                        {section.links.map((item) => (
-                          <li key={item.label}>
-                            <a
-                              href={item.href}
-                              className="block text-sm font-medium text-neutral-700 transition hover:text-primary-700"
-                            >
-                              {item.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  ) : (
-                    <a
-                      href={section.href}
-                      className="text-base font-semibold text-neutral-800 transition hover:text-primary-700"
-                    >
-                      {section.label}
-                    </a>
-                  )}
-                </div>
-              ))}
-              <div className="flex flex-col gap-3">
-                <Link
-                  to="/assessment"
-                  className="inline-flex items-center justify-center rounded-full border border-primary-300 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:border-primary-500 hover:text-primary-900"
-                >
-                  Start Assessment
-                </Link>
-                <Link
-                  to="/advisor"
-                  className="inline-flex items-center justify-center rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
-                >
-                  Schedule a Call
-                </Link>
-              </div>
+              <nav className="space-y-4" aria-label="Mobile">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block text-base font-semibold ${
+                      isActive(item.to)
+                        ? 'text-primary-700'
+                        : 'text-neutral-800 hover:text-primary-700'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+              <Link
+                to="/assessment"
+                onClick={() => setMobileMenuOpen(false)}
+                className="inline-flex items-center justify-center rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
+              >
+                Start Assessment
+              </Link>
             </div>
           </div>
         )}
@@ -258,7 +147,7 @@ export default function Layout({ children }: LayoutProps) {
 
       <footer className="bg-primary-900 text-white mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid gap-12 lg:grid-cols-4">
+          <div className="grid gap-12 lg:grid-cols-3">
             <div className="space-y-4">
               <img
                 src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
@@ -266,7 +155,7 @@ export default function Layout({ children }: LayoutProps) {
                 className="h-8 w-auto"
               />
               <p className="text-sm text-primary-300 leading-relaxed">
-                Enrich is an Aztec | iGrad solution that delivers measurable financial wellness outcomes through personalized learning, actionable tools, and consultative support.
+                Your Money Personality is an Enrich experience that helps individuals understand the motivations behind their money decisions.
               </p>
             </div>
             {footerColumns.map((column) => (
@@ -277,12 +166,20 @@ export default function Layout({ children }: LayoutProps) {
                 <ul className="space-y-3 text-sm">
                   {column.links.map((link) => (
                     <li key={link.label}>
-                      <a
-                        href={link.href}
-                        className="text-primary-300 transition hover:text-white"
-                      >
-                        {link.label}
-                      </a>
+                      {link.to ? (
+                        <Link to={link.to} className="text-primary-300 transition hover:text-white">
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={link.href}
+                          className="text-primary-300 transition hover:text-white"
+                          target={link.href?.startsWith('http') ? '_blank' : undefined}
+                          rel={link.href?.startsWith('http') ? 'noreferrer' : undefined}
+                        >
+                          {link.label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
