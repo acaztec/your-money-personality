@@ -1,176 +1,252 @@
 import { Link } from 'react-router-dom';
-import { Brain, TrendingUp, MessageCircle, ArrowRight, Sparkles, Target, Clock } from 'lucide-react';
+import Layout from '../components/Layout';
+
+const stats = [
+  { label: 'Organizations served', value: '1,200+' },
+  { label: 'Participant satisfaction', value: '94%' },
+  { label: 'Average engagement lift', value: '3.2x' },
+];
+
+const featureSections = [
+  {
+    id: 'programs',
+    heading: 'Financial wellness programs built for measurable outcomes',
+    body: 'Blend self-paced learning with guided interventions that meet employees where they are. Our behavioral design team curates money personality insights, financial wellness checkups, and custom communications to drive lasting change.',
+    imageNote: 'Placeholder: Wide image of professionals collaborating over tablets in a workplace coaching session.',
+  },
+  {
+    id: 'personalized-support',
+    heading: 'Personalized coaching that adapts to each money personality',
+    body: 'Advisors and coaches receive actionable dashboards that translate assessment responses into tailored talking points. Participants gain clarity on habits, motivators, and next steps that align with their financial goals.',
+    imageNote: 'Placeholder: Portrait image of an Enrich coach meeting virtually with a participant.',
+  },
+  {
+    id: 'engagement',
+    heading: 'Campaigns that sustain engagement quarter after quarter',
+    body: 'Deploy turnkey campaigns with curated content, events, and nudges rooted in behavioral science. Every touchpoint reinforces your program KPIs and demonstrates progress to leadership.',
+    imageNote: 'Placeholder: Email or campaign collage illustrating engagement touchpoints.',
+  },
+];
+
+const resourceCards = [
+  {
+    id: 'resources',
+    eyebrow: 'Resource library',
+    title: 'Financial Wellness Checkup toolkit',
+    description: 'Download session guides, participant one-pagers, and measurement templates that streamline your launch.',
+  },
+  {
+    id: 'chapters',
+    eyebrow: 'Money personality chapters',
+    title: 'Your Money Personality in action',
+    description: 'Explore turnkey chapter layouts with imagery, talking points, and exercises you can drop into your LMS.',
+  },
+  {
+    id: 'success',
+    eyebrow: 'Success story',
+    title: 'How Aztec Credit Union doubled program completion',
+    description: 'See how a blended learning journey and advisor follow-up increased assessment completions by 112%.',
+  },
+];
 
 export default function Welcome() {
   return (
-    <div className="min-h-screen professional-bg">
-
-      {/* Header with glassmorphism */}
-      <div className="professional-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <img 
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-              alt="iGrad Enrich" 
-              className="h-10 w-auto static-element"
-            />
-            <Link
-              to="/advisor"
-              className="text-white hover:text-blue-100 transition-colors duration-200 text-sm font-medium"
-            >
-              Advisor Login
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Section with asymmetric layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left column - Text content */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Discover Your
-                <span className="block bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                  Money Personality
-                </span>
-              </h1>
-              <p className="text-xl text-gray-700 leading-relaxed max-w-xl">
-                Unlock the emotional side of your financial decisions with our scientifically-designed assessment. 
-                Get personalized insights and actionable guidance in just 10 minutes.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/assessment" className="btn-primary group">
-                <Sparkles className="w-5 h-5 mr-3" />
-                <span>Start Assessment</span>
-                <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <button className="btn-secondary">
-                <MessageCircle className="w-5 h-5 mr-3" />
-                <span>Learn More</span>
-              </button>
-            </div>
-
-            {/* Mini stats */}
-            <div className="flex items-center space-x-8 pt-8">
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">500K+</div>
-                <div className="text-gray-600 text-sm font-medium">Assessments</div>
-              </div>
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">95%</div>
-                <div className="text-gray-600 text-sm font-medium">Complete</div>
-              </div>
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">10min</div>
-                <div className="text-gray-600 text-sm font-medium">Duration</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column - Floating visual elements */}
-          <div className="relative">
-            <div className="relative z-10">
-              {/* Main floating card */}
-              <div className="modern-card">
-                <div className="text-center space-y-6">
-                  <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                    <Brain className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    42 Questions
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Scientifically designed to analyze your financial behaviors across five key dimensions
+    <Layout>
+      <div className="bg-canvas">
+        <section id="hero" className="bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Your Money Personality</p>
+                  <h1 className="text-4xl sm:text-5xl font-semibold leading-tight text-ink">
+                    Financial wellness that looks beyond the numbers
+                  </h1>
+                  <p className="text-lg text-neutral-700 leading-relaxed max-w-xl">
+                    Discover the motivations behind money decisions and deliver experiences that feel personal from the very first assessment. Enrich pairs science-backed insights with consultative support so you can measure results with confidence.
                   </p>
                 </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link to="/assessment" className="btn-primary">
+                    Start the Money Personality assessment
+                  </Link>
+                  <a href="#programs" className="btn-secondary">
+                    Review our programs
+                  </a>
+                </div>
+                <dl className="grid gap-6 sm:grid-cols-3 pt-8 border-t border-neutral-200">
+                  {stats.map((item) => (
+                    <div key={item.label} className="space-y-1">
+                      <dt className="text-sm font-medium text-neutral-500 uppercase tracking-wide">{item.label}</dt>
+                      <dd className="text-2xl font-semibold text-primary-700">{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
-
-              {/* Smaller floating elements */}
-              <div className="absolute -top-4 -right-4 modern-card p-4">
-                <Target className="w-8 h-8 text-primary-600" />
+              <div className="relative">
+                <div className="rounded-[2rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[360px]">
+                  {featureSections[0].imageNote}
+                </div>
               </div>
-              <div className="absolute -bottom-4 -left-4 modern-card p-4">
-                <Clock className="w-8 h-8 text-accent-600" />
-              </div>
-            </div>
-
-            {/* Background decorative elements */}
-            <div className="absolute inset-0 -z-10">
-              <div className="w-72 h-72 bg-gradient-to-br from-primary-200/30 to-accent-200/30 rounded-full blur-3xl"></div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Features Section with unique grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Why Take This Assessment?
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get deep insights into your financial psychology with our research-backed approach
-          </p>
-        </div>
+        <section id="about-enrich" className="py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-16 lg:grid-cols-[0.9fr_1.1fr] items-start">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-semibold text-ink">
+                Financial wellness leadership backed by Aztec | iGrad
+              </h2>
+              <p className="text-lg text-neutral-700">
+                For over a decade, Enrich has helped employers, credit unions, and universities build cultures of financial wellbeing. Our research partnerships and behavioral economists ensure every touchpoint—from Your Money Personality to ongoing coaching—supports measurable outcomes.
+              </p>
+              <p className="text-neutral-700">
+                When you collaborate with Enrich, you gain a consultative team, branded resource hubs, and audience-specific journeys that highlight your value proposition.
+              </p>
+            </div>
+            <div className="rounded-[2rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[320px]">
+              Placeholder: Team photo featuring Enrich consultants collaborating with partners.
+            </div>
+          </div>
+        </section>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Brain,
-              title: "Behavioral Science",
-              description: "Based on behavioral economics research and validated psychological frameworks",
-              color: "from-blue-500 to-indigo-600"
-            },
-            {
-              icon: TrendingUp,
-              title: "Personalized Insights", 
-              description: "Detailed analysis of your strengths, challenges, and personalized action plans",
-              color: "from-green-500 to-emerald-600"
-            },
-            {
-              icon: MessageCircle,
-              title: "Instant Results",
-              description: "Comprehensive report available immediately after completion",
-              color: "from-purple-500 to-pink-600"
-            }
-          ].map((feature, index) => (
-            <div key={index} className="feature-card modern-card group hover:scale-105 transition-all duration-300">
-              <div className="text-center space-y-6">
-                <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center group-hover:rotate-12 transition-transform duration-300`}>
-                  <feature.icon className="w-8 h-8 text-white" />
+        <section className="py-20 bg-white" id="outcomes">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-semibold text-ink">Proven outcomes clients can share with leadership</h2>
+              <ul className="space-y-4 text-neutral-700">
+                <li>• 75% of participants report improved confidence managing day-to-day finances after completing the assessment series.</li>
+                <li>• Employers see measurable reductions in financial stress markers and absenteeism within the first six months.</li>
+                <li>• Advisors leverage the dashboard to prioritize outreach by readiness and personalize consultations.</li>
+              </ul>
+              <Link to="/dashboard" className="inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
+                View sample reporting
+              </Link>
+            </div>
+            <div className="rounded-[2rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[320px]">
+              Placeholder: Screenshot collage of Enrich reporting dashboard and outcome highlights.
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20" id="solutions">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            {featureSections.map((section, index) => (
+              <div key={section.id} id={section.id} className="grid gap-10 lg:grid-cols-2 items-center">
+                <div className={`${index % 2 === 1 ? 'lg:order-2' : ''} space-y-5`}>
+                  <h3 className="text-2xl font-semibold text-ink">{section.heading}</h3>
+                  <p className="text-neutral-700 leading-relaxed">{section.body}</p>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  {feature.description}
-                </p>
+                <div className={`${index % 2 === 1 ? 'lg:order-1' : ''} rounded-[1.75rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[280px]`}
+                >
+                  {section.imageNote}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="py-20 bg-white" id="resources">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="space-y-4 max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Financial wellness resources</p>
+              <h2 className="text-3xl font-semibold text-ink">Curated tools to power every stage of your program</h2>
+              <p className="text-neutral-700">
+                Activate Your Money Personality chapters, deploy ready-to-use campaigns, and equip advisors with turn-key guides. Every resource is written in Enrich’s voice and ready for your brand system.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-8 md:grid-cols-3">
+              {resourceCards.map((card) => (
+                <article key={card.id} id={card.id} className="resource-card">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">{card.eyebrow}</p>
+                  <h3 className="mt-3 text-xl font-semibold text-ink">{card.title}</h3>
+                  <p className="mt-4 text-neutral-700 leading-relaxed">{card.description}</p>
+                  <a href="#insights" className="mt-6 inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
+                    Explore details
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20" id="partners">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-semibold text-ink">Trusted by organizations who care about financial wellness</h2>
+              <p className="text-neutral-700">
+                From Fortune 500 employers to regional credit unions, Enrich adapts to your culture, compliance requirements, and brand guidelines. Partner with us to launch a turnkey program or refresh your existing initiatives.
+              </p>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="rounded-lg border border-neutral-200 bg-white p-5">
+                  <p className="text-sm text-neutral-500 uppercase tracking-wide">Testimonial highlight</p>
+                  <p className="mt-3 text-neutral-700">
+                    “Your Money Personality gave our members language to talk about money. Engagement with our advisors has never been stronger.”
+                  </p>
+                  <p className="mt-4 text-sm font-semibold text-primary-700">VP of Member Experience, Regional Credit Union</p>
+                </div>
+                <div className="rounded-lg border border-neutral-200 bg-white p-5">
+                  <p className="text-sm text-neutral-500 uppercase tracking-wide">Data point</p>
+                  <p className="mt-3 text-neutral-700">
+                    68% of participants schedule a follow-up consultation within two weeks of receiving their personalized report.
+                  </p>
+                  <p className="mt-4 text-sm font-semibold text-primary-700">Program Impact Study, 2024</p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="rounded-[1.75rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[280px]">
+              Placeholder: Montage of partner logos (credit unions, universities, employers) on a neutral background.
+            </div>
+          </div>
+        </section>
 
-      {/* CTA Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <div className="modern-card space-y-8">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Ready to Discover Your Money Personality?
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Join over 500,000 people who have gained valuable insights into their financial behaviors
-          </p>
-          <Link to="/assessment" className="btn-primary inline-flex">
-            <Sparkles className="w-5 h-5 mr-3" />
-            <span>Take Assessment Now</span>
-            <ArrowRight className="w-5 h-5 ml-3" />
-          </Link>
-        </div>
+        <section className="py-20 bg-white" id="insights">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl space-y-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Blog & Press</p>
+                <h2 className="text-3xl font-semibold text-ink">Latest insights from the Enrich newsroom</h2>
+                <p className="text-neutral-700">
+                  Stay current with trends in financial wellbeing, behavior change, and benefits communication. Our editorial team translates research into actionable guidance for your population.
+                </p>
+              </div>
+              <a href="#contact" className="inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
+                View all updates
+              </a>
+            </div>
+            <div className="mt-12 grid gap-8 md:grid-cols-3">
+              {[1, 2, 3].map((article) => (
+                <article key={article} className="resource-card">
+                  <div className="h-40 rounded-xl placeholder-image flex items-center justify-center text-center text-sm font-medium leading-relaxed">
+                    Placeholder: Editorial image for blog post {article}.
+                  </div>
+                  <h3 className="mt-5 text-xl font-semibold text-ink">Press release headline placeholder {article}</h3>
+                  <p className="mt-4 text-neutral-700">
+                    Brief summary of a recent Enrich partnership, product enhancement, or behavioral insight.
+                  </p>
+                  <a href="#contact" className="mt-6 inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
+                    Read more
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20" id="contact">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+            <h2 className="text-3xl font-semibold text-ink">Ready to align your program with the Enrich experience?</h2>
+            <p className="text-neutral-700 max-w-3xl mx-auto">
+              Bring Your Money Personality to your audience with a cohesive brand system, curated resources, and advisor enablement. We will collaborate on imagery, copy, and rollout plans that reflect your organization.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/advisor" className="btn-primary">Schedule a consultation</Link>
+              <a href="mailto:hello@enrich.org" className="btn-secondary">Email our team</a>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </Layout>
   );
 }
