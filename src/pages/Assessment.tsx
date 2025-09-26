@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AssessmentCard from '../components/AssessmentCard';
 import { calculateProfile } from '../utils/profileCalculator';
 import { AssessmentService } from '../services/assessmentService';
-import { Brain, Sparkles } from 'lucide-react';
 import questionsData from '../data/questions.json';
 
 export default function Assessment() {
@@ -27,30 +26,21 @@ export default function Assessment() {
 
     const loadAssessmentInfo = async () => {
       if (advisorId) {
-        console.log('🔍 Looking up advisor assessment:', advisorId);
-        
-        // Try to get assessment from database first
         const assessment = await AssessmentService.getAssessmentFromDatabase(advisorId);
         if (assessment) {
-          console.log('✅ Found assessment in database:', assessment);
           setAdvisorAssessmentId(advisorId);
           setAdvisorInfo({
             name: assessment.advisor_name,
-            email: assessment.advisor_email
+            email: assessment.advisor_email,
           });
         } else {
-          console.log('❌ Assessment not found in database, checking localStorage...');
-          // Fall back to localStorage for backward compatibility
           const localAssessment = AssessmentService.getAssessment(advisorId);
           if (localAssessment) {
-            console.log('✅ Found assessment in localStorage:', localAssessment);
             setAdvisorAssessmentId(advisorId);
             setAdvisorInfo({
               name: localAssessment.advisorName,
-              email: localAssessment.advisorEmail
+              email: localAssessment.advisorEmail,
             });
-          } else {
-            console.log('❌ Assessment not found anywhere');
           }
         }
       } else if (friendId) {
@@ -60,7 +50,7 @@ export default function Assessment() {
           setFriendInfo({
             sharerName: share.sharerName,
             relationship: share.relationship,
-            personalNote: share.personalNote
+            personalNote: share.personalNote,
           });
         }
       }
@@ -70,173 +60,160 @@ export default function Assessment() {
   }, [searchParams]);
 
   const handleAnswerChange = (value: number) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = value;
-    setAnswers(newAnswers);
+    const nextAnswers = [...answers];
+    nextAnswers[currentQuestion] = value;
+    setAnswers(nextAnswers);
   };
 
   const handleNext = async () => {
     if (currentQuestion < questionsData.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setIsCompleting(true);
-      
-      try {
-        const profile = calculateProfile(answers);
-        
-        // ALWAYS save user profile first
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-        
-        // If this is an advisor assessment, update the status
-        if (advisorAssessmentId) {
-          console.log('Completing advisor assessment:', advisorAssessmentId);
-          const completed = await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+      setCurrentQuestion((prev) => prev + 1);
+      return;
+    }
 
-          if (!completed) {
-            console.error('Failed to mark assessment as completed, but continuing...');
-          }
-        } else if (friendAssessmentId) {
-          console.log('Completing shared assessment:', friendAssessmentId);
-          const completed = await AssessmentService.completeFriendAssessment(friendAssessmentId, profile);
+    setIsCompleting(true);
 
-          if (!completed) {
-            console.error('Failed to mark friend assessment as completed, but continuing...');
-          }
-        } else {
-          console.log('No advisor or share ID - individual assessment');
-        }
+    try {
+      const profile = calculateProfile(answers);
+      localStorage.setItem('userProfile', JSON.stringify(profile));
+      localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
 
-        // Clear any previously stored advisor summary - clients shouldn't keep AI summaries locally
-        if (!advisorAssessmentId && !friendAssessmentId) {
-          localStorage.removeItem('advisorSummary');
-        }
-        
-        // Small delay to ensure storage events fire
-        setTimeout(() => navigate('/dashboard'), 100);
-      } catch (error) {
-        console.error('Assessment completion error:', error);
-        // Fallback - still save user profile even if advisor notification fails
-        const profile = calculateProfile(answers);        
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
-        setTimeout(() => navigate('/dashboard'), 100);
+      if (advisorAssessmentId) {
+        await AssessmentService.completeAssessment(advisorAssessmentId, profile);
+      } else if (friendAssessmentId) {
+        await AssessmentService.completeFriendAssessment(friendAssessmentId, profile);
+      } else {
+        localStorage.removeItem('advisorSummary');
       }
+
+      setTimeout(() => navigate('/dashboard'), 120);
+    } catch (error) {
+      console.error('Assessment completion error:', error);
+      const profile = calculateProfile(answers);
+      localStorage.setItem('userProfile', JSON.stringify(profile));
+      localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
+      setTimeout(() => navigate('/dashboard'), 120);
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
+      setCurrentQuestion((prev) => prev - 1);
     }
+  };
+
+  const exitToWelcome = () => {
+    navigate('/');
   };
 
   if (isCompleting) {
     return (
-      <div className="min-h-screen animated-bg flex items-center justify-center">
-        <div className="modern-card text-center space-y-6 max-w-md">
-          <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-            <Brain className="w-10 h-10 text-white animate-pulse" />
+      <div className="min-h-screen bg-canvas text-ink">
+        <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white shadow-sm">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <span className="text-sm font-semibold text-neutral-600">Wrapping up your assessment…</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Analyzing Your Results</h2>
-          <p className="text-gray-600 leading-relaxed text-sm">
-            Our AI is processing your responses and creating your personalized money personality profile...
-          </p>
-          <div className="flex justify-center space-x-1">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-3 h-3 bg-primary-500 rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.2}s` }}
-              />
-            ))}
+        </header>
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="rounded-3xl border border-neutral-200 bg-white p-12 text-center shadow-subtle space-y-6">
+            <h1 className="text-3xl font-semibold text-ink">Analyzing your responses</h1>
+            <p className="text-neutral-700">
+              We’re translating your selections into a Money Personality profile and tailored guidance. This only takes a moment.
+            </p>
+            <div className="flex justify-center gap-2">
+              {[0, 1, 2].map((dot) => (
+                <span
+                  key={dot}
+                  className="h-3 w-3 rounded-full bg-primary-500 animate-pulse"
+                  style={{ animationDelay: `${dot * 0.2}s` }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen professional-bg">
-
-      {/* Header */}
-      <div className="professional-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <img
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
-              alt="iGrad Enrich"
-              className="h-10 w-auto static-element"
-            />
-            {(advisorInfo || friendInfo) && (
-              <div className="flex items-center space-x-4">
-                {advisorInfo && (
-                  <div className="flex items-center space-x-2 text-white">
-                    <Sparkles className="w-4 h-4" />
-                    <span className="text-sm font-medium">Shared by {advisorInfo.name}</span>
-                  </div>
-                )}
-                {friendInfo && (
-                  <div className="flex items-center space-x-2 text-white">
-                    <Sparkles className="w-4 h-4" />
-                    <span className="text-sm font-medium">Partner invite from {friendInfo.sharerName}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Advisor Welcome Banner */}
-      {advisorInfo && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="text-center">
-              <p className="text-blue-800 font-medium leading-relaxed">
-                <strong>{advisorInfo.name}</strong> has invited you to discover your Money Personality! 
-                This assessment will help them understand your financial behaviors and provide 
-                more personalized guidance tailored to your unique personality.
-              </p>
+    <div className="min-h-screen bg-canvas text-ink">
+      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
+          <button
+            type="button"
+            onClick={exitToWelcome}
+            className="text-sm font-semibold text-primary-700 hover:text-primary-500"
+          >
+            Exit to Enrich
+          </button>
+          <div className="hidden sm:flex items-center gap-4 text-sm text-neutral-600">
+            <span>Question {currentQuestion + 1} of {questionsData.length}</span>
+            <div className="h-1.5 w-40 overflow-hidden rounded-full bg-neutral-200">
+              <div
+                className="progress-bar h-1.5"
+                style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
+              />
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0}
+              className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+                currentQuestion === 0
+                  ? 'border border-neutral-200 text-neutral-400 cursor-not-allowed bg-neutral-100'
+                  : 'border border-neutral-300 text-neutral-700 hover:border-primary-400 hover:text-primary-700'
+              }`}
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="inline-flex items-center justify-center rounded-full bg-accent-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
+            >
+              {currentQuestion === questionsData.length - 1 ? 'Complete' : 'Next'}
+            </button>
+          </div>
         </div>
+      </header>
+
+      {advisorInfo && (
+        <section className="border-b border-primary-200 bg-primary-100/60">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-primary-700 space-y-1">
+            <p><strong>{advisorInfo.name}</strong> invited you to complete Your Money Personality assessment to personalize your next consultation.</p>
+            <p className="text-neutral-600">Responses are shared securely with your advisor to tailor guidance.</p>
+          </div>
+        </section>
       )}
 
       {friendInfo && (
-        <div className="bg-emerald-50 border-b border-emerald-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="text-center space-y-2">
-              <p className="text-emerald-900 font-medium leading-relaxed">
-                <strong>{friendInfo.sharerName}</strong> invited you to take the Money Personality assessment so you can explore how your financial styles work together as {friendInfo.relationship.toLowerCase()}.
-              </p>
-              <p className="text-emerald-800 text-sm">
-                Once you both finish, you'll unlock a compatibility breakdown with strengths, watch-outs, and suggested conversation starters.
-              </p>
-              {friendInfo.personalNote && (
-                <p className="text-emerald-700 text-sm italic">{friendInfo.personalNote}</p>
-              )}
-            </div>
+        <section className="border-b border-accent-600/40 bg-accent-600/10">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-neutral-700 space-y-2">
+            <p>
+              <strong>{friendInfo.sharerName}</strong> invited you to compare Money Personality results as {friendInfo.relationship.toLowerCase()}.
+            </p>
+            {friendInfo.personalNote && (
+              <p className="italic text-neutral-600">“{friendInfo.personalNote}”</p>
+            )}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Assessment Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex justify-center">
-          <AssessmentCard
-            question={questionsData[currentQuestion]}
-            questionNumber={currentQuestion + 1}
-            totalQuestions={questionsData.length}
-            value={answers[currentQuestion]}
-            onChange={handleAnswerChange}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            canGoNext={true}
-            canGoPrevious={currentQuestion > 0}
-          />
-        </div>
-      </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex justify-center">
+        <AssessmentCard
+          question={questionsData[currentQuestion]}
+          questionNumber={currentQuestion + 1}
+          totalQuestions={questionsData.length}
+          value={answers[currentQuestion]}
+          onChange={handleAnswerChange}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          canGoNext
+          canGoPrevious={currentQuestion > 0}
+        />
+      </main>
     </div>
   );
 }
