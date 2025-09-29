@@ -170,3 +170,110 @@ textarea:focus-visible {
   font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
+
+.advisor-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-neutral-700);
+}
+
+.advisor-summary h1,
+.advisor-summary h2,
+.advisor-summary h3 {
+  color: var(--color-ink);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.advisor-summary h1 {
+  font-size: 1.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.advisor-summary h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.advisor-summary h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.advisor-summary p {
+  margin: 0;
+}
+
+.advisor-summary ul,
+.advisor-summary ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.advisor-summary li {
+  margin: 0;
+}
+
+.advisor-summary strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.advisor-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid rgba(28, 59, 111, 0.16);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.advisor-summary thead {
+  background: rgba(79, 114, 163, 0.08);
+}
+
+.advisor-summary th,
+.advisor-summary td {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(28, 59, 111, 0.12);
+  vertical-align: top;
+  font-size: 0.92rem;
+}
+
+.advisor-summary th {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.advisor-summary tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.advisor-summary a {
+  color: var(--color-primary-700);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(38, 84, 156, 0.4);
+}
+
+.advisor-summary blockquote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 4px solid rgba(38, 84, 156, 0.35);
+  color: var(--color-neutral-600);
+  font-style: italic;
+}
+
+.advisor-summary code {
+  font-family: 'Source Sans 3', system-ui, sans-serif;
+  background: rgba(79, 114, 163, 0.1);
+  padding: 0.125rem 0.35rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+}

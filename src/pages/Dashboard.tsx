@@ -10,6 +10,13 @@ import coursesData from '../data/courses.json';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: false,
+  mangle: false,
+});
+
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const advisorId = searchParams.get('advisor');
@@ -289,14 +296,11 @@ export default function Dashboard() {
     if (!content.trim()) return null;
 
     try {
-      const htmlContent = marked(content);
+      const htmlContent = marked.parse(content);
       const sanitizedContent = DOMPurify.sanitize(htmlContent);
-      
+
       return (
-        <div 
-          className="prose prose-sm max-w-none [&>h1]:mb-6 [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h2]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-gray-900 [&>h3]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-gray-900 [&>p]:mb-4 [&>p]:leading-relaxed [&>p]:text-gray-700 [&>ul]:mb-4 [&>ul]:pl-6 [&>li]:mb-3 [&>li]:text-gray-700 [&>strong]:font-semibold [&>strong]:text-gray-900"
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-        />
+        <div className="advisor-summary" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
       );
     } catch (error) {
       console.error('Error rendering advisor summary:', error);
