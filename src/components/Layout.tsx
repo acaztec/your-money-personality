@@ -61,7 +61,7 @@ export default function Layout({ children }: LayoutProps) {
               <Link to="/" className="flex items-center gap-3">
                 <span className="sr-only">Enrich Home</span>
                 <img
-                  src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+                  src="https://media-cdn.igrad.com/IMAGE/Logos/Standard-White/Enrich.png"
                   alt="Enrich by iGrad"
                   className="h-8 w-auto"
                 />
@@ -150,7 +150,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid gap-12 lg:grid-cols-3">
             <div className="space-y-4">
               <img
-                src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+                src="https://media-cdn.igrad.com/IMAGE/Logos/Standard-White/Enrich.png"
                 alt="Enrich by iGrad"
                 className="h-8 w-auto"
               />

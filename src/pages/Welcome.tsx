@@ -37,37 +37,6 @@ const highlights = [
   },
 ];
 
-const bluePanelHighlights = [
-  {
-    title: 'An immersive assessment space',
-    description:
-      'Every question sits within a calm, full-screen workspace so participants can stay focused without distractions.',
-    bullets: [
-      'Sticky navigation keeps progress, back, and next actions accessible.',
-      'Seven-point Likert scale with clear “Not at all” to “Very well” anchors.',
-      'Light gray canvas paired with deep blue accents for contrast compliance.',
-    ],
-    image: {
-      src: 'https://images.pexels.com/photos/1181356/pexels-photo-1181356.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
-      alt: 'Two colleagues collaborating over a laptop while reviewing assessment responses.',
-    },
-  },
-  {
-    title: 'Guidance that carries through the journey',
-    description:
-      'Program touchpoints reuse the hero blue treatment to reinforce continuity from onboarding to follow-up coaching.',
-    bullets: [
-      'Chapter intros feature the curved blue divider from enrich.org reference designs.',
-      'Resource cards surface action items alongside photography, not icons.',
-      'Advisor invitations rest within a blue-backed panel that highlights sharing value.',
-    ],
-    image: {
-      src: 'https://images.pexels.com/photos/3184611/pexels-photo-3184611.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
-      alt: 'Advisor team collaborating around laptops and printed reports.',
-    },
-  },
-];
-
 const steps = [
   {
     title: 'Answer intuitive questions',
@@ -185,36 +154,6 @@ export default function Welcome() {
           </div>
         </section>
 
-        <section className="brand-band brand-band--navy" aria-labelledby="experience-highlights">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="brand-band__header">
-              <p className="brand-band__kicker">Experience preview</p>
-              <h2 id="experience-highlights" className="brand-band__title">
-                Consistent Enrich styling from first click through follow-up
-              </h2>
-              <p className="brand-band__description">
-                We reuse the hero blue treatment across assessment screens, chapter overviews, and advisor touchpoints so participants always know they&apos;re in the Your Money Personality environment.
-              </p>
-            </div>
-            <div className="brand-band__grid">
-              {bluePanelHighlights.map((panel) => (
-                <article key={panel.title} className="brand-band__card">
-                  <h3>{panel.title}</h3>
-                  <p>{panel.description}</p>
-                  <ul>
-                    {panel.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
-                  <figure className="brand-band__media">
-                    <img src={panel.image.src} alt={panel.image.alt} />
-                  </figure>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="py-20" id="share">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-16 lg:grid-cols-[1.05fr_0.95fr] items-center">
             <div className="space-y-6">
@@ -234,8 +173,8 @@ export default function Welcome() {
             <div className="share-card__media">
               <div className="share-card__image-frame">
                 <img
-                  src="https://enrich.org/wp-content/uploads/2024/10/small_FWR_1_1b2a1d7e44.webp"
-                  alt="Financial Wellness Report cover alongside supporting materials."
+                  src="https://images.pexels.com/photos/1181356/pexels-photo-1181356.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1"
+                  alt="Two colleagues collaborating over a laptop while reviewing assessment responses."
                 />
               </div>
             </div>

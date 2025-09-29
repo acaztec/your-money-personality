@@ -259,7 +259,7 @@ export default function AdvisorDashboard() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/">
             <img
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              src="https://media-cdn.igrad.com/IMAGE/Logos/Standard-White/Enrich.png"
               alt="Enrich"
               className="h-8 w-auto"
             />
