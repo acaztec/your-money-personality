@@ -73,16 +73,22 @@ export default function AssessmentCard({
                 type="button"
                 aria-label={`Response ${option}`}
                 aria-pressed={value === option}
-                className={`likert-option ${value === option ? 'active' : ''}`}
+                className={`likert-option ${value === option && value !== 0 ? 'active' : ''}`}
                 onClick={() => onChange(option)}
               >
                 {option}
               </button>
             ))}
           </div>
-          <p className="text-center text-sm text-neutral-600">
-            Your current selection: <span className="font-semibold text-primary-700">{value}</span>
-          </p>
+          {value !== 0 ? (
+            <p className="text-center text-sm text-neutral-600">
+              Your current selection: <span className="font-semibold text-primary-700">{value}</span>
+            </p>
+          ) : (
+            <p className="text-center text-sm text-neutral-500">
+              Please select a response to continue
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

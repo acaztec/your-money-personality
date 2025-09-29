@@ -9,7 +9,7 @@ export default function Assessment() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<number[]>(new Array(questionsData.length).fill(4));
+  const [answers, setAnswers] = useState<number[]>(new Array(questionsData.length).fill(0));
   const [isCompleting, setIsCompleting] = useState(false);
   const [advisorAssessmentId, setAdvisorAssessmentId] = useState<string | null>(null);
   const [advisorInfo, setAdvisorInfo] = useState<{ name: string; email: string } | null>(null);
@@ -210,7 +210,7 @@ export default function Assessment() {
           onChange={handleAnswerChange}
           onNext={handleNext}
           onPrevious={handlePrevious}
-          canGoNext
+          canGoNext={answers[currentQuestion] !== 0}
           canGoPrevious={currentQuestion > 0}
         />
       </main>
