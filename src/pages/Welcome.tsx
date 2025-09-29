@@ -48,8 +48,8 @@ const bluePanelHighlights = [
       'Light gray canvas paired with deep blue accents for contrast compliance.',
     ],
     image: {
-      src: 'https://images.pexels.com/photos/4065613/pexels-photo-4065613.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
-      alt: 'Participant completing a digital assessment on a laptop in a bright workspace.',
+      src: 'https://images.pexels.com/photos/1181356/pexels-photo-1181356.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
+      alt: 'Two colleagues collaborating over a laptop while reviewing assessment responses.',
     },
   },
   {

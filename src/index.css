@@ -165,11 +165,11 @@ textarea:focus-visible {
 }
 
 .hero-section {
-  background-color: var(--color-canvas);
+  background-color: var(--color-primary-900);
 }
 
 .hero-section--full {
-  min-height: min(920px, 100vh);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   padding: clamp(4rem, 6vw, 6rem) 0;
