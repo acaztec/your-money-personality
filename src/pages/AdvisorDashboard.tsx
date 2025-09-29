@@ -278,44 +278,51 @@ export default function AdvisorDashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <section className="modern-card mb-10">
-          <div className="grid gap-8 lg:grid-cols-[1.35fr,1fr] lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Advisor workspace</p>
-              <h1 className="mt-3 text-3xl font-semibold text-primary-900 sm:text-4xl">
-                Welcome back, {advisorName || 'Advisor'}.
-              </h1>
-              <p className="mt-4 text-lg text-neutral-700">
-                Monitor Money Personality invitations, unlock completed reports, and keep clients moving toward measurable financial wellness.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/advisor/share" className="btn-primary">
+        <section className="mb-12 overflow-hidden rounded-[2rem] border border-primary-700/25 bg-primary-900 text-white shadow-subtle">
+          <div className="grid gap-0 lg:grid-cols-[1.2fr,0.85fr]">
+            <div className="flex flex-col justify-between p-8 sm:p-12">
+              <div className="space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-200/80">Advisor workspace</p>
+                <h1 className="text-3xl font-semibold leading-snug sm:text-4xl">
+                  Welcome back, {advisorName || 'Advisor'}.
+                </h1>
+                <p className="text-base leading-relaxed text-primary-100/90 sm:text-lg">
+                  Monitor Money Personality invitations, unlock completed reports, and keep clients moving toward measurable financial wellness.
+                </p>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/advisor/share"
+                  className="inline-flex items-center justify-center rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
+                >
                   Share new assessment
                 </Link>
                 <a
                   href="https://www.enrich.org/financial-wellness-resources"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-secondary"
+                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
                 >
                   Advisor resource center
                 </a>
               </div>
-              <dl className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
-                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Current invitations</dt>
-                  <dd className="mt-2 text-2xl font-semibold text-primary-900">{pendingAssessments.length}</dd>
+              <dl className="mt-10 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-200/80">Current invitations</dt>
+                  <dd className="mt-2 text-3xl font-semibold">{pendingAssessments.length}</dd>
                 </div>
-                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
-                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Reports unlocked</dt>
-                  <dd className="mt-2 text-2xl font-semibold text-primary-900">{unlockedCount}</dd>
+                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-200/80">Reports unlocked</dt>
+                  <dd className="mt-2 text-3xl font-semibold">{unlockedCount}</dd>
                 </div>
               </dl>
             </div>
-            <div className="hidden lg:block">
-              <div className="placeholder-image flex h-full min-h-[240px] items-center justify-center rounded-[1.25rem]">
-                Advisor team reviewing Money Personality results — photography placeholder
-              </div>
+            <div className="relative hidden overflow-hidden lg:block">
+              <img
+                src="https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1"
+                alt="Advisors collaborating while reviewing Money Personality reports on a laptop."
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </section>
@@ -326,7 +333,7 @@ export default function AdvisorDashboard() {
               <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${bannerTheme.accent}`}>
                 {bannerTheme.label}
               </p>
-              <p className="mt-2 text-sm text-neutral-700">{banner.message}</p>
+              <p className="mt-2 text-sm text-ink">{banner.message}</p>
             </div>
             <button
               type="button"
@@ -338,7 +345,7 @@ export default function AdvisorDashboard() {
           </div>
         )}
 
-        <section className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[{
             label: 'Clients engaged',
             value: totalAssessments,
@@ -352,8 +359,8 @@ export default function AdvisorDashboard() {
             label: 'Unlocked insights',
             value: unlockedCount,
           }].map(stat => (
-            <div key={stat.label} className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{stat.label}</p>
+            <div key={stat.label} className="rounded-xl border border-primary-700/20 bg-white p-6 shadow-subtle">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">{stat.label}</p>
               <p className="mt-3 text-3xl font-semibold text-primary-900">{stat.value}</p>
             </div>
           ))}
@@ -363,7 +370,7 @@ export default function AdvisorDashboard() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-primary-900">Completed assessments</h2>
-              <p className="text-sm text-neutral-600">Unlock Money Personality profiles and share tailored coaching plans.</p>
+              <p className="text-sm text-ink/80">Unlock Money Personality profiles and share tailored coaching plans.</p>
             </div>
             <Link to="/advisor/share" className="btn-secondary">
               Send another invitation
@@ -372,9 +379,9 @@ export default function AdvisorDashboard() {
 
           {completedAssessments.length === 0 ? (
             <div className="mt-10 rounded-xl border border-dashed border-neutral-300 bg-white/70 px-6 py-12 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500">No results yet</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-500">No results yet</p>
               <h3 className="mt-3 text-xl font-semibold text-primary-900">Invite a client to experience the assessment.</h3>
-              <p className="mt-3 text-neutral-600">
+              <p className="mt-3 text-ink/80">
                 Once clients finish their Money Personality assessment, their full report appears in this workspace.
               </p>
               <Link to="/advisor/share" className="btn-primary mt-6">
@@ -407,7 +414,7 @@ export default function AdvisorDashboard() {
                       <tr key={assessment.id} className="align-top hover:bg-neutral-100/40">
                         <td className="py-4 pr-4">
                           <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{assessment.client_email}</p>
+                          <p className="mt-1 text-xs text-neutral-600">{assessment.client_email}</p>
                         </td>
                         <td className="py-4 pr-4">
                           {isUnlocked ? (
@@ -427,12 +434,12 @@ export default function AdvisorDashboard() {
                               )}
                             </div>
                           ) : (
-                            <p className="text-sm text-neutral-500">
+                            <p className="text-sm text-neutral-600">
                               {isUnlocking ? 'Processing payment…' : 'Unlock this report to view the full profile.'}
                             </p>
                           )}
                         </td>
-                        <td className="py-4 pr-4 text-neutral-600">
+                        <td className="py-4 pr-4 text-neutral-700">
                           {assessment.completed_at ? new Date(assessment.completed_at).toLocaleDateString() : '—'}
                         </td>
                         <td className="py-4 pr-0">
@@ -481,7 +488,7 @@ export default function AdvisorDashboard() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-primary-900">Pending invitations</h2>
-              <p className="text-sm text-neutral-600">Follow up with clients who have not yet completed the assessment.</p>
+              <p className="text-sm text-ink/80">Follow up with clients who have not yet completed the assessment.</p>
             </div>
             <Link to="/advisor/share" className="btn-secondary">
               Invite another client
@@ -490,9 +497,9 @@ export default function AdvisorDashboard() {
 
           {pendingAssessments.length === 0 ? (
             <div className="mt-10 rounded-xl border border-dashed border-neutral-300 bg-white/70 px-6 py-12 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500">All invitations completed</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-500">All invitations completed</p>
               <h3 className="mt-3 text-xl font-semibold text-primary-900">Every client has submitted their Money Personality assessment.</h3>
-              <p className="mt-3 text-neutral-600">
+              <p className="mt-3 text-ink/80">
                 Send a new invitation to expand your insights across your client base.
               </p>
               <Link to="/advisor/share" className="btn-primary mt-6">
@@ -515,14 +522,14 @@ export default function AdvisorDashboard() {
                     <tr key={assessment.id} className="align-top hover:bg-neutral-100/40">
                       <td className="py-4 pr-4">
                         <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
-                        <p className="mt-1 text-xs text-neutral-500">{assessment.client_email}</p>
+                        <p className="mt-1 text-xs text-neutral-600">{assessment.client_email}</p>
                       </td>
                       <td className="py-4 pr-4">
-                        <span className="inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
+                        <span className="inline-flex rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">
                           Pending completion
                         </span>
                       </td>
-                      <td className="py-4 pr-4 text-neutral-600">
+                      <td className="py-4 pr-4 text-neutral-700">
                         {assessment.sent_at ? new Date(assessment.sent_at).toLocaleDateString() : '—'}
                       </td>
                       <td className="py-4 pr-0">
@@ -533,7 +540,7 @@ export default function AdvisorDashboard() {
                               navigator.clipboard.writeText(assessment.assessment_link);
                               alert('Assessment link copied to clipboard!');
                             }}
-                            className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-600 transition hover:border-primary-500 hover:text-primary-700"
+                            className="rounded-full border border-primary-500/60 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:border-primary-700 hover:text-primary-900"
                           >
                             Copy link
                           </button>

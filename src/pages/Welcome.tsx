@@ -15,7 +15,6 @@ const highlights = [
     image: {
       src: 'https://enrich.org/wp-content/uploads/2024/10/small_Woman_smiling_while_using_laptop_to_view_reporting_console_07897d71ee-e1728799046817.webp',
       alt: 'Participant smiling while reviewing financial wellness insights on a laptop.',
-      creditNote: '1200×900 crop recommended for final asset.',
     },
   },
   {
@@ -25,7 +24,6 @@ const highlights = [
     image: {
       src: 'https://enrich.org/wp-content/uploads/2024/12/maxresdefault.jpg',
       alt: 'Straight-on preview of the Money Personality dashboard video cover.',
-      creditNote: 'Use a centered 1200×900 crop from the provided YouTube still.',
     },
   },
   {
@@ -35,7 +33,6 @@ const highlights = [
     image: {
       src: 'https://enrich.org/wp-content/uploads/2024/10/small_Home_Page_Block_2_e828cca6d4.webp',
       alt: 'Advisor collaborating virtually with a participant over shared resources.',
-      creditNote: 'Consider substituting with brand photography once available.',
     },
   },
 ];
@@ -50,8 +47,10 @@ const bluePanelHighlights = [
       'Seven-point Likert scale with clear “Not at all” to “Very well” anchors.',
       'Light gray canvas paired with deep blue accents for contrast compliance.',
     ],
-    mediaNote:
-      'Placeholder: Screenshot mockup of the Your Money Personality assessment screen framed on a laptop.',
+    image: {
+      src: 'https://images.pexels.com/photos/4065613/pexels-photo-4065613.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
+      alt: 'Participant completing a digital assessment on a laptop in a bright workspace.',
+    },
   },
   {
     title: 'Guidance that carries through the journey',
@@ -62,8 +61,10 @@ const bluePanelHighlights = [
       'Resource cards surface action items alongside photography, not icons.',
       'Advisor invitations rest within a blue-backed panel that highlights sharing value.',
     ],
-    mediaNote:
-      'Placeholder: Collage of dashboard, chapter overview, and advisor share screen in Enrich styling.',
+    image: {
+      src: 'https://images.pexels.com/photos/3184611/pexels-photo-3184611.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
+      alt: 'Advisor team collaborating around laptops and printed reports.',
+    },
   },
 ];
 
@@ -175,7 +176,6 @@ export default function Welcome() {
                     <div className="feature-card__image-frame">
                       <img src={item.image.src} alt={item.image.alt} />
                     </div>
-                    <p className="feature-card__note">{item.image.creditNote}</p>
                   </div>
                   <h3 className="text-2xl font-semibold text-ink">{item.title}</h3>
                   <p className="text-neutral-700 leading-relaxed">{item.description}</p>
@@ -206,9 +206,9 @@ export default function Welcome() {
                       <li key={bullet}>{bullet}</li>
                     ))}
                   </ul>
-                  <div className="brand-band__media placeholder-image">
-                    {panel.mediaNote}
-                  </div>
+                  <figure className="brand-band__media">
+                    <img src={panel.image.src} alt={panel.image.alt} />
+                  </figure>
                 </article>
               ))}
             </div>
@@ -238,7 +238,6 @@ export default function Welcome() {
                   alt="Financial Wellness Report cover alongside supporting materials."
                 />
               </div>
-              <p className="share-card__note">1200×800 crop recommended; swap with bespoke photography if available.</p>
             </div>
           </div>
         </section>

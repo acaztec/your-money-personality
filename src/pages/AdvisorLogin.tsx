@@ -102,31 +102,33 @@ export default function AdvisorLogin() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="space-y-8">
               <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Advisor access</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">Advisor access</p>
                 <h1 className="text-4xl font-semibold text-primary-900 sm:text-5xl">
                   Support every client’s Money Personality journey.
                 </h1>
-                <p className="text-lg text-neutral-700">
+                <p className="text-lg text-ink/85">
                   Invite clients to complete the assessment, unlock their behavioral insights, and personalize your guidance with Enrich resources.
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] border border-neutral-200 bg-white shadow-subtle">
-                <div className="placeholder-image flex h-72 w-full items-center justify-center text-center text-sm font-medium">
-                  Lifestyle photography placeholder — advisor meeting with clients
-                </div>
+              <div className="overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-white shadow-subtle">
+                <img
+                  src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1"
+                  alt="Advisor meeting with clients while reviewing financial plans."
+                  className="h-72 w-full object-cover"
+                />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Measure progress</p>
-                  <p className="mt-2 text-sm text-neutral-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">Measure progress</p>
+                  <p className="mt-2 text-sm text-ink/80">
                     Track completion rates and access Money Personality profiles with a single login.
                   </p>
                 </div>
                 <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Personalize coaching</p>
-                  <p className="mt-2 text-sm text-neutral-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">Personalize coaching</p>
+                  <p className="mt-2 text-sm text-ink/80">
                     Use Enrich tools and resources tailored to each behavioral segment.
                   </p>
                 </div>
@@ -139,7 +141,7 @@ export default function AdvisorLogin() {
                   <h2 className="text-2xl font-semibold text-primary-900">
                     {isSignup ? 'Create advisor account' : 'Advisor sign in'}
                   </h2>
-                  <p className="text-sm text-neutral-600">
+                  <p className="text-sm text-ink/80">
                     {isSignup
                       ? 'Set up access for your firm to share assessments with clients.'
                       : 'Log in to manage invitations and review client results.'}
