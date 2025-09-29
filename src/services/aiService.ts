@@ -236,7 +236,6 @@ function buildSystemPrompt(promptData: Record<string, unknown>): string {
     '  4. Risks & Conversation Starters',
     '  5. Advisor Actions (prioritized)',
     '  6. Communication Tips',
-    '  7. Confidence',
     '- In "Client Overview" highlight the highest and lowest category averages from profile.category_scores with their numeric values when available, and describe how the personality mix supports or tensions those numbers.',
     '- In "Strongest Signals" create a markdown table with columns: Item | Client | Intensity | Why it matters | Advisor move. Each row must cite the exact question text in quotes, show the client score as {score}/{scale_max}, state the intensity label and method (midpoint vs z-score), explain the planning implication in one sentence, and offer one concrete advisor action or question.',
     '- Order the "Strongest Signals" table by the provided rank so the highest-intensity items appear first.',
@@ -246,7 +245,6 @@ function buildSystemPrompt(promptData: Record<string, unknown>): string {
     '- "Advisor Actions" must list actions under sub-bullets labeled Quick Win (0-2 wks), Next (1-3 mos), and Build (3-12 mos) with 1-2 specific items each, and each item should reference the relevant question id, category score, or benchmark stat that supports the recommendation.',
     '- Provide 3-5 "Communication Tips" tied to the client\'s personalities and evidence in the data.',
     '- After Communication Tips, include a bolded Case Point line only if case_study data is present, matching the format **Case Point (Partner): finding — applicability**.',
-    '- Finish with "Confidence: {High|Medium|Low}" followed by "Notes:" summarizing the intensity method (use assessment.intensity_context.method_summary and thresholds) and any limitations (e.g., lack of benchmark data).',
     '- Maintain a precise, professional tone. Avoid vague language, filler, or unsubstantiated hedging; every recommendation should connect back to a measurement in the data.',
     '- Respond in markdown only.'
   ];
