@@ -1,176 +1,264 @@
 import { Link } from 'react-router-dom';
-import { Brain, TrendingUp, MessageCircle, ArrowRight, Sparkles, Target, Clock } from 'lucide-react';
+import Layout from '../components/Layout';
+
+const stats = [
+  { label: 'Completed assessments', value: '500K+' },
+  { label: 'Average completion time', value: '10 minutes' },
+  { label: 'Personality lenses', value: '5 core styles' },
+];
+
+const highlights = [
+  {
+    title: 'Personalized guidance',
+    description:
+      'Discover the motivators behind spending, saving, and planning so you can make confident choices that fit your life.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Woman_smiling_while_using_laptop_to_view_reporting_console_07897d71ee-e1728799046817.webp',
+      alt: 'Participant smiling while reviewing financial wellness insights on a laptop.',
+    },
+  },
+  {
+    title: 'Dashboard follow-up',
+    description:
+      'Review tailored insights and recommended next steps inside the Money Personality dashboard after you finish.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/12/maxresdefault.jpg',
+      alt: 'Straight-on preview of the Money Personality dashboard video cover.',
+    },
+  },
+  {
+    title: 'Advisor collaboration',
+    description:
+      'Share results securely with an Enrich advisor or trusted partner to continue the financial wellness conversation.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Home_Page_Block_2_e828cca6d4.webp',
+      alt: 'Advisor collaborating virtually with a participant over shared resources.',
+    },
+  },
+];
+
+const bluePanelHighlights = [
+  {
+    title: 'An immersive assessment space',
+    description:
+      'Every question sits within a calm, full-screen workspace so participants can stay focused without distractions.',
+    bullets: [
+      'Sticky navigation keeps progress, back, and next actions accessible.',
+      'Seven-point Likert scale with clear “Not at all” to “Very well” anchors.',
+      'Light gray canvas paired with deep blue accents for contrast compliance.',
+    ],
+    image: {
+      src: 'https://images.pexels.com/photos/1181356/pexels-photo-1181356.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
+      alt: 'Two colleagues collaborating over a laptop while reviewing assessment responses.',
+    },
+  },
+  {
+    title: 'Guidance that carries through the journey',
+    description:
+      'Program touchpoints reuse the hero blue treatment to reinforce continuity from onboarding to follow-up coaching.',
+    bullets: [
+      'Chapter intros feature the curved blue divider from enrich.org reference designs.',
+      'Resource cards surface action items alongside photography, not icons.',
+      'Advisor invitations rest within a blue-backed panel that highlights sharing value.',
+    ],
+    image: {
+      src: 'https://images.pexels.com/photos/3184611/pexels-photo-3184611.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1',
+      alt: 'Advisor team collaborating around laptops and printed reports.',
+    },
+  },
+];
+
+const steps = [
+  {
+    title: 'Answer intuitive questions',
+    description:
+      'Work through a short series of statements about money habits. Use the seven-point scale to choose what fits you best.',
+  },
+  {
+    title: 'Reveal your personality blend',
+    description:
+      'Instantly see how your motivations align to our five Money Personality styles with plain-language descriptions.',
+  },
+  {
+    title: 'Put insights to work',
+    description:
+      'Jump into the dashboard for reflection exercises, coaching prompts, and actions you can revisit over time.',
+  },
+];
 
 export default function Welcome() {
   return (
-    <div className="min-h-screen professional-bg">
-
-      {/* Header with glassmorphism */}
-      <div className="professional-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <img 
-              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-              alt="iGrad Enrich" 
-              className="h-10 w-auto static-element"
-            />
-            <Link
-              to="/advisor"
-              className="text-white hover:text-blue-100 transition-colors duration-200 text-sm font-medium"
-            >
-              Advisor Login
-            </Link>
+    <Layout>
+      <div className="bg-canvas">
+        <section id="hero" className="hero-section hero-section--full">
+          <div className="hero-section__inner">
+            <div className="hero-card">
+              <div className="hero-card__accent hero-card__accent--dots" aria-hidden="true" />
+              <div className="hero-card__accent hero-card__accent--orb" aria-hidden="true" />
+              <div className="hero-card__layout">
+                <div className="hero-card__content">
+                  <p className="hero-card__kicker">Your Money Personality</p>
+                  <h1 className="hero-card__title">
+                    Feel confident about your financial choices—one step at a time
+                  </h1>
+                  <p className="hero-card__description">
+                    Explore the Your Money Personality assessment to understand the motivations guiding how you save, spend, and plan. It only takes a few minutes to reveal insights you can use right away.
+                  </p>
+                  <div className="hero-card__actions">
+                    <Link to="/assessment" className="btn-primary">
+                      Start assessment
+                    </Link>
+                    <Link to="/dashboard" className="btn-secondary">
+                      View sample results
+                    </Link>
+                  </div>
+                </div>
+                <div className="hero-card__media" aria-hidden="true">
+                  <div className="hero-card__photo-frame">
+                    <img
+                      src="https://media-cdn.igrad.com/IMAGE/hub-redesign/enrich/home-hero.webp"
+                      alt="Parent and child smiling while reviewing Money Personality guidance"
+                    />
+                  </div>
+                </div>
+              </div>
+              <dl className="hero-card__stats">
+                {stats.map((item) => (
+                  <div key={item.label} className="hero-card__stat">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Hero Section with asymmetric layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left column - Text content */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Discover Your
-                <span className="block bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                  Money Personality
-                </span>
-              </h1>
-              <p className="text-xl text-gray-700 leading-relaxed max-w-xl">
-                Unlock the emotional side of your financial decisions with our scientifically-designed assessment. 
-                Get personalized insights and actionable guidance in just 10 minutes.
+        <section className="py-20" id="how-it-works">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">How it works</p>
+              <h2 className="mt-4 text-3xl font-semibold text-ink">A focused experience built around self-reflection</h2>
+              <p className="mt-4 text-neutral-700">
+                Your Money Personality keeps the process simple so you can concentrate on honest answers. Progress saves automatically, and you can move back to adjust selections at any point.
               </p>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/assessment" className="btn-primary group">
-                <Sparkles className="w-5 h-5 mr-3" />
-                <span>Start Assessment</span>
-                <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <button className="btn-secondary">
-                <MessageCircle className="w-5 h-5 mr-3" />
-                <span>Learn More</span>
-              </button>
-            </div>
-
-            {/* Mini stats */}
-            <div className="flex items-center space-x-8 pt-8">
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">500K+</div>
-                <div className="text-gray-600 text-sm font-medium">Assessments</div>
-              </div>
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">95%</div>
-                <div className="text-gray-600 text-sm font-medium">Complete</div>
-              </div>
-              <div className="text-center">
-                <div className="professional-stat text-2xl font-bold">10min</div>
-                <div className="text-gray-600 text-sm font-medium">Duration</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column - Floating visual elements */}
-          <div className="relative">
-            <div className="relative z-10">
-              {/* Main floating card */}
-              <div className="modern-card">
-                <div className="text-center space-y-6">
-                  <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                    <Brain className="w-10 h-10 text-white" />
+            <ol className="mt-12 grid gap-8 md:grid-cols-3">
+              {steps.map((step, index) => (
+                <li key={step.title} className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-subtle space-y-4">
+                  <div className="flex items-center justify-between text-sm font-semibold text-primary-500">
+                    <span>Step {index + 1}</span>
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+                      {index + 1}
+                    </span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    42 Questions
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Scientifically designed to analyze your financial behaviors across five key dimensions
-                  </p>
-                </div>
-              </div>
+                  <h3 className="text-xl font-semibold text-ink">{step.title}</h3>
+                  <p className="text-neutral-700 leading-relaxed">{step.description}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
-              {/* Smaller floating elements */}
-              <div className="absolute -top-4 -right-4 modern-card p-4">
-                <Target className="w-8 h-8 text-primary-600" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 modern-card p-4">
-                <Clock className="w-8 h-8 text-accent-600" />
-              </div>
+        <section className="py-20 bg-white" id="highlights">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">What you gain</p>
+              <h2 className="mt-4 text-3xl font-semibold text-ink">Insights that translate into practical next steps</h2>
+              <p className="mt-4 text-neutral-700">
+                Each Money Personality report combines narrative guidance with prompts you can return to over time. Use it on your own or as a conversation starter with someone you trust.
+              </p>
             </div>
-
-            {/* Background decorative elements */}
-            <div className="absolute inset-0 -z-10">
-              <div className="w-72 h-72 bg-gradient-to-br from-primary-200/30 to-accent-200/30 rounded-full blur-3xl"></div>
+            <div className="grid gap-10 lg:grid-cols-3">
+              {highlights.map((item) => (
+                <article key={item.title} className="space-y-5">
+                  <div className="feature-card__media">
+                    <div className="feature-card__image-frame">
+                      <img src={item.image.src} alt={item.image.alt} />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-semibold text-ink">{item.title}</h3>
+                  <p className="text-neutral-700 leading-relaxed">{item.description}</p>
+                </article>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Features Section with unique grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Why Take This Assessment?
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get deep insights into your financial psychology with our research-backed approach
-          </p>
-        </div>
+        <section className="brand-band brand-band--navy" aria-labelledby="experience-highlights">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="brand-band__header">
+              <p className="brand-band__kicker">Experience preview</p>
+              <h2 id="experience-highlights" className="brand-band__title">
+                Consistent Enrich styling from first click through follow-up
+              </h2>
+              <p className="brand-band__description">
+                We reuse the hero blue treatment across assessment screens, chapter overviews, and advisor touchpoints so participants always know they&apos;re in the Your Money Personality environment.
+              </p>
+            </div>
+            <div className="brand-band__grid">
+              {bluePanelHighlights.map((panel) => (
+                <article key={panel.title} className="brand-band__card">
+                  <h3>{panel.title}</h3>
+                  <p>{panel.description}</p>
+                  <ul>
+                    {panel.bullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                  <figure className="brand-band__media">
+                    <img src={panel.image.src} alt={panel.image.alt} />
+                  </figure>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Brain,
-              title: "Behavioral Science",
-              description: "Based on behavioral economics research and validated psychological frameworks",
-              color: "from-blue-500 to-indigo-600"
-            },
-            {
-              icon: TrendingUp,
-              title: "Personalized Insights", 
-              description: "Detailed analysis of your strengths, challenges, and personalized action plans",
-              color: "from-green-500 to-emerald-600"
-            },
-            {
-              icon: MessageCircle,
-              title: "Instant Results",
-              description: "Comprehensive report available immediately after completion",
-              color: "from-purple-500 to-pink-600"
-            }
-          ].map((feature, index) => (
-            <div key={index} className="feature-card modern-card group hover:scale-105 transition-all duration-300">
-              <div className="text-center space-y-6">
-                <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center group-hover:rotate-12 transition-transform duration-300`}>
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  {feature.description}
-                </p>
+        <section className="py-20" id="share">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-16 lg:grid-cols-[1.05fr_0.95fr] items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-semibold text-ink">Share your results when you are ready</h2>
+              <p className="text-neutral-700">
+                Invite an advisor, coach, or accountability partner into the experience. Shared assessments surface discussion prompts and next steps so every conversation stays productive.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/advisor" className="btn-secondary">
+                  Invite an advisor
+                </Link>
+                <Link to="/dashboard" className="inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
+                  Preview shared view
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="share-card__media">
+              <div className="share-card__image-frame">
+                <img
+                  src="https://enrich.org/wp-content/uploads/2024/10/small_FWR_1_1b2a1d7e44.webp"
+                  alt="Financial Wellness Report cover alongside supporting materials."
+                />
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* CTA Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <div className="modern-card space-y-8">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Ready to Discover Your Money Personality?
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Join over 500,000 people who have gained valuable insights into their financial behaviors
-          </p>
-          <Link to="/assessment" className="btn-primary inline-flex">
-            <Sparkles className="w-5 h-5 mr-3" />
-            <span>Take Assessment Now</span>
-            <ArrowRight className="w-5 h-5 ml-3" />
-          </Link>
-        </div>
+        <section className="py-20 bg-white" id="cta">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+            <h2 className="text-3xl font-semibold text-ink">Begin your Money Personality journey</h2>
+            <p className="text-neutral-700 max-w-3xl mx-auto">
+              Set aside a quiet moment, work through the assessment at your own pace, and return to your dashboard whenever you need a refresher. Your progress is saved so you can pick up right where you left off.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/assessment" className="btn-primary">
+                Start assessment
+              </Link>
+              <Link to="/dashboard" className="btn-secondary">
+                Continue where you left off
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </Layout>
   );
 }

@@ -93,7 +93,7 @@ export default function AdvisorWelcome() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+    <div className="min-h-screen professional-bg">
       {/* Header */}
       <div className="bg-primary-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -106,20 +106,20 @@ export default function AdvisorWelcome() {
             <div className="flex items-center space-x-4">
               <Link
                 to="/advisor/dashboard"
-                className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+                className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium"
               >
                 Dashboard
               </Link>
               <Link
                 to="/"
-                className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+                className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium"
               >
                 For Individuals
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center space-x-2 text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
+                className="inline-flex items-center space-x-2 text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -132,9 +132,9 @@ export default function AdvisorWelcome() {
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl font-bold text-primary-900 mb-6">
             Discover Your Client's
-            <span className="text-blue-600"> Money Personality</span>
+            <span className="text-primary-700"> Money Personality</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             Unlock the emotional side of your clients' financial decisions. Understand their behavioral patterns, 
@@ -144,25 +144,25 @@ export default function AdvisorWelcome() {
 
         {/* Stats Bar */}
         <div className="grid md:grid-cols-3 gap-8 mb-16 text-center">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="text-3xl font-bold text-blue-600 mb-2">500K+</div>
-            <div className="text-gray-600">Assessments Completed</div>
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            <div className="text-3xl font-bold text-primary-700 mb-2">500K+</div>
+            <div className="text-neutral-600">Assessments Completed</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="text-3xl font-bold text-green-600 mb-2">95%</div>
-            <div className="text-gray-600">Completion Rate</div>
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            <div className="text-3xl font-bold text-accent-600 mb-2">95%</div>
+            <div className="text-neutral-600">Completion Rate</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="text-3xl font-bold text-purple-600 mb-2">10 min</div>
-            <div className="text-gray-600">Average Time</div>
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            <div className="text-3xl font-bold text-primary-500 mb-2">10 min</div>
+            <div className="text-neutral-600">Average Time</div>
           </div>
         </div>
 
         {/* Share Assessment Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mb-16">
+        <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200 p-8 mb-16">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-8 h-8 text-blue-600" />
+            <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-primary-700" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Share Assessment with Client</h2>
             <p className="text-gray-600">Send a personalized invitation to your client to complete their Money Personality assessment</p>
@@ -177,44 +177,44 @@ export default function AdvisorWelcome() {
             const sampleReportUrl = SAMPLE_REPORT_PLACEHOLDER_URL;
 
             return (
-              <div className="mb-6 rounded-xl border border-green-200 bg-green-50/80 p-5 shadow-sm">
+              <div className="mb-6 rounded-xl border border-accent-600/40 bg-white p-5 shadow-subtle">
                 <div className="flex items-start space-x-3">
                   <div className="mt-0.5">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
+                    <CheckCircle className="w-6 h-6 text-accent-600" />
                   </div>
                   <div>
-                    <p className="text-green-900 font-semibold">{copy.headline}</p>
-                    <p className="text-green-800 text-sm mt-1">{copy.intro}</p>
+                    <p className="text-primary-900 font-semibold">{copy.headline}</p>
+                    <p className="text-neutral-700 text-sm mt-1">{copy.intro}</p>
                   </div>
                 </div>
 
-                <ul className="mt-4 list-disc space-y-2 pl-6 text-sm text-green-800">
+                <ul className="mt-4 list-disc space-y-2 pl-6 text-sm text-neutral-700">
                   {copy.bullets.map((bullet, index) => (
                     <li key={index}>{bullet}</li>
                   ))}
                 </ul>
 
                 {lastShareDetails.qualifiesForTrial ? (
-                  <div className="mt-4 rounded-lg border border-green-300 bg-white p-4 text-sm text-green-800">
-                    <p className="font-semibold text-green-900">Complimentary preview unlocked</p>
+                  <div className="mt-4 rounded-lg border border-accent-600/30 bg-white p-4 text-sm text-neutral-700">
+                    <p className="font-semibold text-primary-900">Complimentary preview unlocked</p>
                     <p className="mt-1">
                       Because this is your first Money Personality invitation, you'll be able to review {clientLabel}'s full results at no cost once they finish the assessment.
                     </p>
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-green-800">
+                  <p className="mt-4 text-sm text-neutral-700">
                     We'll follow up as soon as your client completes the assessment so you can unlock their full Money Personality report.
                   </p>
                 )}
 
                 <div className="mt-4 rounded-lg bg-white p-4">
-                  <p className="text-sm font-semibold text-gray-900">{copy.sample.heading}</p>
-                  <p className="mt-1 text-sm text-gray-700">{copy.sample.description}</p>
+                  <p className="text-sm font-semibold text-primary-900">{copy.sample.heading}</p>
+                  <p className="mt-1 text-sm text-neutral-700">{copy.sample.description}</p>
                   <a
                     href={sampleReportUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+                    className="mt-3 inline-flex items-center justify-center rounded-lg border border-primary-700 px-4 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100"
                   >
                     {copy.sample.ctaLabel}
                   </a>
@@ -236,7 +236,7 @@ export default function AdvisorWelcome() {
                       <button
                         type="button"
                         onClick={handleCopyLink}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
+                        className="inline-flex items-center justify-center rounded-lg bg-accent-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
                       >
                         Copy link
                       </button>
@@ -245,15 +245,15 @@ export default function AdvisorWelcome() {
                   </div>
                 )}
 
-                <p className="mt-4 text-sm text-green-800">
+                <p className="mt-4 text-sm text-neutral-700">
                   {copy.dashboard.description}{' '}
-                  <Link to="/advisor/dashboard" className="font-semibold text-green-900 underline-offset-2 hover:underline">
+                  <Link to="/advisor/dashboard" className="font-semibold text-primary-900 underline-offset-2 hover:underline">
                     {copy.dashboard.ctaLabel}
                   </Link>
                   .
                 </p>
 
-                <p className="mt-2 text-xs text-green-700">{copy.closing}</p>
+                <p className="mt-2 text-xs text-neutral-600">{copy.closing}</p>
               </div>
             );
           })()}
@@ -364,7 +364,7 @@ export default function AdvisorWelcome() {
                 className={`inline-flex items-center px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 ${
                   isSharing
                     ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-primary-700 hover:bg-primary-800 text-white'
                 }`}
               >
                 {isSharing ? (
@@ -387,7 +387,7 @@ export default function AdvisorWelcome() {
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Brain className="w-8 h-8 text-blue-600" />
+              <Brain className="w-8 h-8 text-primary-700" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Behavioral Analysis
@@ -399,7 +399,7 @@ export default function AdvisorWelcome() {
 
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <MessageCircle className="w-8 h-8 text-green-600" />
+              <MessageCircle className="w-8 h-8 text-accent-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               AI-Powered Insights
@@ -411,7 +411,7 @@ export default function AdvisorWelcome() {
 
           <div className="text-center">
             <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Users className="w-8 h-8 text-purple-600" />
+              <Users className="w-8 h-8 text-primary-500" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Deeper Client Relationships
@@ -423,12 +423,12 @@ export default function AdvisorWelcome() {
         </div>
 
         {/* How It Works */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200 p-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">How It Works</h2>
           
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+              <div className="w-12 h-12 bg-primary-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                 1
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Share Assessment</h4>
@@ -436,7 +436,7 @@ export default function AdvisorWelcome() {
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+              <div className="w-12 h-12 bg-primary-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                 2
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Client Completes</h4>
@@ -444,7 +444,7 @@ export default function AdvisorWelcome() {
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+              <div className="w-12 h-12 bg-primary-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                 3
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Get Notified</h4>
@@ -452,7 +452,7 @@ export default function AdvisorWelcome() {
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+              <div className="w-12 h-12 bg-primary-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                 4
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Access Insights</h4>
