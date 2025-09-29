@@ -7,23 +7,6 @@ import {
   DatabaseAssessmentResult,
 } from '../services/assessmentService';
 import { AdvisorAssessment } from '../types';
-import {
-  Users,
-  Clock,
-  CheckCircle,
-  Eye,
-  Plus,
-  Calendar,
-  ExternalLink,
-  LogOut,
-  Trash2,
-  Lock,
-  CreditCard,
-  Loader2,
-  AlertTriangle,
-  Unlock,
-  X
-} from 'lucide-react';
 
 export default function AdvisorDashboard() {
   const { advisor, logout } = useAuth();
@@ -47,7 +30,7 @@ export default function AdvisorDashboard() {
     async (showSpinner = true) => {
       const currentAdvisorEmail = advisor?.email;
       const currentAdvisorName = advisor?.name || '';
-      
+
       if (!currentAdvisorEmail) {
         if (showSpinner) {
           setIsLoading(false);
@@ -106,7 +89,6 @@ export default function AdvisorDashboard() {
           }
         }
 
-        // Set unlocked results directly - React will handle shallow comparison
         setUnlockedResults(dbResults);
       } catch (error) {
         console.error('Failed to load advisor dashboard data:', error);
@@ -116,7 +98,7 @@ export default function AdvisorDashboard() {
         }
       }
     },
-    [advisor?.email, advisor?.name], // Use advisor object properties directly
+    [advisor?.email, advisor?.name],
   );
 
   useEffect(() => {
@@ -213,18 +195,21 @@ export default function AdvisorDashboard() {
     switch (banner.type) {
       case 'success':
         return {
-          className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-          icon: <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />,
+          container: 'border border-accent-600/50 bg-white text-neutral-700',
+          label: 'Success',
+          accent: 'text-accent-600',
         };
       case 'error':
         return {
-          className: 'border-red-200 bg-red-50 text-red-700',
-          icon: <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />,
+          container: 'border border-primary-700/40 bg-white text-neutral-700',
+          label: 'Attention',
+          accent: 'text-primary-700',
         };
       default:
         return {
-          className: 'border-blue-200 bg-blue-50 text-blue-700',
-          icon: <AlertTriangle className="w-5 h-5 text-blue-500 mt-0.5" />,
+          container: 'border border-primary-500/40 bg-white text-neutral-700',
+          label: 'Notice',
+          accent: 'text-primary-500',
         };
     }
   }, [banner]);
@@ -239,7 +224,6 @@ export default function AdvisorDashboard() {
     [assessments],
   );
 
-  // Create a lookup map for unlocked results
   const unlockedResultsMap = useMemo(() => {
     const map: Record<string, DatabaseAssessmentResult> = {};
     unlockedResults.forEach(result => {
@@ -257,256 +241,230 @@ export default function AdvisorDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen professional-bg flex items-center justify-center">
-        <div className="modern-card text-center space-y-6">
-          <div className="w-20 h-20 mx-auto morph-shape bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-          <h2 className="text-xl font-bold text-gray-900">Loading Dashboard...</h2>
+      <div className="min-h-screen professional-bg flex items-center justify-center px-4">
+        <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white px-8 py-10 text-center shadow-subtle">
+          <div className="mx-auto mb-6 h-12 w-12 rounded-full border-2 border-primary-300 border-t-transparent animate-spin" />
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500">Loading</p>
+          <h2 className="mt-2 text-lg font-semibold text-primary-900">Preparing your advisor workspace…</h2>
         </div>
       </div>
     );
   }
-  
+
   const totalAssessments = assessments.length;
 
   return (
     <div className="min-h-screen professional-bg">
-      {/* Header */}
-      <div className="professional-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link to="/">
-              <img 
-                src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-                alt="iGrad Enrich" 
-                className="h-8 w-auto"
-              />
-            </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-white text-sm">Welcome, {advisor?.name}</span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 text-primary-100 hover:text-white transition-colors duration-200 text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="modern-card mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome back, {advisor?.name}!
-              </h1>
-              <p className="text-gray-600">
-                Manage your client assessments and view results from your dashboard.
-              </p>
-            </div>
-            <Link
-              to="/advisor/share"
-              className="btn-primary"
+      <header className="bg-white border-b border-neutral-200">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link to="/">
+            <img
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              alt="Enrich"
+              className="h-8 w-auto"
+            />
+          </Link>
+          <div className="flex items-center gap-3 text-sm text-neutral-600">
+            <span className="hidden sm:inline">Welcome back, {advisorName || 'Advisor'}</span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-neutral-300 px-4 py-2 font-semibold text-neutral-700 transition hover:border-primary-500 hover:text-primary-700"
             >
-              <Plus className="w-5 h-5 mr-2" />
-              Share New Assessment
-            </Link>
+              Sign out
+            </button>
           </div>
         </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <section className="modern-card mb-10">
+          <div className="grid gap-8 lg:grid-cols-[1.35fr,1fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Advisor workspace</p>
+              <h1 className="mt-3 text-3xl font-semibold text-primary-900 sm:text-4xl">
+                Welcome back, {advisorName || 'Advisor'}.
+              </h1>
+              <p className="mt-4 text-lg text-neutral-700">
+                Monitor Money Personality invitations, unlock completed reports, and keep clients moving toward measurable financial wellness.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/advisor/share" className="btn-primary">
+                  Share new assessment
+                </Link>
+                <a
+                  href="https://www.enrich.org/financial-wellness-resources"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary"
+                >
+                  Advisor resource center
+                </a>
+              </div>
+              <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Current invitations</dt>
+                  <dd className="mt-2 text-2xl font-semibold text-primary-900">{pendingAssessments.length}</dd>
+                </div>
+                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Reports unlocked</dt>
+                  <dd className="mt-2 text-2xl font-semibold text-primary-900">{unlockedCount}</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="hidden lg:block">
+              <div className="placeholder-image flex h-full min-h-[240px] items-center justify-center rounded-[1.25rem]">
+                Advisor team reviewing Money Personality results — photography placeholder
+              </div>
+            </div>
+          </div>
+        </section>
 
         {banner && bannerTheme && (
-          <div className={`mb-6 rounded-xl border p-4 flex items-start justify-between ${bannerTheme.className}`}>
-            <div className="flex items-start space-x-3">
-              {bannerTheme.icon}
-              <p className="text-sm leading-6">{banner.message}</p>
+          <div className={`mb-10 flex items-start justify-between gap-6 rounded-xl px-6 py-5 shadow-sm ${bannerTheme.container}`}>
+            <div>
+              <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${bannerTheme.accent}`}>
+                {bannerTheme.label}
+              </p>
+              <p className="mt-2 text-sm text-neutral-700">{banner.message}</p>
             </div>
             <button
               type="button"
               onClick={() => setBanner(null)}
-              className="ml-4 text-sm opacity-60 hover:opacity-100 transition"
+              className="text-sm font-semibold text-neutral-500 transition hover:text-neutral-700"
             >
-              <X className="w-4 h-4" />
+              Dismiss
             </button>
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{totalAssessments}</p>
-              </div>
-              <Users className="w-8 h-8 text-blue-600" />
+        <section className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[{
+            label: 'Clients engaged',
+            value: totalAssessments,
+          }, {
+            label: 'Assessments completed',
+            value: completedAssessments.length,
+          }, {
+            label: 'In progress',
+            value: pendingAssessments.length,
+          }, {
+            label: 'Unlocked insights',
+            value: unlockedCount,
+          }].map(stat => (
+            <div key={stat.label} className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{stat.label}</p>
+              <p className="mt-3 text-3xl font-semibold text-primary-900">{stat.value}</p>
             </div>
-          </div>
+          ))}
+        </section>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedAssessments.length}</p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+        <section className="modern-card">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-primary-900">Completed assessments</h2>
+              <p className="text-sm text-neutral-600">Unlock Money Personality profiles and share tailored coaching plans.</p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-orange-600">{pendingAssessments.length}</p>
-              </div>
-              <Clock className="w-8 h-8 text-orange-600" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Unlocked Reports</p>
-                <p className="text-2xl font-bold text-emerald-600">{unlockedCount}</p>
-              </div>
-              <Unlock className="w-8 h-8 text-emerald-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Assessment Results Table */}
-        <div className="modern-card">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Completed Assessments</h2>
-            {completedAssessments.length === 0 && (
-              <Link
-                to="/advisor/share"
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
-                Share your first assessment →
-              </Link>
-            )}
+            <Link to="/advisor/share" className="btn-secondary">
+              Send another invitation
+            </Link>
           </div>
 
           {completedAssessments.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No completed assessments yet</h3>
-              <p className="text-gray-600 mb-6">
-                Once clients complete their assessments, their results will appear here.
+            <div className="mt-10 rounded-xl border border-dashed border-neutral-300 bg-white/70 px-6 py-12 text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500">No results yet</p>
+              <h3 className="mt-3 text-xl font-semibold text-primary-900">Invite a client to experience the assessment.</h3>
+              <p className="mt-3 text-neutral-600">
+                Once clients finish their Money Personality assessment, their full report appears in this workspace.
               </p>
-              <Link to="/advisor/share" className="btn-primary">
-                <Plus className="w-5 h-5 mr-2" />
-                Share Assessment
+              <Link to="/advisor/share" className="btn-primary mt-6">
+                Share the assessment link
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Client</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Personality Types</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Completed</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-neutral-200 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                    <th className="py-3 pr-4">Client</th>
+                    <th className="py-3 pr-4">Personality focus</th>
+                    <th className="py-3 pr-4">Completed</th>
+                    <th className="py-3 pr-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-neutral-200 text-sm">
                   {completedAssessments.map(assessment => {
                     const unlockedResult = unlockedResultsMap[assessment.id];
                     const isUnlocked = Boolean(unlockedResult);
                     const isPaid = assessment.is_paid;
                     const isUnlocking = isPaid && !isUnlocked;
 
-                    return (
-                      <tr key={assessment.id} className="hover:bg-gray-50">
-                        <td className="py-4 px-4">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {assessment.client_name || 'Anonymous Client'}
-                            </div>
-                            <div className="text-sm text-gray-600">{assessment.client_email}</div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          {isUnlocked ? (
-                            <div className="flex flex-wrap gap-1">
-                              {(() => {
-                                const personalities = Array.isArray(unlockedResult?.profile?.personalities)
-                                  ? (unlockedResult?.profile?.personalities as string[])
-                                  : [];
+                    const personalities = isUnlocked && Array.isArray(unlockedResult?.profile?.personalities)
+                      ? (unlockedResult?.profile?.personalities as string[])
+                      : [];
 
-                                return (
-                                  <>
-                                    {personalities.slice(0, 2).map((personality: string, idx: number) => (
-                                      <span
-                                        key={idx}
-                                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                                      >
-                                        {personality}
-                                      </span>
-                                    ))}
-                                    {personalities.length > 2 && (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                        +{personalities.length - 2} more
-                                      </span>
-                                    )}
-                                  </>
-                                );
-                              })()}
+                    return (
+                      <tr key={assessment.id} className="align-top hover:bg-neutral-100/40">
+                        <td className="py-4 pr-4">
+                          <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
+                          <p className="mt-1 text-xs text-neutral-500">{assessment.client_email}</p>
+                        </td>
+                        <td className="py-4 pr-4">
+                          {isUnlocked ? (
+                            <div className="flex flex-wrap gap-2">
+                              {personalities.slice(0, 3).map((personality, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700"
+                                >
+                                  {personality}
+                                </span>
+                              ))}
+                              {personalities.length > 3 && (
+                                <span className="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
+                                  +{personalities.length - 3} more
+                                </span>
+                              )}
                             </div>
                           ) : (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Lock className="w-4 h-4 mr-2 text-gray-400" />
-                              {isUnlocking ? 'Processing payment...' : 'Unlock to view the full report'}
-                            </div>
+                            <p className="text-sm text-neutral-500">
+                              {isUnlocking ? 'Processing payment…' : 'Unlock this report to view the full profile.'}
+                            </p>
                           )}
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            {assessment.completed_at ? new Date(assessment.completed_at).toLocaleDateString() : '—'}
-                          </div>
+                        <td className="py-4 pr-4 text-neutral-600">
+                          {assessment.completed_at ? new Date(assessment.completed_at).toLocaleDateString() : '—'}
                         </td>
-                        <td className="py-4 px-4">
-                          <div className="flex flex-wrap items-center gap-2">
+                        <td className="py-4 pr-0">
+                          <div className="flex flex-wrap gap-2">
                             {isUnlocked ? (
                               <button
+                                type="button"
                                 onClick={() => handleViewResults(assessment.id)}
-                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                                className="rounded-full bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-800"
                               >
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Results
+                                View results
                               </button>
                             ) : !isPaid ? (
-                            <button
-                              onClick={() => handleUnlock(assessment.id)}
-                              disabled={checkoutLoadingId === assessment.id}
-                              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                              {checkoutLoadingId === assessment.id ? (
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                ) : (
-                                  <CreditCard className="w-4 h-4 mr-2" />
-                                )}
-                                {checkoutLoadingId === assessment.id ? 'Unlocking…' : 'Unlock report (demo)'}
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUnlock(assessment.id)}
+                                disabled={checkoutLoadingId === assessment.id}
+                                className="rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {checkoutLoadingId === assessment.id ? 'Unlocking…' : 'Unlock report'}
+                              </button>
                             ) : (
-                              <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-amber-700 bg-amber-100 rounded-lg">
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Unlocking...
+                              <span className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-600">
+                                {isUnlocking ? 'Unlocking…' : 'Payment received'}
                               </span>
                             )}
                             <button
+                              type="button"
                               onClick={() => handleDeleteClick(assessment.id, assessment.client_name)}
-                              className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                              className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-600 transition hover:border-primary-500 hover:text-primary-700"
                             >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
+                              Remove
                             </button>
                           </div>
                         </td>
@@ -517,67 +475,74 @@ export default function AdvisorDashboard() {
               </table>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Pending Assessments Section */}
-        {pendingAssessments.length > 0 && (
-          <div className="modern-card mt-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Pending Assessments</h2>
-              <span className="text-sm text-gray-500">{pendingAssessments.length} waiting for completion</span>
+        <section className="modern-card mt-10">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-primary-900">Pending invitations</h2>
+              <p className="text-sm text-neutral-600">Follow up with clients who have not yet completed the assessment.</p>
             </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Client</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Sent</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
+            <Link to="/advisor/share" className="btn-secondary">
+              Invite another client
+            </Link>
+          </div>
+
+          {pendingAssessments.length === 0 ? (
+            <div className="mt-10 rounded-xl border border-dashed border-neutral-300 bg-white/70 px-6 py-12 text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500">All invitations completed</p>
+              <h3 className="mt-3 text-xl font-semibold text-primary-900">Every client has submitted their Money Personality assessment.</h3>
+              <p className="mt-3 text-neutral-600">
+                Send a new invitation to expand your insights across your client base.
+              </p>
+              <Link to="/advisor/share" className="btn-primary mt-6">
+                Share the assessment link
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-neutral-200 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                    <th className="py-3 pr-4">Client</th>
+                    <th className="py-3 pr-4">Status</th>
+                    <th className="py-3 pr-4">Sent</th>
+                    <th className="py-3 pr-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-neutral-200 text-sm">
                   {pendingAssessments.map(assessment => (
-                    <tr key={assessment.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {assessment.client_name || 'Anonymous Client'}
-                          </div>
-                          <div className="text-sm text-gray-600">{assessment.client_email}</div>
-                        </div>
+                    <tr key={assessment.id} className="align-top hover:bg-neutral-100/40">
+                      <td className="py-4 pr-4">
+                        <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
+                        <p className="mt-1 text-xs text-neutral-500">{assessment.client_email}</p>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          <Clock className="w-3 h-3 mr-1" />
-                          Pending
+                      <td className="py-4 pr-4">
+                        <span className="inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
+                          Pending completion
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {assessment.sent_at ? new Date(assessment.sent_at).toLocaleDateString() : '—'}
-                        </div>
+                      <td className="py-4 pr-4 text-neutral-600">
+                        {assessment.sent_at ? new Date(assessment.sent_at).toLocaleDateString() : '—'}
                       </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
+                      <td className="py-4 pr-0">
+                        <div className="flex flex-wrap gap-2">
                           <button
+                            type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(assessment.assessment_link);
                               alert('Assessment link copied to clipboard!');
                             }}
-                            className="text-gray-600 hover:text-gray-700 p-1"
-                            title="Copy Link"
+                            className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-600 transition hover:border-primary-500 hover:text-primary-700"
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            Copy link
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteClick(assessment.id, assessment.client_name)}
-                            className="text-red-600 hover:text-red-700 p-1"
-                            title="Delete Assessment"
+                            className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-600 transition hover:border-primary-500 hover:text-primary-700"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Remove
                           </button>
                         </div>
                       </td>
@@ -586,63 +551,42 @@ export default function AdvisorDashboard() {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </section>
+      </main>
 
-      {/* Delete Confirmation Modal */}
       {deleteConfirm.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
-            <div className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <Trash2 className="w-6 h-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Delete Assessment</h3>
-                  <p className="text-sm text-gray-600">This action cannot be undone</p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-8 shadow-subtle">
+            <h3 className="text-2xl font-semibold text-primary-900">Delete assessment</h3>
+            <p className="mt-3 text-sm text-neutral-600">
+              Removing this invitation permanently deletes any associated progress or results for{' '}
+              <strong className="font-semibold text-primary-900">{deleteConfirm.clientName || 'this client'}</strong>.
+            </p>
+
+            {deleteError && (
+              <div className="mt-6 rounded-xl border border-primary-700/40 bg-white px-4 py-3 text-sm text-primary-700">
+                {deleteError}
               </div>
+            )}
 
-              <p className="text-gray-700 mb-6">
-                Are you sure you want to delete the assessment for{' '}
-                <strong>{deleteConfirm.clientName || 'this client'}</strong>? This will permanently 
-                remove all assessment data and results.
-              </p>
-
-              {deleteError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-800 text-sm">{deleteError}</p>
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={handleDeleteCancel}
-                  disabled={isDeleting}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteConfirm}
-                  disabled={isDeleting}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center space-x-2"
-                >
-                  {isDeleting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Deleting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </>
-                  )}
-                </button>
-              </div>
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-semibold text-neutral-600 transition hover:border-primary-500 hover:text-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="rounded-full bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? 'Deleting…' : 'Delete assessment'}
+              </button>
             </div>
           </div>
         </div>

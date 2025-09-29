@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function AdvisorLogin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signup, resendConfirmationEmail } = useAuth();
-  
+  const { login, signup } = useAuth();
+
   const [isSignup, setIsSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,7 +43,7 @@ export default function AdvisorLogin() {
           setIsLoading(false);
           return;
         }
-        
+
         const result = await signup({
           email: formData.email,
           password: formData.password,
@@ -53,7 +52,7 @@ export default function AdvisorLogin() {
         });
 
         if (result.success) {
-          setSuccess('Account created successfully! Redirecting...');
+          setSuccess('Account created successfully! Redirecting…');
           setTimeout(() => navigate(from), 1500);
         } else {
           setError(result.error || 'Signup failed');
@@ -65,7 +64,7 @@ export default function AdvisorLogin() {
         });
 
         if (result.success) {
-          setSuccess('Login successful! Redirecting...');
+          setSuccess('Login successful! Redirecting…');
           setTimeout(() => navigate(from), 1000);
         } else {
           setError(result.error || 'Login failed');
@@ -79,195 +78,194 @@ export default function AdvisorLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-      {/* Header */}
-      <div className="bg-primary-600 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link to="/">
-              <img 
-                src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png" 
-                alt="iGrad Enrich" 
-                className="h-8 w-auto"
-              />
-            </Link>
-            <Link
-              to="/"
-              className="text-primary-100 hover:text-white transition-colors duration-200 text-sm font-medium"
-            >
-              For Individuals
-            </Link>
-          </div>
+    <div className="min-h-screen professional-bg flex flex-col">
+      <header className="bg-white border-b border-neutral-200">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link to="/">
+            <img
+              src="https://media-cdn.igrad.com/IMAGE/Logos/White/iGradEnrich.png"
+              alt="Enrich"
+              className="h-8 w-auto"
+            />
+          </Link>
+          <Link
+            to="/"
+            className="text-sm font-semibold text-primary-700 transition hover:text-primary-900"
+          >
+            Return to Money Personality
+          </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="flex items-center justify-center py-16 px-4">
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {isSignup ? 'Create Advisor Account' : 'Advisor Login'}
-              </h2>
-              <p className="text-gray-600">
-                {isSignup 
-                  ? 'Join thousands of advisors using Money Personality assessments'
-                  : 'Access your client assessments and insights'
-                }
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                  <p className="text-red-800 text-sm">{error}</p>
-                </div>
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <p className="text-green-800 text-sm">{success}</p>
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {isSignup && (
-                <>
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required={isSignup}
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="John Smith"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                      Company (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Your Financial Firm"
-                    />
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="advisor@firm.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password *
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    minLength={6}
-                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="••••••••"
-                  />
-                </div>
-                {isSignup && (
-                  <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full flex items-center justify-center px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                  isLoading
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
-                    {isSignup ? 'Creating Account...' : 'Signing In...'}
-                  </>
-                ) : (
-                  isSignup ? 'Create Account' : 'Sign In'
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => {
-                  setIsSignup(!isSignup);
-                  setError('');
-                  setSuccess('');
-                  setFormData({ email: '', password: '', name: '', company: '' });
-                }}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
-                {isSignup 
-                  ? 'Already have an account? Sign In'
-                  : "Don't have an account? Sign Up"
-                }
-              </button>
-            </div>
-
-            {!isSignup && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <p className="text-blue-800 text-sm">
-                  <strong>New User?</strong> Create an account to get started with the Money Personality assessment platform.
+      <main className="flex-1">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Advisor access</p>
+                <h1 className="text-4xl font-semibold text-primary-900 sm:text-5xl">
+                  Support every client’s Money Personality journey.
+                </h1>
+                <p className="text-lg text-neutral-700">
+                  Invite clients to complete the assessment, unlock their behavioral insights, and personalize your guidance with Enrich resources.
                 </p>
               </div>
-            )}
 
-            <div className="mt-4 p-4 bg-amber-50 rounded-lg">
-              <p className="text-amber-800 text-sm">
-                <strong>Note:</strong> You may need to confirm your email after signup. Check your inbox and click the confirmation link, then return here to login.
-              </p>
+              <div className="rounded-[1.5rem] border border-neutral-200 bg-white shadow-subtle">
+                <div className="placeholder-image flex h-72 w-full items-center justify-center text-center text-sm font-medium">
+                  Lifestyle photography placeholder — advisor meeting with clients
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Measure progress</p>
+                  <p className="mt-2 text-sm text-neutral-700">
+                    Track completion rates and access Money Personality profiles with a single login.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-neutral-200 bg-white/80 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Personalize coaching</p>
+                  <p className="mt-2 text-sm text-neutral-700">
+                    Use Enrich tools and resources tailored to each behavioral segment.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full">
+              <div className="rounded-[1.25rem] border border-neutral-200 bg-white p-8 shadow-subtle sm:p-10">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold text-primary-900">
+                    {isSignup ? 'Create advisor account' : 'Advisor sign in'}
+                  </h2>
+                  <p className="text-sm text-neutral-600">
+                    {isSignup
+                      ? 'Set up access for your firm to share assessments with clients.'
+                      : 'Log in to manage invitations and review client results.'}
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="mt-6 rounded-xl border border-primary-700/40 bg-white px-4 py-3 text-sm text-primary-700">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="mt-6 rounded-xl border border-accent-600/40 bg-white px-4 py-3 text-sm text-accent-600">
+                    {success}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                  {isSignup && (
+                    <>
+                      <div>
+                        <label htmlFor="name" className="block text-sm font-semibold text-neutral-700">
+                          Full name *
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          required={isSignup}
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="Jamie Advisor"
+                          className="mt-2 w-full rounded-md border border-neutral-300 px-4 py-3 text-neutral-700 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300/60"
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="company" className="block text-sm font-semibold text-neutral-700">
+                          Company (optional)
+                        </label>
+                        <input
+                          type="text"
+                          id="company"
+                          name="company"
+                          value={formData.company}
+                          onChange={handleInputChange}
+                          placeholder="Your advisory firm"
+                          className="mt-2 w-full rounded-md border border-neutral-300 px-4 py-3 text-neutral-700 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300/60"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-neutral-700">
+                      Email address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="advisor@firm.com"
+                      className="mt-2 w-full rounded-md border border-neutral-300 px-4 py-3 text-neutral-700 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300/60"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-semibold text-neutral-700">
+                      Password *
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      minLength={6}
+                      placeholder="••••••••"
+                      className="mt-2 w-full rounded-md border border-neutral-300 px-4 py-3 text-neutral-700 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300/60"
+                    />
+                    {isSignup && (
+                      <p className="mt-2 text-xs text-neutral-500">Minimum 6 characters</p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full rounded-full bg-primary-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isLoading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
+                  </button>
+                </form>
+
+                <button
+                  onClick={() => {
+                    setIsSignup(!isSignup);
+                    setError('');
+                    setSuccess('');
+                    setFormData({ email: '', password: '', name: '', company: '' });
+                  }}
+                  className="mt-6 text-sm font-semibold text-primary-700 transition hover:text-primary-900"
+                >
+                  {isSignup ? 'Already have an account? Sign in' : "New to Money Personality? Create an advisor account"}
+                </button>
+
+                <div className="mt-8 space-y-4">
+                  {!isSignup && (
+                    <div className="rounded-xl border border-neutral-200 bg-white/80 px-4 py-3 text-sm text-neutral-600">
+                      <strong className="font-semibold text-primary-900">New advisor?</strong> Create an account to invite clients and track their assessments.
+                    </div>
+                  )}
+                  <div className="rounded-xl border border-neutral-200 bg-white/80 px-4 py-3 text-sm text-neutral-600">
+                    <strong className="font-semibold text-primary-900">Email confirmation:</strong> After signup, check your inbox for the confirmation link before signing in.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

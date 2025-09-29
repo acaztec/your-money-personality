@@ -235,8 +235,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-blue-800">
+              <div className="rounded-lg border border-primary-200 bg-primary-100 p-4 mb-6">
+                <p className="text-sm text-primary-700">
                   <strong>Client:</strong> {advisorResult.client_name || 'Anonymous'} ({advisorResult.client_email})
                 </p>
               </div>
@@ -324,11 +324,11 @@ export default function Dashboard() {
                 {isAdvisorView ? 'Client Assessment Results' : 'Your Money Personality Results'}
               </h1>
               {isAdvisorView && advisorResult && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-blue-800 font-medium">
+                <div className="rounded-lg border border-primary-200 bg-primary-100 p-4">
+                  <p className="text-primary-700 font-medium">
                     <strong>Client:</strong> {advisorResult.client_name || 'Anonymous'} ({advisorResult.client_email})
                   </p>
-                  <p className="text-blue-700 text-sm mt-1">
+                  <p className="text-primary-600 text-sm mt-1">
                     Assessment completed on {new Date(advisorResult.completed_at || '').toLocaleDateString()}
                   </p>
                 </div>
@@ -370,12 +370,12 @@ export default function Dashboard() {
         {isAdvisorView && advisorSummary && (
           <div className="modern-card">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Advisor Insights</h2>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+            <div className="rounded-xl border border-primary-200 bg-primary-100 p-6">
               {renderAdvisorSummary(advisorSummary)}
             </div>
           </div>
@@ -385,21 +385,21 @@ export default function Dashboard() {
         {!isAdvisorView && compatibility && (
           <div className="modern-card">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
                 <Users className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Compatibility Insights</h2>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-100 mb-6">
+            <div className="rounded-xl border border-accent-600/30 bg-white p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-emerald-900">{compatibility.compatibilityLabel}</h3>
-                  <p className="text-emerald-700">Compatibility Score: {compatibility.compatibilityScore}</p>
+                  <h3 className="text-xl font-bold text-primary-900">{compatibility.compatibilityLabel}</h3>
+                  <p className="text-neutral-600">Compatibility Score: {compatibility.compatibilityScore}</p>
                 </div>
-                <Award className="w-12 h-12 text-emerald-600" />
+                <Award className="w-12 h-12 text-accent-600" />
               </div>
-              <p className="text-emerald-800 leading-relaxed">{compatibility.summary}</p>
+              <p className="text-neutral-700 leading-relaxed">{compatibility.summary}</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
@@ -410,8 +410,8 @@ export default function Dashboard() {
                 </h4>
                 <div className="space-y-3">
                   {compatibility.alignmentHighlights.map((highlight, index) => (
-                    <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
-                      <p className="text-green-800 text-sm">{highlight}</p>
+                    <div key={index} className="rounded-lg border-l-4 border-accent-600 bg-white p-3">
+                      <p className="text-neutral-700 text-sm">{highlight}</p>
                     </div>
                   ))}
                 </div>
@@ -424,8 +424,8 @@ export default function Dashboard() {
                 </h4>
                 <div className="space-y-3">
                   {compatibility.potentialFriction.map((friction, index) => (
-                    <div key={index} className="bg-amber-50 p-3 rounded-lg border-l-4 border-amber-500">
-                      <p className="text-amber-800 text-sm">{friction}</p>
+                    <div key={index} className="rounded-lg border-l-4 border-orange-400 bg-white p-3">
+                      <p className="text-neutral-700 text-sm">{friction}</p>
                     </div>
                   ))}
                 </div>
@@ -435,13 +435,13 @@ export default function Dashboard() {
             {compatibility.conversationStarters.length > 0 && (
               <div className="mt-8">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <MessageCircle className="w-5 h-5 text-blue-600 mr-2" />
+                  <MessageCircle className="w-5 h-5 text-primary-700 mr-2" />
                   Conversation Starters
                 </h4>
                 <div className="grid gap-3">
                   {compatibility.conversationStarters.map((starter, index) => (
-                    <div key={index} className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
-                      <p className="text-blue-800 text-sm">{starter}</p>
+                    <div key={index} className="rounded-lg border-l-4 border-primary-500 bg-primary-100 p-3">
+                      <p className="text-primary-700 text-sm">{starter}</p>
                     </div>
                   ))}
                 </div>
@@ -507,17 +507,17 @@ export default function Dashboard() {
         {!isAdvisorView && recommendedTools.length > 0 && (
           <div className="modern-card">
             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-              <BookOpen className="w-6 h-6 text-indigo-600 mr-3" />
+              <BookOpen className="w-6 h-6 text-primary-700 mr-3" />
               Recommended Tools
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendedTools.map((tool, index) => (
-                <div key={index} className="feature-card p-4 rounded-lg border border-gray-200 hover:border-indigo-300 transition-all duration-300">
+                <div key={index} className="feature-card p-4 rounded-lg border border-gray-200 hover:border-primary-400 transition-all duration-300">
                   <div className="text-center">
-                    <BookOpen className="w-8 h-8 text-indigo-600 mx-auto mb-3" />
+                    <BookOpen className="w-8 h-8 text-primary-700 mx-auto mb-3" />
                     <h4 className="font-semibold text-gray-900 mb-2">{tool.title}</h4>
                     <p className="text-gray-600 text-sm">{tool.description}</p>
-                    <span className="inline-block mt-2 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full">
+                    <span className="inline-block mt-2 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                       {tool.category}
                     </span>
                   </div>
@@ -531,12 +531,12 @@ export default function Dashboard() {
         {!isAdvisorView && recommendedCourses.length > 0 && (
           <div className="modern-card">
             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-              <TrendingUp className="w-6 h-6 text-purple-600 mr-3" />
+              <TrendingUp className="w-6 h-6 text-primary-700 mr-3" />
               Recommended Learning
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendedCourses.map((course, index) => (
-                <div key={index} className="feature-card p-4 rounded-lg border border-gray-200 hover:border-purple-300 transition-all duration-300">
+                <div key={index} className="feature-card p-4 rounded-lg border border-gray-200 hover:border-primary-400 transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
                     {course.recommended && (
                       <span className="bg-accent-500 text-white text-xs px-2 py-1 rounded-full">
@@ -545,8 +545,8 @@ export default function Dashboard() {
                     )}
                   </div>
                   <h4 className="font-semibold text-gray-900 mb-2">{course.title}</h4>
-                  <p className="text-purple-600 text-sm mb-2">{course.duration}</p>
-                  <span className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                  <p className="text-primary-700 text-sm mb-2">{course.duration}</p>
+                  <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                     {course.category}
                   </span>
                 </div>
@@ -559,7 +559,7 @@ export default function Dashboard() {
         {!isAdvisorView && (
           <div className="modern-card">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
                 <Share2 className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Share the Compatibility Quiz</h2>
@@ -570,15 +570,15 @@ export default function Dashboard() {
             </p>
 
             {shareSuccess && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mb-6 rounded-lg border border-accent-600/40 bg-white p-4">
                 <div className="flex items-center space-x-2">
-                  <Star className="w-5 h-5 text-green-600" />
-                  <p className="text-green-800 font-medium">Assessment invitation sent successfully!</p>
+                  <Star className="w-5 h-5 text-accent-600" />
+                  <p className="text-neutral-700 font-medium">Assessment invitation sent successfully!</p>
                 </div>
-                <p className="text-green-700 text-sm mt-1">They'll receive an email with the quiz link.</p>
+                <p className="text-neutral-600 text-sm mt-1">They'll receive an email with the quiz link.</p>
                 {shareLink && (
                   <div className="mt-4 text-left">
-                    <p className="text-sm text-green-700 mb-2">
+                    <p className="text-sm text-neutral-600 mb-2">
                       Want to share it directly? Use this link:
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -586,18 +586,18 @@ export default function Dashboard() {
                         type="text"
                         readOnly
                         value={shareLink}
-                        className="flex-1 px-3 py-2 border border-green-200 rounded-lg bg-white text-sm text-gray-800"
+                        className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg bg-white text-sm text-gray-800"
                       />
                       <button
                         type="button"
                         onClick={handleCopyShareLink}
-                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors"
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-accent-600 hover:bg-accent-700 rounded-lg shadow-sm transition-colors"
                       >
                         Copy link
                       </button>
                     </div>
                     {shareCopyFeedback && (
-                      <p className="text-xs text-green-700 mt-2">{shareCopyFeedback}</p>
+                      <p className="text-xs text-neutral-600 mt-2">{shareCopyFeedback}</p>
                     )}
                   </div>
                 )}
@@ -732,9 +732,9 @@ export default function Dashboard() {
                         </div>
                         <div className="text-right">
                           <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                            share.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                            share.status === 'completed'
+                              ? 'bg-accent-600/15 text-accent-600'
+                              : 'bg-orange-100 text-orange-700'
                           }`}>
                             {share.status === 'completed' ? 'Completed' : 'Pending'}
                           </span>
