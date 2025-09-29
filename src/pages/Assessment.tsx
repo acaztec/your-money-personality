@@ -171,7 +171,12 @@ export default function Assessment() {
             <button
               type="button"
               onClick={handleNext}
-              className="inline-flex items-center justify-center rounded-full bg-accent-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
+             disabled={answers[currentQuestion] === 0}
+             className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition ${
+               answers[currentQuestion] !== 0
+                 ? 'bg-accent-600 text-white hover:bg-accent-700'
+                 : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+             }`}
             >
               {currentQuestion === questionsData.length - 1 ? 'Complete' : 'Next'}
             </button>
