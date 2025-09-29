@@ -50,41 +50,46 @@ export default function Welcome() {
   return (
     <Layout>
       <div className="bg-canvas">
-        <section id="hero" className="bg-white">
+        <section id="hero" className="hero-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
-              <div className="space-y-8">
-                <div className="space-y-6">
-                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Your Money Personality</p>
-                  <h1 className="text-4xl sm:text-5xl font-semibold leading-tight text-ink">
-                    Understand the story behind your financial decisions
+            <div className="hero-card">
+              <div className="hero-card__accent hero-card__accent--dots" aria-hidden="true" />
+              <div className="hero-card__accent hero-card__accent--orb" aria-hidden="true" />
+              <div className="hero-card__layout">
+                <div className="hero-card__content">
+                  <p className="hero-card__kicker">Your Money Personality</p>
+                  <h1 className="hero-card__title">
+                    Feel confident about your financial choices—one step at a time
                   </h1>
-                  <p className="text-lg text-neutral-700 leading-relaxed max-w-xl">
-                    Take the Money Personality assessment to uncover the motivations that drive how you save, spend, and plan. Finish in about ten minutes and leave with insights you can use immediately.
+                  <p className="hero-card__description">
+                    Explore the Your Money Personality assessment to understand the motivations guiding how you save, spend, and plan. It only takes a few minutes to reveal insights you can use right away.
                   </p>
+                  <div className="hero-card__actions">
+                    <Link to="/assessment" className="btn-primary">
+                      Start assessment
+                    </Link>
+                    <Link to="/dashboard" className="btn-secondary">
+                      View sample results
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link to="/assessment" className="btn-primary">
-                    Start assessment
-                  </Link>
-                  <Link to="/dashboard" className="btn-secondary">
-                    View sample results
-                  </Link>
-                </div>
-                <dl className="grid gap-6 sm:grid-cols-3 pt-8 border-t border-neutral-200">
-                  {stats.map((item) => (
-                    <div key={item.label} className="space-y-1">
-                      <dt className="text-sm font-medium text-neutral-500 uppercase tracking-wide">{item.label}</dt>
-                      <dd className="text-2xl font-semibold text-primary-700">{item.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-              <div className="relative">
-                <div className="rounded-[2rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[360px]">
-                  Placeholder: Lifestyle photo of someone completing the assessment on a tablet in a relaxed setting.
+                <div className="hero-card__media" aria-hidden="true">
+                  <div className="hero-card__photo-frame">
+                    <img
+                      src="https://media-cdn.igrad.com/IMAGE/hub-redesign/enrich/home-hero.webp"
+                      alt="Parent and child smiling while reviewing Money Personality guidance"
+                    />
+                  </div>
                 </div>
               </div>
+              <dl className="hero-card__stats">
+                {stats.map((item) => (
+                  <div key={item.label} className="hero-card__stat">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </section>
