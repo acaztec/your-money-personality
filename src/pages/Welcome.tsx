@@ -12,19 +12,58 @@ const highlights = [
     title: 'Personalized guidance',
     description:
       'Discover the motivators behind spending, saving, and planning so you can make confident choices that fit your life.',
-    imageNote: 'Placeholder: Close-up photo of a participant reviewing their Money Personality profile on a laptop.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Woman_smiling_while_using_laptop_to_view_reporting_console_07897d71ee-e1728799046817.webp',
+      alt: 'Participant smiling while reviewing financial wellness insights on a laptop.',
+      creditNote: '1200×900 crop recommended for final asset.',
+    },
   },
   {
     title: 'Dashboard follow-up',
     description:
       'Review tailored insights and recommended next steps inside the Money Personality dashboard after you finish.',
-    imageNote: 'Placeholder: Screenshot-style photo of the Money Personality dashboard with charts and summaries.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/12/maxresdefault.jpg',
+      alt: 'Straight-on preview of the Money Personality dashboard video cover.',
+      creditNote: 'Use a centered 1200×900 crop from the provided YouTube still.',
+    },
   },
   {
     title: 'Advisor collaboration',
     description:
       'Share results securely with an Enrich advisor or trusted partner to continue the financial wellness conversation.',
-    imageNote: 'Placeholder: Photo of an advisor and participant meeting virtually and taking notes.',
+    image: {
+      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Home_Page_Block_2_e828cca6d4.webp',
+      alt: 'Advisor collaborating virtually with a participant over shared resources.',
+      creditNote: 'Consider substituting with brand photography once available.',
+    },
+  },
+];
+
+const bluePanelHighlights = [
+  {
+    title: 'An immersive assessment space',
+    description:
+      'Every question sits within a calm, full-screen workspace so participants can stay focused without distractions.',
+    bullets: [
+      'Sticky navigation keeps progress, back, and next actions accessible.',
+      'Seven-point Likert scale with clear “Not at all” to “Very well” anchors.',
+      'Light gray canvas paired with deep blue accents for contrast compliance.',
+    ],
+    mediaNote:
+      'Placeholder: Screenshot mockup of the Your Money Personality assessment screen framed on a laptop.',
+  },
+  {
+    title: 'Guidance that carries through the journey',
+    description:
+      'Program touchpoints reuse the hero blue treatment to reinforce continuity from onboarding to follow-up coaching.',
+    bullets: [
+      'Chapter intros feature the curved blue divider from enrich.org reference designs.',
+      'Resource cards surface action items alongside photography, not icons.',
+      'Advisor invitations rest within a blue-backed panel that highlights sharing value.',
+    ],
+    mediaNote:
+      'Placeholder: Collage of dashboard, chapter overview, and advisor share screen in Enrich styling.',
   },
 ];
 
@@ -50,8 +89,8 @@ export default function Welcome() {
   return (
     <Layout>
       <div className="bg-canvas">
-        <section id="hero" className="hero-section">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <section id="hero" className="hero-section hero-section--full">
+          <div className="hero-section__inner">
             <div className="hero-card">
               <div className="hero-card__accent hero-card__accent--dots" aria-hidden="true" />
               <div className="hero-card__accent hero-card__accent--orb" aria-hidden="true" />
@@ -132,11 +171,44 @@ export default function Welcome() {
             <div className="grid gap-10 lg:grid-cols-3">
               {highlights.map((item) => (
                 <article key={item.title} className="space-y-5">
-                  <div className="rounded-[1.75rem] overflow-hidden placeholder-image flex items-center justify-center p-8 text-center text-sm font-medium leading-relaxed min-h-[240px]">
-                    {item.imageNote}
+                  <div className="feature-card__media">
+                    <div className="feature-card__image-frame">
+                      <img src={item.image.src} alt={item.image.alt} />
+                    </div>
+                    <p className="feature-card__note">{item.image.creditNote}</p>
                   </div>
                   <h3 className="text-2xl font-semibold text-ink">{item.title}</h3>
                   <p className="text-neutral-700 leading-relaxed">{item.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="brand-band brand-band--navy" aria-labelledby="experience-highlights">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="brand-band__header">
+              <p className="brand-band__kicker">Experience preview</p>
+              <h2 id="experience-highlights" className="brand-band__title">
+                Consistent Enrich styling from first click through follow-up
+              </h2>
+              <p className="brand-band__description">
+                We reuse the hero blue treatment across assessment screens, chapter overviews, and advisor touchpoints so participants always know they&apos;re in the Your Money Personality environment.
+              </p>
+            </div>
+            <div className="brand-band__grid">
+              {bluePanelHighlights.map((panel) => (
+                <article key={panel.title} className="brand-band__card">
+                  <h3>{panel.title}</h3>
+                  <p>{panel.description}</p>
+                  <ul>
+                    {panel.bullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                  <div className="brand-band__media placeholder-image">
+                    {panel.mediaNote}
+                  </div>
                 </article>
               ))}
             </div>
@@ -159,8 +231,14 @@ export default function Welcome() {
                 </Link>
               </div>
             </div>
-            <div className="rounded-[2rem] overflow-hidden placeholder-image flex items-center justify-center p-10 text-center text-sm font-medium leading-relaxed min-h-[320px]">
-              Placeholder: Two people reviewing a Money Personality summary together in a meeting room.
+            <div className="share-card__media">
+              <div className="share-card__image-frame">
+                <img
+                  src="https://enrich.org/wp-content/uploads/2024/10/small_FWR_1_1b2a1d7e44.webp"
+                  alt="Financial Wellness Report cover alongside supporting materials."
+                />
+              </div>
+              <p className="share-card__note">1200×800 crop recommended; swap with bespoke photography if available.</p>
             </div>
           </div>
         </section>
