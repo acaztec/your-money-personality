@@ -267,22 +267,22 @@ export default function Dashboard() {
 
   const getPersonalityImage = (personalityName: string) => {
     const personalityImages: Record<string, string> = {
-      'Apprehensive': 'https://images.pexels.com/photos/5699479/pexels-photo-5699479.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Cautious': 'https://images.pexels.com/photos/5561923/pexels-photo-5561923.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Relaxed': 'https://images.pexels.com/photos/3771097/pexels-photo-3771097.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Confident': 'https://images.pexels.com/photos/3771115/pexels-photo-3771115.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Optimistic': 'https://images.pexels.com/photos/3771118/pexels-photo-3771118.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Skeptical': 'https://images.pexels.com/photos/3771130/pexels-photo-3771130.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Future Focused': 'https://images.pexels.com/photos/3771136/pexels-photo-3771136.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Present Focused': 'https://images.pexels.com/photos/3771142/pexels-photo-3771142.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Social': 'https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Independent': 'https://images.pexels.com/photos/3771148/pexels-photo-3771148.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Elusive': 'https://images.pexels.com/photos/3771154/pexels-photo-3771154.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Organized': 'https://images.pexels.com/photos/5699456/pexels-photo-5699456.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Fun Seeking': 'https://images.pexels.com/photos/3771160/pexels-photo-3771160.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
-      'Change Seeking': 'https://images.pexels.com/photos/3771166/pexels-photo-3771166.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1',
+      'Apprehensive': 'https://images.pexels.com/photos/4386374/pexels-photo-4386374.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Cautious': 'https://images.pexels.com/photos/6693655/pexels-photo-6693655.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Relaxed': 'https://images.pexels.com/photos/4050415/pexels-photo-4050415.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Confident': 'https://images.pexels.com/photos/3184302/pexels-photo-3184302.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Optimistic': 'https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Skeptical': 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Future Focused': 'https://images.pexels.com/photos/3184307/pexels-photo-3184307.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Present Focused': 'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Social': 'https://images.pexels.com/photos/3184398/pexels-photo-3184398.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Independent': 'https://images.pexels.com/photos/3184287/pexels-photo-3184287.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Elusive': 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Organized': 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Fun Seeking': 'https://images.pexels.com/photos/3153198/pexels-photo-3153198.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
+      'Change Seeking': 'https://images.pexels.com/photos/5668870/pexels-photo-5668870.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1',
     };
-    return personalityImages[personalityName] || 'https://images.pexels.com/photos/3771097/pexels-photo-3771097.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1';
+    return personalityImages[personalityName] || 'https://images.pexels.com/photos/6693655/pexels-photo-6693655.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1';
   };
 
   if (isLocked && advisorResult) {
