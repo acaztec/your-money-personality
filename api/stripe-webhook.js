@@ -20,7 +20,7 @@ if (!SUPABASE_SERVICE_ROLE_KEY) {
 function createSupabaseAdmin() {
   return {
     from: (table) => ({
-      update: async (data) => ({
+      update: (data) => ({
         eq: async (column, value) => {
           const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${column}=eq.${value}`, {
             method: 'PATCH',
