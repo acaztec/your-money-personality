@@ -40,8 +40,8 @@ const footerColumns: FooterColumn[] = [
     heading: 'Help',
     links: [
       { label: 'Contact Support', href: 'mailto:support@enrich.org' },
-      { label: 'Privacy Policy', href: 'https://www.enrich.org/privacy-policy' },
-      { label: 'Terms of Use', href: 'https://www.enrich.org/terms' },
+      { label: 'Privacy Policy', href: 'https://www.igrad.com/privacy' },
+      { label: 'Terms of Use', href: 'https://www.igrad.com/terms' },
     ],
   },
 ];
