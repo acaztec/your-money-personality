@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { getOrCreateUserId } from '../utils/userIdentity';
 import { generateCompatibilityInsights } from '../utils/compatibilityInsights';
 import { generateAdvisorSummary } from './aiService';
+import { stripeService } from './stripeService';
 
 export interface DatabaseAdvisorAssessment {
   id: string;
@@ -702,7 +703,20 @@ export class AssessmentService {
         return { success: false, error: 'Authentication required' };
       }
 
-      return await this.forceUnlockAssessment(assessmentId);
+      const advisorEmail = session.user?.email;
+
+      if (!advisorEmail) {
+        return { success: false, error: 'Advisor email not found' };
+      }
+
+      await stripeService.redirectToCheckout({
+        assessmentId,
+        advisorEmail,
+        successUrl: `${window.location.origin}/advisor/dashboard?payment=success`,
+        cancelUrl: `${window.location.origin}/advisor/dashboard?payment=cancelled`,
+      });
+
+      return { success: true };
     } catch (error) {
       console.error('Error unlocking assessment:', error);
       return {
