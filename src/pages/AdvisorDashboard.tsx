@@ -50,6 +50,36 @@ export default function AdvisorDashboard() {
 
         if (dbAssessments.length > 0) {
           setAssessments(dbAssessments);
+
+          // Auto-unlock trial assessments that are completed but not yet unlocked
+          const trialAssessmentsToUnlock = dbAssessments.filter(
+            assessment =>
+              assessment.is_trial &&
+              assessment.status === 'completed' &&
+              !assessment.is_paid
+          );
+
+          if (trialAssessmentsToUnlock.length > 0) {
+            console.log('Auto-unlocking trial assessments:', trialAssessmentsToUnlock.map(a => a.id));
+
+            for (const assessment of trialAssessmentsToUnlock) {
+              try {
+                await AssessmentService.forceUnlockAssessment(assessment.id);
+                console.log('Auto-unlocked trial assessment:', assessment.id);
+              } catch (error) {
+                console.error('Failed to auto-unlock trial assessment:', assessment.id, error);
+              }
+            }
+
+            // Refresh data after auto-unlocking
+            const [updatedAssessments, updatedResults] = await Promise.all([
+              AssessmentService.getAssessmentsForAdvisorFromDatabase(currentAdvisorEmail, currentAdvisorName),
+              AssessmentService.getUnlockedAssessmentResultsForAdvisor(currentAdvisorEmail),
+            ]);
+
+            setAssessments(updatedAssessments);
+            setUnlockedResults(updatedResults);
+          }
         } else {
           const fallback = AssessmentService.getAssessmentsForAdvisor(currentAdvisorEmail);
 
@@ -405,6 +435,7 @@ export default function AdvisorDashboard() {
                     const isUnlocked = Boolean(unlockedResult);
                     const isPaid = assessment.is_paid;
                     const isUnlocking = isPaid && !isUnlocked;
+                    const isTrial = assessment.is_trial;
 
                     const personalities = isUnlocked && Array.isArray(unlockedResult?.profile?.personalities)
                       ? (unlockedResult?.profile?.personalities as string[])
@@ -413,8 +444,17 @@ export default function AdvisorDashboard() {
                     return (
                       <tr key={assessment.id} className="align-top hover:bg-neutral-100/40">
                         <td className="py-4 pr-4">
-                          <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
-                          <p className="mt-1 text-xs text-neutral-600">{assessment.client_email}</p>
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <p className="font-semibold text-primary-900">{assessment.client_name || 'Anonymous Client'}</p>
+                              <p className="mt-1 text-xs text-neutral-600">{assessment.client_email}</p>
+                            </div>
+                            {isTrial && (
+                              <span className="inline-flex items-center rounded-full bg-accent-100 px-2 py-0.5 text-xs font-semibold text-accent-700">
+                                Trial
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 pr-4">
                           {isUnlocked ? (
@@ -435,7 +475,7 @@ export default function AdvisorDashboard() {
                             </div>
                           ) : (
                             <p className="text-sm text-neutral-600">
-                              {isUnlocking ? 'Processing payment…' : 'Unlock this report to view the full profile.'}
+                              {isUnlocking ? 'Processing…' : isTrial ? 'Free trial report available' : 'Unlock this report to view the full profile.'}
                             </p>
                           )}
                         </td>
@@ -459,7 +499,7 @@ export default function AdvisorDashboard() {
                                 disabled={checkoutLoadingId === assessment.id}
                                 className="rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60"
                               >
-                                {checkoutLoadingId === assessment.id ? 'Unlocking…' : 'Unlock report'}
+                                {checkoutLoadingId === assessment.id ? 'Unlocking…' : isTrial ? 'View free trial report' : 'Unlock report'}
                               </button>
                             ) : (
                               <span className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-600">

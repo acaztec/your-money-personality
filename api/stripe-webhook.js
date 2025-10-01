@@ -8,6 +8,14 @@ const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+if (!SUPABASE_URL) {
+  console.error('SUPABASE_URL environment variable is not set');
+}
+
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('SUPABASE_SERVICE_ROLE_KEY environment variable is not set');
+}
+
 // Helper to create Supabase admin client (server-side only)
 function createSupabaseAdmin() {
   return {
@@ -103,6 +111,12 @@ export default async function handler(req, res) {
 
   console.log('Received event:', event.type);
 
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing required environment variables');
+    res.status(500).json({ error: 'Server configuration error' });
+    return;
+  }
+
   const supabase = createSupabaseAdmin();
 
   try {
@@ -118,6 +132,26 @@ export default async function handler(req, res) {
           console.error('Missing metadata in checkout session:', session.metadata);
           res.status(400).json({ error: 'Missing metadata' });
           return;
+        }
+
+        // Check if this is a trial assessment
+        const assessmentResponse = await fetch(`${SUPABASE_URL}/rest/v1/advisor_assessments?id=eq.${assessmentId}&select=is_trial`, {
+          headers: {
+            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!assessmentResponse.ok) {
+          console.error('Failed to check trial status');
+        }
+
+        const assessmentData = await assessmentResponse.json();
+        const isTrial = assessmentData?.[0]?.is_trial || false;
+
+        if (isTrial) {
+          console.log('⚠️ Trial assessment should not require payment:', assessmentId);
         }
 
         const now = new Date().toISOString();

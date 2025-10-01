@@ -709,6 +709,15 @@ export class AssessmentService {
         return { success: false, error: 'Advisor email not found' };
       }
 
+      // Check if this is a trial assessment
+      const assessment = await this.getAssessmentFromDatabase(assessmentId);
+
+      if (assessment?.is_trial) {
+        console.log('Trial assessment detected, unlocking without payment:', assessmentId);
+        return await this.forceUnlockAssessment(assessmentId);
+      }
+
+      // Not a trial, proceed with Stripe checkout
       await stripeService.redirectToCheckout({
         assessmentId,
         advisorEmail,
