@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Welcome from './pages/Welcome';
 import AdvisorWelcome from './pages/AdvisorWelcome';
+import AdvisorLanding from './pages/AdvisorLanding';
 import AdvisorLogin from './pages/AdvisorLogin';
 import AdvisorDashboard from './pages/AdvisorDashboard';
 import Assessment from './pages/Assessment';
@@ -18,14 +19,10 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Public advisor routes */}
+          <Route path="/advisor" element={<AdvisorLanding />} />
           <Route path="/advisor/login" element={<AdvisorLogin />} />
-          
+
           {/* Protected advisor routes */}
-          <Route path="/advisor" element={
-            <ProtectedRoute>
-              <AdvisorWelcome />
-            </ProtectedRoute>
-          } />
           <Route path="/advisor/share" element={
             <ProtectedRoute>
               <AdvisorWelcome />

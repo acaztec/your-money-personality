@@ -59,24 +59,13 @@ export default function Assessment() {
     loadAssessmentInfo();
   }, [searchParams]);
 
-  const handleAnswerChange = (value: number) => {
-    const nextAnswers = [...answers];
-    nextAnswers[currentQuestion] = value;
-    setAnswers(nextAnswers);
-  };
-
-  const handleNext = async () => {
-    if (currentQuestion < questionsData.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
-      return;
-    }
-
+  const completeAssessment = async (finalAnswers: number[]) => {
     setIsCompleting(true);
 
     try {
-      const profile = calculateProfile(answers);
+      const profile = calculateProfile(finalAnswers);
       localStorage.setItem('userProfile', JSON.stringify(profile));
-      localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
+      localStorage.setItem('assessmentAnswers', JSON.stringify(finalAnswers));
 
       if (advisorAssessmentId) {
         await AssessmentService.completeAssessment(advisorAssessmentId, profile);
@@ -89,11 +78,40 @@ export default function Assessment() {
       setTimeout(() => navigate('/dashboard'), 120);
     } catch (error) {
       console.error('Assessment completion error:', error);
-      const profile = calculateProfile(answers);
+      const profile = calculateProfile(finalAnswers);
       localStorage.setItem('userProfile', JSON.stringify(profile));
-      localStorage.setItem('assessmentAnswers', JSON.stringify(answers));
+      localStorage.setItem('assessmentAnswers', JSON.stringify(finalAnswers));
       setTimeout(() => navigate('/dashboard'), 120);
     }
+  };
+
+  const handleAnswerChange = (value: number) => {
+    if (isCompleting) return;
+
+    const nextAnswers = [...answers];
+    nextAnswers[currentQuestion] = value;
+    setAnswers(nextAnswers);
+
+    const isLastQuestion = currentQuestion === questionsData.length - 1;
+
+    const advance = () => {
+      if (isLastQuestion) {
+        void completeAssessment(nextAnswers);
+      } else {
+        setCurrentQuestion((prev) => Math.min(prev + 1, questionsData.length - 1));
+      }
+    };
+
+    window.setTimeout(advance, 180);
+  };
+
+  const handleNext = async () => {
+    if (currentQuestion < questionsData.length - 1) {
+      setCurrentQuestion((prev) => prev + 1);
+      return;
+    }
+
+    await completeAssessment(answers);
   };
 
   const handlePrevious = () => {

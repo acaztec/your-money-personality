@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,35 +22,48 @@ interface FooterColumn {
   links: FooterLink[];
 }
 
-const navItems: NavItem[] = [
-  { label: 'Assessment', to: '/assessment' },
-  { label: 'Dashboard', to: '/dashboard' },
-  { label: 'Advisor', to: '/advisor' },
-];
-
-const footerColumns: FooterColumn[] = [
-  {
-    heading: 'Your Money Personality',
-    links: [
-      { label: 'Start Assessment', to: '/assessment' },
-      { label: 'View Dashboard', to: '/dashboard' },
-      { label: 'Share with an Advisor', to: '/advisor' },
-    ],
-  },
-  {
-    heading: 'Help',
-    links: [
-      { label: 'Contact Support', href: 'mailto:support@enrich.org' },
-      { label: 'Privacy Policy', href: 'https://www.igrad.com/privacy' },
-      { label: 'Terms of Use', href: 'https://www.igrad.com/terms' },
-    ],
-  },
-];
-
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   const isActive = (path: string) => location.pathname.startsWith(path);
+
+  const navItems = useMemo<NavItem[]>(() => {
+    const items: NavItem[] = [
+      { label: 'Assessment', to: '/assessment' },
+      { label: 'Advisor', to: '/advisor' },
+    ];
+
+    if (isAuthenticated) {
+      items.push({ label: 'Advisor Dashboard', to: '/advisor/dashboard' });
+    }
+
+    return items;
+  }, [isAuthenticated]);
+
+  const footerColumns: FooterColumn[] = useMemo(
+    () => [
+      {
+        heading: 'Your Money Personality',
+        links: [
+          { label: 'Start Assessment', to: '/assessment' },
+          { label: 'Advisor resources', to: '/advisor' },
+          ...(isAuthenticated
+            ? [{ label: 'Advisor Dashboard', to: '/advisor/dashboard' }]
+            : [{ label: 'Advisor Log In', to: '/advisor/login' }]),
+        ],
+      },
+      {
+        heading: 'Help',
+        links: [
+          { label: 'Contact Support', href: 'mailto:support@enrich.org' },
+          { label: 'Privacy Policy', href: 'https://www.igrad.com/privacy' },
+          { label: 'Terms of Use', href: 'https://www.igrad.com/terms' },
+        ],
+      },
+    ],
+    [isAuthenticated]
+  );
 
   return (
     <div className="min-h-screen bg-canvas text-ink flex flex-col">

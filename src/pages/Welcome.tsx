@@ -159,14 +159,14 @@ export default function Welcome() {
             <div className="space-y-6">
               <h2 className="text-3xl font-semibold text-ink">Share your results when you are ready</h2>
               <p className="text-neutral-700">
-                Invite an advisor, coach, or accountability partner into the experience. Shared assessments surface discussion prompts and next steps so every conversation stays productive.
+                Bring others into the journey when it makes sense. Advisors receive AI-powered summaries to guide coaching, while friend shares focus on mutual reflection without the advisor insights layer.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/advisor" className="btn-secondary">
-                  Invite an advisor
+                  Share with an advisor
                 </Link>
-                <Link to="/dashboard" className="inline-flex items-center font-semibold text-primary-700 hover:text-primary-500">
-                  Preview shared view
+                <Link to="/dashboard" className="btn-link">
+                  Share with a friend
                 </Link>
               </div>
             </div>

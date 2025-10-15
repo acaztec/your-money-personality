@@ -115,6 +115,21 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--color-primary-700);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-link:hover {
+  color: var(--color-primary-900);
+  transform: translateY(-1px);
+}
+
 .progress-bar {
   background-color: var(--color-primary-500);
   border-radius: 999px;
