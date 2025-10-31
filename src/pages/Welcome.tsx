@@ -37,6 +37,25 @@ const highlights = [
   },
 ];
 
+const glanceItems = [
+  {
+    title: 'Emotions',
+    description: 'How do you feel about money?',
+  },
+  {
+    title: 'Outlook',
+    description: 'What is your viewpoint about the future?',
+  },
+  {
+    title: 'Focus',
+    description: 'Are you centered on the present or the future?',
+  },
+  {
+    title: 'Influence',
+    description: 'Do others impact your money decisions?',
+  },
+];
+
 const steps = [
   {
     title: 'Answer intuitive questions',
@@ -67,15 +86,15 @@ export default function Welcome() {
               <div className="hero-card__layout">
                 <div className="hero-card__content">
                   <p className="hero-card__kicker">Your Money Personality</p>
-                  <h1 className="hero-card__title">
-                    Feel confident about your financial choices—one step at a time
-                  </h1>
-                  <p className="hero-card__description">
-                    Explore the Your Money Personality assessment to understand the motivations guiding how you save, spend, and plan. It only takes a few minutes to reveal insights you can use right away.
-                  </p>
+                  <h1 className="hero-card__title">Discover your personality type</h1>
+                  <div className="hero-card__description space-y-3">
+                    <p>Understand the strengths and weaknesses of your relationship with money.</p>
+                    <p>Receive recommendations tailored to the motivations behind your money decisions.</p>
+                    <p>Learn how to manage your money in a way that makes sense for you with personality-specific insights.</p>
+                  </div>
                   <div className="hero-card__actions">
                     <Link to="/assessment" className="btn-primary">
-                      Start assessment
+                      Get your Analysis
                     </Link>
                     <Link to="/dashboard" className="btn-secondary">
                       View sample results
@@ -99,6 +118,28 @@ export default function Welcome() {
                   </div>
                 ))}
               </dl>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 bg-white" id="at-a-glance">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-semibold text-ink">Your Money Personality® at a glance</h2>
+              <p className="mt-4 text-neutral-700">
+                Understand how each category contributes to the way you approach money before you dive into your full analysis.
+              </p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {glanceItems.map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-3xl border border-neutral-200 bg-white p-6 text-center shadow-subtle space-y-3"
+                >
+                  <h3 className="text-xl font-semibold text-ink">{item.title}</h3>
+                  <p className="text-neutral-700 leading-relaxed">{item.description}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -189,7 +230,7 @@ export default function Welcome() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/assessment" className="btn-primary">
-                Start assessment
+                Get your Analysis
               </Link>
               <Link to="/dashboard" className="btn-secondary">
                 Continue where you left off

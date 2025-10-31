@@ -26,27 +26,23 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const isActive = (path: string) => location.pathname.startsWith(path);
+  const isActive = (path: string) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  const navItems = useMemo<NavItem[]>(() => {
-    const items: NavItem[] = [
-      { label: 'Assessment', to: '/assessment' },
-      { label: 'Advisor', to: '/advisor' },
-    ];
-
-    if (isAuthenticated) {
-      items.push({ label: 'Advisor Dashboard', to: '/advisor/dashboard' });
-    }
-
-    return items;
-  }, [isAuthenticated]);
+  const navItems = useMemo<NavItem[]>(
+    () => [
+      { label: 'For Individuals', to: '/' },
+      { label: 'For Advisors', to: '/advisor' },
+    ],
+    []
+  );
 
   const footerColumns: FooterColumn[] = useMemo(
     () => [
       {
         heading: 'Your Money Personality',
         links: [
-          { label: 'Start Assessment', to: '/assessment' },
+          { label: 'Get your Analysis', to: '/assessment' },
           { label: 'Advisor resources', to: '/advisor' },
           ...(isAuthenticated
             ? [{ label: 'Advisor Dashboard', to: '/advisor/dashboard' }]
@@ -102,7 +98,7 @@ export default function Layout({ children }: LayoutProps) {
                   to="/assessment"
                   className="hidden lg:inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-white/90"
                 >
-                  Start Assessment
+                  Get your Analysis
                 </Link>
                 <button
                   type="button"
@@ -148,7 +144,7 @@ export default function Layout({ children }: LayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-white/90"
               >
-                Start Assessment
+                Get your Analysis
               </Link>
             </div>
           </div>
