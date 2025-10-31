@@ -3,8 +3,8 @@ import Layout from '../components/Layout';
 
 const stats = [
   { label: 'Completed assessments', value: '500K+' },
-  { label: 'Average completion time', value: '10 minutes' },
-  { label: 'Personality lenses', value: '5 core styles' },
+  { label: '96% completion rate', value: 'Learners finish what they start' },
+  { label: 'Personality lenses', value: '5 core insights' },
 ];
 
 const highlights = [
@@ -22,17 +22,17 @@ const highlights = [
     description:
       'Review tailored insights and recommended next steps inside the Money Personality dashboard after you finish.',
     image: {
-      src: 'https://enrich.org/wp-content/uploads/2024/12/maxresdefault.jpg',
-      alt: 'Straight-on preview of the Money Personality dashboard video cover.',
+      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Woman_smiling_while_using_tablet_to_review_financial_tools_5e938497bd.webp',
+      alt: 'Participant reviewing Money Personality recommendations on a tablet.',
     },
   },
   {
-    title: 'Advisor collaboration',
+    title: 'Advisor-ready summaries',
     description:
-      'Share results securely with an Enrich advisor or trusted partner to continue the financial wellness conversation.',
+      'Share results securely with an Enrich advisor or trusted partner when you are ready to continue the conversation.',
     image: {
-      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Home_Page_Block_2_e828cca6d4.webp',
-      alt: 'Advisor collaborating virtually with a participant over shared resources.',
+      src: 'https://enrich.org/wp-content/uploads/2024/11/small_Two_People_Smiling_while_Having_A_Meeting_13bf0332f1.webp',
+      alt: 'Advisor and participant smiling while reviewing insights together.',
     },
   },
 ];
@@ -70,7 +70,7 @@ const steps = [
   {
     title: 'Put insights to work',
     description:
-      'Jump into the dashboard for reflection exercises, coaching prompts, and actions you can revisit over time.',
+      'Use your personalized insights to reflect, plan next steps, and revisit recommendations as your goals evolve.',
   },
 ];
 
@@ -95,9 +95,6 @@ export default function Welcome() {
                   <div className="hero-card__actions">
                     <Link to="/assessment" className="btn-primary">
                       Get your Analysis
-                    </Link>
-                    <Link to="/dashboard" className="btn-secondary">
-                      View sample results
                     </Link>
                   </div>
                 </div>
@@ -150,7 +147,7 @@ export default function Welcome() {
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">How it works</p>
               <h2 className="mt-4 text-3xl font-semibold text-ink">A focused experience built around self-reflection</h2>
               <p className="mt-4 text-neutral-700">
-                Your Money Personality keeps the process simple so you can concentrate on honest answers. Progress saves automatically, and you can move back to adjust selections at any point.
+                Discover what influences your relationship with money, uncover growth opportunities, and receive tailored guidance you can immediately put into practice.
               </p>
             </div>
             <ol className="mt-12 grid gap-8 md:grid-cols-3">
@@ -195,46 +192,19 @@ export default function Welcome() {
           </div>
         </section>
 
-        <section className="py-20" id="share">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-16 lg:grid-cols-[1.05fr_0.95fr] items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-semibold text-ink">Share your results when you are ready</h2>
-              <p className="text-neutral-700">
-                Bring others into the journey when it makes sense. Advisors receive AI-powered summaries to guide coaching, while friend shares focus on mutual reflection without the advisor insights layer.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/advisor" className="btn-secondary">
-                  Share with an advisor
-                </Link>
-                <Link to="/dashboard" className="btn-link">
-                  Share with a friend
-                </Link>
-              </div>
-            </div>
-            <div className="share-card__media">
-              <div className="share-card__image-frame">
-                <img
-                  src="https://images.pexels.com/photos/1181356/pexels-photo-1181356.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&dpr=1"
-                  alt="Two colleagues collaborating over a laptop while reviewing assessment responses."
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 bg-white" id="cta">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-            <h2 className="text-3xl font-semibold text-ink">Begin your Money Personality journey</h2>
-            <p className="text-neutral-700 max-w-3xl mx-auto">
-              Set aside a quiet moment, work through the assessment at your own pace, and return to your dashboard whenever you need a refresher. Your progress is saved so you can pick up right where you left off.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/assessment" className="btn-primary">
-                Get your Analysis
-              </Link>
-              <Link to="/dashboard" className="btn-secondary">
-                Continue where you left off
-              </Link>
+        <section className="py-16" id="trusted-by">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Trusted by learners across industries</p>
+            <h2 className="text-3xl font-semibold text-ink">Helping organizations empower financial confidence</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5 items-center">
+              {['University of Kentucky', 'Principal®', 'ADP®', 'Community Banks', 'Credit Unions Nationwide'].map((name) => (
+                <div
+                  key={name}
+                  className="rounded-2xl border border-neutral-200 bg-white px-6 py-5 text-lg font-semibold text-neutral-700 shadow-subtle"
+                >
+                  {name}
+                </div>
+              ))}
             </div>
           </div>
         </section>
