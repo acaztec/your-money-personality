@@ -159,11 +159,13 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid gap-12 lg:grid-cols-3">
             <div className="space-y-4">
-              <img
-                src="https://media-cdn.igrad.com/IMAGE/Logos/Color/iGradEnrich.png"
-                alt="Enrich by iGrad"
-                className="h-8 w-auto"
-              />
+              <div className="inline-flex items-center justify-center rounded-lg bg-primary-700 px-4 py-2">
+                <img
+                  src="https://media-cdn.igrad.com/IMAGE/Logos/Standard-White/Enrich.png"
+                  alt="Enrich by iGrad"
+                  className="h-8 w-auto"
+                />
+              </div>
               <p className="text-sm text-neutral-600 leading-relaxed">
                 Your Money Personality is an Enrich experience that helps individuals understand the motivations behind their money decisions.
               </p>

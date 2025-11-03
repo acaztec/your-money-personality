@@ -50,7 +50,7 @@ const partners = [
   },
   {
     name: 'ADP®',
-    logo: 'https://toppng.com/uploads/preview/adp-logo-11530966707d7ig28joww.png',
+    logo: 'https://tse2.mm.bing.net/th/id/OIP.VCpR9tGbliKIChyj2Y2o6AHaFC?pid=Api',
     alt: 'ADP logo',
   },
 ];
