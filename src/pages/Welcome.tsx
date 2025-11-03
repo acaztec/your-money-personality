@@ -37,6 +37,24 @@ const highlights = [
   },
 ];
 
+const partners = [
+  {
+    name: 'University of Kentucky',
+    logo: 'https://www.pngall.com/wp-content/uploads/15/University-of-Kentucky-Logo-PNG-Images.png',
+    alt: 'University of Kentucky logo',
+  },
+  {
+    name: 'Principal®',
+    logo: 'https://logodix.com/logo/1624043.jpg',
+    alt: 'Principal Financial Group logo',
+  },
+  {
+    name: 'ADP®',
+    logo: 'https://toppng.com/uploads/preview/adp-logo-11530966707d7ig28joww.png',
+    alt: 'ADP logo',
+  },
+];
+
 const glanceItems = [
   {
     title: 'Emotions',
@@ -196,13 +214,18 @@ export default function Welcome() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Trusted by learners across industries</p>
             <h2 className="text-3xl font-semibold text-ink">Helping organizations empower financial confidence</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5 items-center">
-              {['University of Kentucky', 'Principal®', 'ADP®', 'Community Banks', 'Credit Unions Nationwide'].map((name) => (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-center justify-items-center">
+              {partners.map((partner) => (
                 <div
-                  key={name}
-                  className="rounded-2xl border border-neutral-200 bg-white px-6 py-5 text-lg font-semibold text-neutral-700 shadow-subtle"
+                  key={partner.name}
+                  className="flex h-24 w-full items-center justify-center rounded-2xl border border-neutral-200 bg-white px-6 py-5 shadow-subtle"
                 >
-                  {name}
+                  <img
+                    src={partner.logo}
+                    alt={partner.alt}
+                    className="h-12 w-auto max-w-[160px] object-contain"
+                    loading="lazy"
+                  />
                 </div>
               ))}
             </div>
