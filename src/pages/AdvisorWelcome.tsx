@@ -153,8 +153,8 @@ export default function AdvisorWelcome() {
             <div className="text-neutral-600">Completion Rate</div>
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            <div className="text-3xl font-bold text-primary-500 mb-2">10 min</div>
-            <div className="text-neutral-600">Average Time</div>
+            <div className="text-3xl font-bold text-primary-500 mb-2">4.8/5</div>
+            <div className="text-neutral-600">Client Satisfaction</div>
           </div>
         </div>
 

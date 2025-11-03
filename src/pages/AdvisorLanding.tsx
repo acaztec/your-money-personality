@@ -108,12 +108,18 @@ export default function AdvisorLanding() {
         <section className="py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary-500">Advisor resources</p>
-            <h1 className="text-4xl font-semibold text-ink sm:text-5xl">
-              Share the Your Money Personality assessment with clients
-            </h1>
+            <h1 className="text-4xl font-semibold text-ink sm:text-5xl">Discover your Client’s Money Personality.</h1>
             <p className="text-neutral-700 text-lg">
-              Invite someone to take the assessment and explore their motivations around money. Advisors who log in receive AI-
-              powered summaries and dashboard access once a client completes the experience.
+              Using a Myers-Briggs assessment format built with behavioral scientists, we provide a psychological profile of
+              your client’s financial motivators, stressors, and emotional relationship with their finances.
+            </p>
+            <p className="text-neutral-700 text-lg">
+              Understand their behavioral patterns, build deeper trust and communicate more effectively with our proven
+              insights.
+            </p>
+            <p className="text-neutral-700 text-lg">
+              Invite someone to take the assessment and explore their motivations around money. Advisors who log in receive
+              AI-powered summaries and dashboard access once a client completes the experience.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               {isAuthenticated ? (
