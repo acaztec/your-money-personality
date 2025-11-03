@@ -19,10 +19,21 @@ export default function Assessment() {
     relationship: string;
     personalNote?: string;
   } | null>(null);
+  const [participantName, setParticipantName] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     const advisorId = searchParams.get('advisor');
     const friendId = searchParams.get('share');
+    const nameParam =
+      searchParams.get('name') ||
+      searchParams.get('firstName') ||
+      searchParams.get('clientName') ||
+      searchParams.get('recipientName');
+
+    if (nameParam) {
+      setParticipantName((prev) => prev ?? nameParam);
+    }
 
     const loadAssessmentInfo = async () => {
       if (advisorId) {
@@ -33,6 +44,9 @@ export default function Assessment() {
             name: assessment.advisor_name,
             email: assessment.advisor_email,
           });
+          if (assessment.client_name) {
+            setParticipantName((prev) => prev ?? assessment.client_name);
+          }
         } else {
           const localAssessment = AssessmentService.getAssessment(advisorId);
           if (localAssessment) {
@@ -41,6 +55,9 @@ export default function Assessment() {
               name: localAssessment.advisorName,
               email: localAssessment.advisorEmail,
             });
+            if (localAssessment.clientName) {
+              setParticipantName((prev) => prev ?? localAssessment.clientName);
+            }
           }
         }
       } else if (friendId) {
@@ -52,6 +69,9 @@ export default function Assessment() {
             relationship: share.relationship,
             personalNote: share.personalNote,
           });
+          if (share.recipientName) {
+            setParticipantName((prev) => prev ?? share.recipientName);
+          }
         }
       }
     };
@@ -105,15 +125,6 @@ export default function Assessment() {
     window.setTimeout(advance, 180);
   };
 
-  const handleNext = async () => {
-    if (currentQuestion < questionsData.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
-      return;
-    }
-
-    await completeAssessment(answers);
-  };
-
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1);
@@ -122,6 +133,10 @@ export default function Assessment() {
 
   const exitToWelcome = () => {
     navigate('/');
+  };
+
+  const beginAssessment = () => {
+    setHasStarted(true);
   };
 
   if (isCompleting) {
@@ -165,39 +180,21 @@ export default function Assessment() {
             Exit to Enrich
           </button>
           <div className="hidden sm:flex items-center gap-4 text-sm text-neutral-600">
-            <span>Question {currentQuestion + 1} of {questionsData.length}</span>
-            <div className="h-1.5 w-40 overflow-hidden rounded-full bg-neutral-200">
-              <div
-                className="progress-bar h-1.5"
-                style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
-                currentQuestion === 0
-                  ? 'border border-neutral-200 text-neutral-400 cursor-not-allowed bg-neutral-100'
-                  : 'border border-neutral-300 text-neutral-700 hover:border-primary-400 hover:text-primary-700'
-              }`}
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-             disabled={answers[currentQuestion] === 0}
-             className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition ${
-               answers[currentQuestion] !== 0
-                 ? 'bg-accent-600 text-white hover:bg-accent-700'
-                 : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
-             }`}
-            >
-              {currentQuestion === questionsData.length - 1 ? 'Complete' : 'Next'}
-            </button>
+            {hasStarted ? (
+              <>
+                <span className="font-semibold text-primary-700">
+                  {Math.round(((currentQuestion + 1) / questionsData.length) * 100)}% complete
+                </span>
+                <div className="h-1.5 w-40 overflow-hidden rounded-full bg-neutral-200">
+                  <div
+                    className="progress-bar h-1.5"
+                    style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
+                  />
+                </div>
+              </>
+            ) : (
+              <span className="font-semibold text-primary-700">Ready when you are</span>
+            )}
           </div>
         </div>
       </header>
@@ -224,18 +221,37 @@ export default function Assessment() {
         </section>
       )}
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex justify-center">
-        <AssessmentCard
-          question={questionsData[currentQuestion]}
-          questionNumber={currentQuestion + 1}
-          totalQuestions={questionsData.length}
-          value={answers[currentQuestion]}
-          onChange={handleAnswerChange}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          canGoNext={answers[currentQuestion] !== 0}
-          canGoPrevious={currentQuestion > 0}
-        />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center gap-10">
+        {!hasStarted ? (
+          <section className="w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-10 text-center shadow-subtle space-y-6">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-ink">
+              Welcome{participantName ? `, ${participantName}` : ''}! Ready to see your money personality?
+            </h1>
+            <p className="text-sm sm:text-base text-neutral-700 leading-relaxed">
+              Over the next few minutes, we&apos;ll ask you five sets of questions that will analyze your money personality type in five categories.
+              Answer openly and honestly, without overthinking it.
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={beginAssessment}
+                className="inline-flex items-center justify-center rounded-full bg-primary-600 px-8 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+              >
+                Let&apos;s get started
+              </button>
+            </div>
+          </section>
+        ) : (
+          <AssessmentCard
+            question={questionsData[currentQuestion]}
+            questionNumber={currentQuestion + 1}
+            totalQuestions={questionsData.length}
+            value={answers[currentQuestion]}
+            onChange={handleAnswerChange}
+            onPrevious={handlePrevious}
+            canGoPrevious={currentQuestion > 0}
+          />
+        )}
       </main>
     </div>
   );
