@@ -327,14 +327,6 @@ export default function AdvisorDashboard() {
                 >
                   Share new assessment
                 </Link>
-                <a
-                  href="https://www.enrich.org/financial-wellness-resources"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
-                >
-                  Advisor resource center
-                </a>
               </div>
               <dl className="mt-10 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
