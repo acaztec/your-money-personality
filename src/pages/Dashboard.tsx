@@ -1,12 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Brain, Target, TrendingUp, Users, BookOpen, Sparkles, Star, Award, Mail, Share2, Lock, CreditCard, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Brain, Target, TrendingUp, Users, Sparkles, Star, Award, Mail, Share2, Lock, CreditCard, ChevronRight, ChevronLeft } from 'lucide-react';
 import Layout from '../components/Layout';
-import { Profile, Tool, Course, CompatibilityInsights, FriendAssessmentShare } from '../types';
+import { Profile, CompatibilityInsights, FriendAssessmentShare } from '../types';
 import { AssessmentService, DatabaseAssessmentResult } from '../services/assessmentService';
 import { getOrCreateUserId } from '../utils/userIdentity';
-import toolsData from '../data/tools.json';
-import coursesData from '../data/courses.json';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
@@ -25,13 +23,12 @@ interface Chapter {
 }
 
 const chapters: Chapter[] = [
-  { id: 'overview', title: 'Overview', number: 1, total: 7 },
-  { id: 'emotions', title: 'Emotions', number: 2, total: 7 },
-  { id: 'outlook', title: 'Outlook', number: 3, total: 7 },
-  { id: 'focus', title: 'Focus', number: 4, total: 7 },
-  { id: 'influence', title: 'Influence', number: 5, total: 7 },
-  { id: 'bonus', title: 'Bonus', number: 6, total: 7 },
-  { id: 'recommendations', title: 'Recommendations', number: 7, total: 7 },
+  { id: 'overview', title: 'Overview', number: 1, total: 6 },
+  { id: 'emotions', title: 'Emotions', number: 2, total: 6 },
+  { id: 'outlook', title: 'Outlook', number: 3, total: 6 },
+  { id: 'focus', title: 'Focus', number: 4, total: 6 },
+  { id: 'influence', title: 'Influence', number: 5, total: 6 },
+  { id: 'bonus', title: 'Bonus', number: 6, total: 6 },
 ];
 
 export default function Dashboard() {
@@ -197,34 +194,6 @@ export default function Dashboard() {
       setShareCopyFeedback('Unable to copy automatically. Please copy the link manually.');
       setTimeout(() => setShareCopyFeedback(''), 4000);
     }
-  };
-
-  const recommendedTools = useMemo(() => {
-    if (!profile?.personalities) return [];
-    return (toolsData as Tool[]).filter(tool => 
-      tool.personalities.includes('all') || 
-      tool.personalities.some(p => profile.personalities.includes(p))
-    );
-  }, [profile?.personalities]);
-
-  const recommendedCourses = useMemo(() => {
-    if (!profile?.personalities) return [];
-    return (coursesData as Course[]).filter(course => 
-      course.personalities.some(p => profile.personalities.includes(p))
-    );
-  }, [profile?.personalities]);
-
-  const getToolsForPersonality = (personalityName: string) => {
-    return (toolsData as Tool[]).filter(tool => 
-      tool.personalities.includes('all') || 
-      tool.personalities.includes(personalityName.toLowerCase().replace(' ', '-'))
-    ).slice(0, 2);
-  };
-
-  const getCoursesForPersonality = (personalityName: string) => {
-    return (coursesData as Course[]).filter(course => 
-      course.personalities.includes(personalityName.toLowerCase().replace(' ', '-'))
-    ).slice(0, 2);
   };
 
   const currentChapterData = chapters.find(c => c.id === currentChapter);
@@ -451,9 +420,9 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={nextChapter}
-                  disabled={currentChapter === 'recommendations'}
+                  disabled={currentChapter === 'bonus'}
                   className={`btn-primary inline-flex items-center ${
-                    currentChapter === 'recommendations' ? 'opacity-50 cursor-not-allowed' : ''
+                    currentChapter === 'bonus' ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   Next
@@ -533,9 +502,6 @@ export default function Dashboard() {
                                             'bonus';
                   
                   if (personalityCategory !== currentChapter) return null;
-
-                  const personalityTools = getToolsForPersonality(personalityName);
-                  const personalityCourses = getCoursesForPersonality(personalityName);
 
                   return (
                     <div key={index} className="space-y-8">
@@ -625,66 +591,6 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Recommended Tools & Courses for this personality */}
-                      <div className="modern-card p-8">
-                        <h4 className="text-2xl font-semibold text-ink mb-6">
-                          Recommendations for {personalityName} Personality Types
-                        </h4>
-                        <p className="text-neutral-600 mb-8">
-                          Check out this must use course and tool based on your personality
-                        </p>
-
-                        <div className="grid lg:grid-cols-2 gap-8">
-                          {personalityTools.length > 0 && (
-                            <div>
-                              <h5 className="font-semibold text-primary-700 mb-4 flex items-center">
-                                <BookOpen className="w-5 h-5 mr-2" />
-                                Recommended Tool
-                              </h5>
-                              <div className="space-y-4">
-                                {personalityTools.slice(0, 1).map((tool, idx) => (
-                                  <div key={idx} className="border border-primary-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
-                                    <h6 className="font-semibold text-primary-900 mb-2">{tool.title}</h6>
-                                    <p className="text-sm text-neutral-700 mb-3">{tool.description}</p>
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded">{personalityName}</span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {personalityCourses.length > 0 && (
-                            <div>
-                              <h5 className="font-semibold text-primary-700 mb-4 flex items-center">
-                                <TrendingUp className="w-5 h-5 mr-2" />
-                                Recommended Course
-                              </h5>
-                              <div className="space-y-4">
-                                {personalityCourses.slice(0, 1).map((course, idx) => (
-                                  <div key={idx} className="border border-primary-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
-                                    <h6 className="font-semibold text-primary-900 mb-2">{course.title}</h6>
-                                    <p className="text-sm text-neutral-700 mb-3">{course.duration}</p>
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded">{personalityName}</span>
-                                      {course.recommended && (
-                                        <span className="text-xs bg-accent-500 text-white px-2 py-1 rounded">Recommended</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex justify-center gap-4 mt-8">
-                          <button className="btn-secondary">See All Tools</button>
-                          <button className="btn-secondary">See All Courses</button>
-                        </div>
-                      </div>
-
                       {/* Action Items */}
                       <div className="modern-card p-8">
                         <h4 className="text-2xl font-semibold text-ink mb-6">Action Items</h4>
@@ -707,154 +613,14 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Placeholder for Recommended Content */}
-                      <div className="modern-card p-8">
-                        <h4 className="text-2xl font-semibold text-ink mb-6">
-                          Recommendations for {personalityName} Personality Types
-                        </h4>
-                        <p className="text-neutral-600 mb-8">See All Content</p>
-
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {[1, 2, 3].map((item) => (
-                            <div key={item} className="border border-neutral-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
-                              <div className="text-xs font-semibold uppercase tracking-wide text-primary-600 mb-2">
-                                Behavioral Finance
-                              </div>
-                              <h6 className="font-semibold text-primary-900 mb-2 text-sm">
-                                Content Coming Soon
-                              </h6>
-                              <p className="text-xs text-neutral-600">4 MIN</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="text-center mt-8">
-                          <button className="btn-secondary">Explore All Content</button>
-                        </div>
-                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* Recommendations Chapter */}
-            {currentChapter === 'recommendations' && (
-              <div className="space-y-8">
-                <div className="modern-card p-8">
-                  <h2 className="text-2xl font-bold text-primary-900 mb-8 text-center">Your Money Personalities</h2>
-                  
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                    {profile.personalityData?.map((personalityInfo: any, index: number) => (
-                      <div key={index} className="text-center p-6 border border-primary-200 rounded-xl hover:border-primary-400 transition-colors">
-                        <div className="w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                          <Brain className="w-8 h-8 text-primary-700" />
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-neutral-600">Your {
-                            profile.personalities[index].toLowerCase().includes('focused') ? 'Focus' :
-                            profile.personalities[index].toLowerCase().includes('confident') || profile.personalities[index].toLowerCase().includes('optimistic') || profile.personalities[index].toLowerCase().includes('skeptical') ? 'Outlook' :
-                            profile.personalities[index].toLowerCase().includes('apprehensive') || profile.personalities[index].toLowerCase().includes('cautious') || profile.personalities[index].toLowerCase().includes('relaxed') ? 'Emotions' :
-                            profile.personalities[index].toLowerCase().includes('social') || profile.personalities[index].toLowerCase().includes('independent') || profile.personalities[index].toLowerCase().includes('elusive') ? 'Influence' :
-                            'Bonus'
-                          } Type</p>
-                          <h3 className="text-xl font-bold text-primary-900">{profile.personalities[index]}</h3>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="text-center mb-8">
-                    <button className="btn-secondary">View all money personality types</button>
-                  </div>
-                </div>
-
-                {/* All Recommended Tools */}
-                <div className="modern-card p-8">
-                  <h3 className="text-2xl font-semibold text-ink mb-8">Recommended Tools For Your Personality Types</h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {recommendedTools.slice(0, 6).map((tool, index) => (
-                      <div key={index} className="border border-primary-200 rounded-lg p-6 hover:border-primary-400 transition-colors">
-                        <div className="flex items-start justify-between mb-4">
-                          <BookOpen className="w-8 h-8 text-primary-700" />
-                        </div>
-                        <h4 className="font-semibold text-primary-900 mb-3">{tool.title}</h4>
-                        <p className="text-sm text-neutral-700 mb-4">{tool.description}</p>
-                        <div className="text-xs">
-                          {tool.personalities.filter(p => p !== 'all').map(p => 
-                            profile.personalities.find(pp => pp.toLowerCase().replace(' ', '-') === p) || 
-                            (p === 'cautious' ? 'Cautious' : p === 'organized' ? 'Organized' : '')
-                          ).filter(Boolean).slice(0, 1).map((personality, idx) => (
-                            <span key={idx} className="bg-primary-100 text-primary-700 px-2 py-1 rounded mr-2">
-                              {personality}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-center">
-                    <button className="btn-secondary">Explore All Tools</button>
-                  </div>
-                </div>
-
-                {/* All Recommended Courses */}
-                <div className="modern-card p-8">
-                  <h3 className="text-2xl font-semibold text-ink mb-8">Recommended Courses For Your Personality Types</h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {recommendedCourses.slice(0, 6).map((course, index) => (
-                      <div key={index} className="border border-primary-200 rounded-lg p-6 hover:border-primary-400 transition-colors">
-                        <div className="flex items-start justify-between mb-4">
-                          <TrendingUp className="w-8 h-8 text-primary-700" />
-                          {course.recommended && (
-                            <span className="bg-accent-500 text-white text-xs px-2 py-1 rounded">Recommended</span>
-                          )}
-                        </div>
-                        <h4 className="font-semibold text-primary-900 mb-2">{course.title}</h4>
-                        <p className="text-sm text-primary-600 mb-4">{course.duration}</p>
-                        <div className="text-xs">
-                          {course.personalities.map(p => 
-                            profile.personalities.find(pp => pp.toLowerCase().replace(' ', '-') === p) || 
-                            (p === 'cautious' ? 'Cautious' : p === 'organized' ? 'Organized' : '')
-                          ).filter(Boolean).slice(0, 1).map((personality, idx) => (
-                            <span key={idx} className="bg-primary-100 text-primary-700 px-2 py-1 rounded mr-2">
-                              {personality}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-center">
-                    <button className="btn-secondary">Explore All Courses</button>
-                  </div>
-                </div>
-
-                {/* Recommended Content Placeholder */}
-                <div className="modern-card p-8">
-                  <h3 className="text-2xl font-semibold text-ink mb-8">Recommended Content For Your Personality Types</h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {[1, 2, 3, 4, 5, 6].map((item) => (
-                      <div key={item} className="border border-neutral-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-primary-600 mb-2">
-                          Behavioral Finance
-                        </div>
-                        <h6 className="font-semibold text-primary-900 mb-2 text-sm">
-                          Content Coming Soon
-                        </h6>
-                        <p className="text-xs text-neutral-600">4 MIN</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-center">
-                    <button className="btn-secondary">Explore All Content</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Share Assessment - Don't show for advisor view and only on recommendations chapter */}
-            {!isAdvisorView && currentChapter === 'recommendations' && (
+            {/* Share Assessment - Don't show for advisor view and only on final chapter */}
+            {!isAdvisorView && currentChapter === 'bonus' && (
               <div className="modern-card p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
@@ -1049,8 +815,8 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Compatibility Results - Only show for non-advisor views on recommendations chapter */}
-            {!isAdvisorView && compatibility && currentChapter === 'recommendations' && (
+            {/* Compatibility Results - Only show for non-advisor views on final chapter */}
+            {!isAdvisorView && compatibility && currentChapter === 'bonus' && (
               <div className="modern-card p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">

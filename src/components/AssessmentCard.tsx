@@ -48,9 +48,14 @@ export default function AssessmentCard({
       </div>
 
       <div className="rounded-3xl border border-neutral-200 bg-white p-8 sm:p-12 shadow-subtle space-y-10">
-        <h2 className="text-2xl sm:text-3xl font-semibold leading-tight text-center text-ink">
-          {question}
-        </h2>
+        <div className="space-y-4 text-center">
+          <h2 className="text-2xl sm:text-3xl font-semibold leading-tight text-center text-ink">
+            {question}
+          </h2>
+          <p className="text-sm sm:text-base text-neutral-600">
+            How well does this statement describe you? This gives important context to the questions and rating system.
+          </p>
+        </div>
 
         <div className="space-y-6">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
