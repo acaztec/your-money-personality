@@ -53,7 +53,7 @@ export default function AssessmentCard({
             {question}
           </h2>
           <p className="text-sm sm:text-base text-neutral-600">
-            How well does this statement describe you? This gives important context to the questions and rating system.
+            How well does this statement describe you?
           </p>
         </div>
 

@@ -20,6 +20,7 @@ export default function Assessment() {
     personalNote?: string;
   } | null>(null);
   const [participantName, setParticipantName] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     const advisorId = searchParams.get('advisor');
@@ -134,6 +135,10 @@ export default function Assessment() {
     navigate('/');
   };
 
+  const beginAssessment = () => {
+    setHasStarted(true);
+  };
+
   if (isCompleting) {
     return (
       <div className="min-h-screen bg-canvas text-ink">
@@ -175,13 +180,21 @@ export default function Assessment() {
             Exit to Enrich
           </button>
           <div className="hidden sm:flex items-center gap-4 text-sm text-neutral-600">
-            <span className="font-semibold text-primary-700">{Math.round(((currentQuestion + 1) / questionsData.length) * 100)}% complete</span>
-            <div className="h-1.5 w-40 overflow-hidden rounded-full bg-neutral-200">
-              <div
-                className="progress-bar h-1.5"
-                style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
-              />
-            </div>
+            {hasStarted ? (
+              <>
+                <span className="font-semibold text-primary-700">
+                  {Math.round(((currentQuestion + 1) / questionsData.length) * 100)}% complete
+                </span>
+                <div className="h-1.5 w-40 overflow-hidden rounded-full bg-neutral-200">
+                  <div
+                    className="progress-bar h-1.5"
+                    style={{ width: `${((currentQuestion + 1) / questionsData.length) * 100}%` }}
+                  />
+                </div>
+              </>
+            ) : (
+              <span className="font-semibold text-primary-700">Ready when you are</span>
+            )}
           </div>
         </div>
       </header>
@@ -209,24 +222,36 @@ export default function Assessment() {
       )}
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center gap-10">
-        <section className="w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-8 text-center shadow-subtle">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-ink">
-            Welcome{participantName ? `, ${participantName}` : ''}! Ready to see your money personality?
-          </h1>
-          <p className="mt-4 text-sm sm:text-base text-neutral-700 leading-relaxed">
-            Over the next few minutes, we&apos;ll ask you five sets of questions that will analyze your money personality type in five categories.
-            Answer openly and honestly, without overthinking it. Sound easy enough? Let&apos;s get started!
-          </p>
-        </section>
-        <AssessmentCard
-          question={questionsData[currentQuestion]}
-          questionNumber={currentQuestion + 1}
-          totalQuestions={questionsData.length}
-          value={answers[currentQuestion]}
-          onChange={handleAnswerChange}
-          onPrevious={handlePrevious}
-          canGoPrevious={currentQuestion > 0}
-        />
+        {!hasStarted ? (
+          <section className="w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-10 text-center shadow-subtle space-y-6">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-ink">
+              Welcome{participantName ? `, ${participantName}` : ''}! Ready to see your money personality?
+            </h1>
+            <p className="text-sm sm:text-base text-neutral-700 leading-relaxed">
+              Over the next few minutes, we&apos;ll ask you five sets of questions that will analyze your money personality type in five categories.
+              Answer openly and honestly, without overthinking it.
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={beginAssessment}
+                className="inline-flex items-center justify-center rounded-full bg-primary-600 px-8 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+              >
+                Let&apos;s get started
+              </button>
+            </div>
+          </section>
+        ) : (
+          <AssessmentCard
+            question={questionsData[currentQuestion]}
+            questionNumber={currentQuestion + 1}
+            totalQuestions={questionsData.length}
+            value={answers[currentQuestion]}
+            onChange={handleAnswerChange}
+            onPrevious={handlePrevious}
+            canGoPrevious={currentQuestion > 0}
+          />
+        )}
       </main>
     </div>
   );
