@@ -22,8 +22,8 @@ const highlights = [
     description:
       'Review tailored insights and recommended next steps inside the Money Personality dashboard after you finish.',
     image: {
-      src: 'https://enrich.org/wp-content/uploads/2024/10/small_Woman_smiling_while_using_tablet_to_review_financial_tools_5e938497bd.webp',
-      alt: 'Participant reviewing Money Personality recommendations on a tablet.',
+      src: 'https://media.istockphoto.com/id/2161896248/photo/smiling-businessman-in-team-meeting-with-colleagues-in-office.jpg?s=612x612&w=0&k=20&c=6Y1U-APKe1WwLAsYjJIYTkj1Rcpqnir1iE4jBtRhBTk=',
+      alt: 'Team members smiling together during a collaborative planning session.',
     },
   },
   {
@@ -31,8 +31,8 @@ const highlights = [
     description:
       'Share results securely with an Enrich advisor or trusted partner when you are ready to continue the conversation.',
     image: {
-      src: 'https://enrich.org/wp-content/uploads/2024/11/small_Two_People_Smiling_while_Having_A_Meeting_13bf0332f1.webp',
-      alt: 'Advisor and participant smiling while reviewing insights together.',
+      src: 'https://www.advocis.ca/wp-content/uploads/2023/08/iStock-1448489359.jpg',
+      alt: 'Advisor and participant reviewing insights together at a table.',
     },
   },
 ];
@@ -65,7 +65,7 @@ const steps = [
   {
     title: 'Reveal your personality blend',
     description:
-      'Instantly see how your motivations align to our five Money Personality styles with plain-language descriptions.',
+      'Instantly see how your motivations align to our five Money Personality insights with plain-language descriptions.',
   },
   {
     title: 'Put insights to work',
