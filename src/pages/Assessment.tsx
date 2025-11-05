@@ -23,6 +23,11 @@ export default function Assessment() {
   const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
+    setHasStarted(false);
+    setCurrentQuestion(0);
+    setAnswers(new Array(questionsData.length).fill(0));
+    setIsCompleting(false);
+
     const advisorId = searchParams.get('advisor');
     const friendId = searchParams.get('share');
     const nameParam =

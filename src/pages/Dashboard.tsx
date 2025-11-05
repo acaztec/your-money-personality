@@ -434,19 +434,33 @@ export default function Dashboard() {
             {/* Chapter Content */}
             {currentChapter === 'overview' && (
               <div className="space-y-8">
+                {isAdvisorView && advisorSummary && (
+                  <div className="modern-card p-8">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
+                        <Sparkles className="w-5 h-5 text-white" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-primary-900">Advisor Insights</h2>
+                    </div>
+                    <div className="rounded-xl border border-primary-200 bg-primary-100 p-6">
+                      {renderAdvisorSummary(advisorSummary)}
+                    </div>
+                  </div>
+                )}
+
                 <div className="modern-card p-8">
                   <h2 className="text-2xl font-bold text-primary-900 mb-6">Overview</h2>
-                  
+
                   <div className="space-y-8">
                     <section>
                       <h3 className="text-xl font-semibold text-ink mb-4">The Why</h3>
                       <p className="text-neutral-700 leading-relaxed">
-                        {isAdvisorView ? advisorResult?.client_name || 'Your client' : 'Test3'}, managing your finances is about more than just your money in the bank. 
-                        It involves setting goals, evaluating choices, and high stakes! Like most things in life, your unique personality and behaviors are an important piece. 
+                        {isAdvisorView ? advisorResult?.client_name || 'Your client' : 'Test3'}, managing your finances is about more than just your money in the bank.
+                        It involves setting goals, evaluating choices, and high stakes! Like most things in life, your unique personality and behaviors are an important piece.
                         This analysis will help you better understand the "why" behind your financial decision making, while recommending positive changes.
                       </p>
                       <p className="text-neutral-700 leading-relaxed mt-4">
-                        Please remember, your financial personality and behaviors depend on complex factors and may change over time. 
+                        Please remember, your financial personality and behaviors depend on complex factors and may change over time.
                         As such, this analysis is to be taken as suggestion only. For individualized advice consult a financial professional.
                       </p>
                     </section>
@@ -454,9 +468,9 @@ export default function Dashboard() {
                     <section>
                       <h3 className="text-xl font-semibold text-ink mb-4">The Science</h3>
                       <p className="text-neutral-700 leading-relaxed">
-                        This report (and the science behind it) is the first of its kind in a financial wellness program. 
-                        It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics. 
-                        Our goal is to help you understand - in simple, practical terms - the unique characteristics of your personality 
+                        This report (and the science behind it) is the first of its kind in a financial wellness program.
+                        It was developed in collaboration with financial wellness experts led by a Ph.D. in Behavioral Economics.
+                        Our goal is to help you understand - in simple, practical terms - the unique characteristics of your personality
                         that affect your financial decision making.
                       </p>
                     </section>
@@ -464,27 +478,12 @@ export default function Dashboard() {
                     <section>
                       <h3 className="text-xl font-semibold text-ink mb-4">The How</h3>
                       <p className="text-neutral-700 leading-relaxed">
-                        Based on your earlier responses, our analysis engine assessed the influences on your financial behaviors across a range of categories. 
-                        Our analysis looks at different components of your money personality, with explanations of your dominant traits, strengths, challenges, 
+                        Based on your earlier responses, our analysis engine assessed the influences on your financial behaviors across a range of categories.
+                        Our analysis looks at different components of your money personality, with explanations of your dominant traits, strengths, challenges,
                         and even a few tips and tricks to make your money personality work for you. Enjoy!
                       </p>
                     </section>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* AI Advisor Summary - Only show for advisor view */}
-            {isAdvisorView && advisorSummary && currentChapter === 'overview' && (
-              <div className="modern-card p-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-primary-900">Advisor Insights</h2>
-                </div>
-                <div className="rounded-xl border border-primary-200 bg-primary-100 p-6">
-                  {renderAdvisorSummary(advisorSummary)}
                 </div>
               </div>
             )}
