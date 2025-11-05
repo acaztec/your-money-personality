@@ -224,33 +224,6 @@ export default function AdvisorLanding() {
           </div>
         </section>
 
-        <section className="py-16 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-2 items-start">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-ink">Want to share with a friend instead?</h2>
-              <p className="text-neutral-700">
-                Participants can invite someone they trust straight from their Money Personality dashboard. These peer-to-peer
-                shares provide comparison insights but do not include advisor-only AI summaries.
-              </p>
-              <Link to="/dashboard" className="btn-link">
-                Explore the participant dashboard
-              </Link>
-            </div>
-            <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 space-y-4 text-sm text-neutral-700">
-              <p className="font-semibold text-ink">Advisor benefits at a glance</p>
-              <ul className="list-disc space-y-2 pl-5">
-                <li>Automated AI recaps tailored to each client’s assessment responses.</li>
-                <li>Dashboard visibility into completion status and shared activity.</li>
-                <li>Starter email copy to make introductions quick and on-brand.</li>
-              </ul>
-              {!isAuthenticated && (
-                <p className="text-neutral-600">
-                  Log in when you’re ready to unlock these benefits and streamline your follow-up process.
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
       </div>
     </Layout>
   );
